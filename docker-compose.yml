@@ -1,0 +1,19 @@
+# Postgres only — run the Node app on the host with `npm run dev`.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: po-backends-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: api_user
+      POSTGRES_PASSWORD: api_pass
+      POSTGRES_DB: po_backends_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U api_user -d po_backends_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

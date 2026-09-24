@@ -1,0 +1,502 @@
+openapi: 3.0.3
+info:
+  title: Supplier Master (SRM) API (mock)
+  version: 1.0.0
+  description: |
+    Mock **Supplier Relationship Management / supplier master** backend. Owns the enterprise
+    supplier identity (`SUP-100245`), ship-from sites, contacts, the **cross-reference to ERP
+    vendor numbers**, and **consumer entitlements** used to enforce "which consumer may see or
+    act for which supplier".
+
+    Differences from the façade the iPaaS must handle:
+    * Nested camelCase (`name.legal`, `classification.tier`, `address.postalCode`).
+    * Offset pagination: `{ total, offset, limit, items }`.
+    * Error dialect: `{ "errors": [ { "code", "message", "field?" } ], "traceId" }`.
+    * Addresses use `address.line1/city/region/postalCode/countryCode`.
+
+    **Demo headers** (when `CHAOS_ENABLED=true`): `x-mock-status`, `x-mock-delay-ms`.
+servers:
+  - url: /srm
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Suppliers
+  - name: Sites
+  - name: Cross Reference
+  - name: Entitlements
+  - name: Health
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check (no auth)
+      security: []
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string, example: ok}
+                  service: {type: string, example: srm}
+  /v1/suppliers:
+    get:
+      tags: [Suppliers]
+      summary: Search suppliers
+      operationId: listSuppliers
+      parameters:
+        - {name: status, in: query, description: 'ACTIVE, ON_HOLD, BLOCKED (comma separated)', schema: {type: string}}
+        - {name: country, in: query, schema: {type: string, example: US}}
+        - {name: tier, in: query, schema: {type: string, example: STRATEGIC}}
+        - {name: supplierCode, in: query, description: Comma separated, schema: {type: string}}
+        - {name: erpVendorNumber, in: query, description: Comma separated, schema: {type: string}}
+        - {name: q, in: query, description: Name contains (case-insensitive), schema: {type: string}}
+        - {name: expand, in: query, description: 'contacts,sites', schema: {type: string}}
+        - {name: offset, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
+      responses:
+        '200':
+          description: Page of suppliers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer, example: 6}
+                  offset: {type: integer, example: 0}
+                  limit: {type: integer, example: 20}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Supplier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+  /v1/suppliers/{supplierCode}:
+    parameters:
+      - $ref: '#/components/parameters/SupplierCode'
+    get:
+      tags: [Suppliers]
+      summary: Get a supplier (contacts and sites included by default)
+      operationId: getSupplier
+      parameters:
+        - {name: expand, in: query, description: 'Override embedded collections, e.g. `sites` or empty', schema: {type: string}}
+      responses:
+        '200':
+          description: Supplier
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Supplier'}
+              example:
+                supplierCode: SUP-100245
+                erpVendorNumber: '0000710245'
+                name: {legal: 'Apex Precision Components, Inc.', trading: Apex Precision}
+                status: ACTIVE
+                statusReason: null
+                classification: {tier: STRATEGIC, riskRating: LOW}
+                capabilities: {portal: true, asn: true}
+                countryCode: US
+                duns: '081466849'
+                onboardedOn: '2019-04-01'
+                updatedAt: '2026-09-24T12:00:00.000Z'
+                contacts:
+                  - {contactId: CNT-0001, role: PRIMARY, name: Rachel Kim, email: rachel.kim@apex-precision.example.com, phone: '+1-404-555-0142'}
+                sites:
+                  - siteCode: SUP-ATL-01
+                    supplierCode: SUP-100245
+                    type: SHIP_FROM
+                    name: Supplier Distribution Center
+                    address: {line1: 4500 Fulton Industrial Blvd SW, city: Atlanta, region: GA, postalCode: '30301', countryCode: US}
+                    active: true
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Suppliers]
+      summary: Update supplier status / capabilities (demo control)
+      operationId: updateSupplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: {type: string, enum: [ACTIVE, ON_HOLD, BLOCKED]}
+                statusReason: {type: string}
+                capabilities:
+                  type: object
+                  properties:
+                    portal: {type: boolean}
+                    asn: {type: boolean}
+                classification:
+                  type: object
+                  properties:
+                    tier: {type: string, enum: [STRATEGIC, PREFERRED, APPROVED, CONDITIONAL]}
+                    riskRating: {type: string, enum: [LOW, MEDIUM, HIGH]}
+            example:
+              status: ON_HOLD
+              statusReason: Quality escalation QE-2026-77
+      responses:
+        '200':
+          description: Updated supplier
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Supplier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/suppliers/{supplierCode}/sites:
+    parameters:
+      - $ref: '#/components/parameters/SupplierCode'
+    get:
+      tags: [Sites]
+      summary: List a supplier's sites
+      operationId: listSupplierSites
+      parameters:
+        - {name: type, in: query, description: 'SHIP_FROM, REMIT_TO, MANUFACTURING', schema: {type: string}}
+        - {name: active, in: query, schema: {type: boolean}}
+      responses:
+        '200':
+          description: Sites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Site'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/suppliers/{supplierCode}/contacts:
+    parameters:
+      - $ref: '#/components/parameters/SupplierCode'
+    get:
+      tags: [Suppliers]
+      summary: List a supplier's contacts
+      operationId: listSupplierContacts
+      parameters:
+        - {name: role, in: query, description: 'PRIMARY, LOGISTICS, QUALITY, FINANCE', schema: {type: string}}
+      responses:
+        '200':
+          description: Contacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Contact'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/sites/{siteCode}:
+    get:
+      tags: [Sites]
+      summary: Get a site by code (validate an ASN ship-from)
+      operationId: getSite
+      parameters:
+        - {name: siteCode, in: path, required: true, schema: {type: string, example: SUP-ATL-01}}
+      responses:
+        '200':
+          description: Site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Site'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/vendor-xref:
+    get:
+      tags: [Cross Reference]
+      summary: Batch-resolve ERP vendor numbers <-> supplier codes
+      description: Use this in list flows to translate many ERP `vendor_id`s in one call.
+      operationId: resolveVendorXref
+      parameters:
+        - {name: erpVendorNumber, in: query, description: Comma separated, schema: {type: string, example: '0000710245,0000710311'}}
+        - {name: supplierCode, in: query, description: Comma separated, schema: {type: string, example: SUP-100402}}
+      responses:
+        '200':
+          description: Mappings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/VendorXref'}
+                  unresolved:
+                    type: array
+                    items: {type: string}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/vendor-xref/{erpVendorNumber}:
+    get:
+      tags: [Cross Reference]
+      summary: Resolve one ERP vendor number
+      operationId: getVendorXref
+      parameters:
+        - {name: erpVendorNumber, in: path, required: true, schema: {type: string, example: '0000710245'}}
+      responses:
+        '200':
+          description: Mapping
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/VendorXref'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/entitlements:
+    get:
+      tags: [Entitlements]
+      summary: List registered API consumers and their entitlements
+      operationId: listEntitlements
+      parameters:
+        - {name: active, in: query, schema: {type: boolean}}
+      responses:
+        '200':
+          description: Entitlements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Entitlement'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/entitlements/{consumerId}:
+    get:
+      tags: [Entitlements]
+      summary: Get a consumer's entitlements
+      operationId: getEntitlement
+      parameters:
+        - $ref: '#/components/parameters/ConsumerId'
+      responses:
+        '200':
+          description: Entitlement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Entitlement'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/entitlements/{consumerId}/check:
+    parameters:
+      - $ref: '#/components/parameters/ConsumerId'
+    get:
+      tags: [Entitlements]
+      summary: Authorization decision (query string form)
+      operationId: checkEntitlementGet
+      parameters:
+        - {name: scope, in: query, required: true, schema: {type: string, enum: [supplier-orders.read, supplier-orders.write]}}
+        - {name: supplierCode, in: query, schema: {type: string, example: SUP-100245}}
+      responses:
+        '200':
+          description: Decision (allowed may be false)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/EntitlementDecision'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Entitlements]
+      summary: Authorization decision
+      description: |
+        Always returns 200 with `allowed` and a `reason`:
+        `OK`, `CONSUMER_INACTIVE`, `SCOPE_NOT_GRANTED`, `SUPPLIER_NOT_FOUND`,
+        `SUPPLIER_SCOPE_DENIED`, `SUPPLIER_BLOCKED`, `SUPPLIER_ON_HOLD` (write scope only).
+      operationId: checkEntitlement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scope]
+              properties:
+                scope: {type: string, enum: [supplier-orders.read, supplier-orders.write]}
+                supplierCode: {type: string, pattern: '^SUP-[0-9]{6}$'}
+            example:
+              scope: supplier-orders.write
+              supplierCode: SUP-100245
+      responses:
+        '200':
+          description: Decision
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/EntitlementDecision'}
+              example:
+                consumerId: prc-edi-bridge
+                consumerType: supplier-partner
+                scope: supplier-orders.write
+                supplierCode: SUP-100402
+                allowed: false
+                reason: SCOPE_NOT_GRANTED
+                allowedSuppliers: [SUP-100402]
+                evaluatedAt: '2026-09-24T12:00:00.000Z'
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Default key `srm-demo-key` (set `SRM_API_KEY`). Disabled when `SRM_AUTH_MODE=none`.
+  parameters:
+    SupplierCode:
+      name: supplierCode
+      in: path
+      required: true
+      schema: {type: string, pattern: '^SUP-[0-9]{6}$', example: SUP-100245}
+    ConsumerId:
+      name: consumerId
+      in: path
+      required: true
+      schema: {type: string, example: apex-supplier-portal}
+  schemas:
+    Address:
+      type: object
+      properties:
+        line1: {type: string, nullable: true}
+        city: {type: string, nullable: true}
+        region: {type: string, nullable: true}
+        postalCode: {type: string, nullable: true}
+        countryCode: {type: string}
+    Site:
+      type: object
+      properties:
+        siteCode: {type: string, example: SUP-ATL-01}
+        supplierCode: {type: string, example: SUP-100245}
+        type: {type: string, enum: [SHIP_FROM, REMIT_TO, MANUFACTURING]}
+        name: {type: string}
+        address: {$ref: '#/components/schemas/Address'}
+        active: {type: boolean}
+    Contact:
+      type: object
+      properties:
+        contactId: {type: string}
+        role: {type: string, enum: [PRIMARY, LOGISTICS, QUALITY, FINANCE]}
+        name: {type: string}
+        email: {type: string}
+        phone: {type: string, nullable: true}
+    Supplier:
+      type: object
+      properties:
+        supplierCode: {type: string, example: SUP-100245}
+        erpVendorNumber: {type: string, example: '0000710245'}
+        name:
+          type: object
+          properties:
+            legal: {type: string}
+            trading: {type: string, nullable: true}
+        status: {type: string, enum: [ACTIVE, ON_HOLD, BLOCKED]}
+        statusReason: {type: string, nullable: true}
+        classification:
+          type: object
+          properties:
+            tier: {type: string, enum: [STRATEGIC, PREFERRED, APPROVED, CONDITIONAL]}
+            riskRating: {type: string, enum: [LOW, MEDIUM, HIGH]}
+        capabilities:
+          type: object
+          properties:
+            portal: {type: boolean}
+            asn: {type: boolean, description: Supplier may submit advance shipment notices}
+        countryCode: {type: string}
+        duns: {type: string, nullable: true}
+        onboardedOn: {type: string, format: date, nullable: true}
+        updatedAt: {type: string, format: date-time}
+        contacts:
+          type: array
+          items: {$ref: '#/components/schemas/Contact'}
+        sites:
+          type: array
+          items: {$ref: '#/components/schemas/Site'}
+    VendorXref:
+      type: object
+      properties:
+        supplierCode: {type: string, example: SUP-100245}
+        erpVendorNumber: {type: string, example: '0000710245'}
+        status: {type: string, example: ACTIVE}
+        legalName: {type: string}
+    Entitlement:
+      type: object
+      properties:
+        consumerId: {type: string, example: apex-supplier-portal}
+        displayName: {type: string}
+        consumerType: {type: string, enum: [supplier-partner, internal-application, operations-support]}
+        allSuppliers: {type: boolean}
+        suppliers:
+          type: array
+          items: {type: string}
+        scopes:
+          type: array
+          items: {type: string}
+        active: {type: boolean}
+        costCenter: {type: string, nullable: true}
+        contactEmail: {type: string, nullable: true}
+        updatedAt: {type: string, format: date-time}
+    EntitlementDecision:
+      type: object
+      properties:
+        consumerId: {type: string}
+        consumerType: {type: string}
+        scope: {type: string}
+        supplierCode: {type: string, nullable: true}
+        allowed: {type: boolean}
+        reason: {type: string}
+        allowedSuppliers:
+          type: array
+          items: {type: string}
+        evaluatedAt: {type: string, format: date-time}
+    SrmError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code: {type: string}
+              message: {type: string}
+              field: {type: string}
+        traceId: {type: string}
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}
+          example:
+            errors:
+              - {code: VALIDATION_FAILED, message: Request validation failed}
+              - {code: FIELD_INVALID, field: scope, message: 'must be one of: supplier-orders.read, supplier-orders.write'}
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}
+          example:
+            errors: [{code: SUPPLIER_NOT_FOUND, message: Supplier SUP-999999 does not exist}]
+    TooManyRequests:
+      description: Rate limited
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}
+    ServiceUnavailable:
+      description: Unavailable (or simulated)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}

@@ -1,0 +1,890 @@
+openapi: 3.0.3
+info:
+  title: ERP Purchasing API (mock)
+  version: 1.0.0
+  description: |
+    Mock **ERP purchasing system of record** (SAP-flavoured). One of three independent backends
+    behind the *Supplier Order Collaboration API* façade. It deliberately does **not** match the
+    façade contract, so the iPaaS has real transformation work to do:
+
+    | Concern | ERP representation | Façade representation |
+    |---|---|---|
+    | PO number | `4500123456` (10 digits) | `PO-4500123456` |
+    | Supplier | `vendor_id` `0000710245` (resolve via SRM `/vendor-xref`) | `SUP-100245` |
+    | Line number | `item_no` `"00010"` | `lineNumber` `10` |
+    | Status | codes `01 02 03 04 05 09` | `OPEN`, `PARTIALLY_ACKNOWLEDGED`, … |
+    | Dates | `YYYYMMDD` | `YYYY-MM-DD` |
+    | Timestamps | `YYYYMMDDhhmmss` (UTC) | RFC 3339 |
+    | Decimals | strings `"250.000"` | numbers |
+    | Ship-to | `plant` code (resolve via `/plants/{plantCode}`) | `shipTo` address |
+    | Buying org | `purch_org` `JBUS` (resolve via `/reference/purchasing-orgs`) | `Jabil-US` |
+    | Errors | `{ "error": { "code", "message", "details" } }` | RFC 7807 ProblemDetails |
+
+    **List vs detail:** `GET /purchase-orders` returns headers only (fan-out to
+    `/purchase-orders/{poNumber}` or pass `include=items`).
+
+    **Demo headers** (when `CHAOS_ENABLED=true`): `x-mock-status: 503` forces an error,
+    `x-mock-delay-ms: 2000` adds latency. `ERP_LATENCY_MS` makes every call slow.
+servers:
+  - url: /erp
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Purchase Orders
+  - name: Confirmations
+    description: Supplier order acknowledgements (AB accept, AC accept with changes, RJ reject).
+  - name: Inbound Deliveries
+    description: ERP side of an ASN. Reserves open quantity; reversible for compensation.
+  - name: Reference Data
+  - name: Health
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check (no auth)
+      security: []
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+        '503':
+          description: Database unavailable
+  /v1/reference/status-codes:
+    get:
+      tags: [Reference Data]
+      summary: PO header status codes
+      operationId: listStatusCodes
+      responses:
+        '200':
+          description: Status codes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        status_code: {type: string, example: '01'}
+                        status_text: {type: string, example: Open}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/reference/confirmation-categories:
+    get:
+      tags: [Reference Data]
+      summary: Confirmation categories
+      operationId: listConfirmationCategories
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        conf_category: {type: string, example: AB}
+                        text: {type: string, example: Order acknowledgement - accepted as ordered}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/reference/purchasing-orgs:
+    get:
+      tags: [Reference Data]
+      summary: Purchasing organisations (maps purch_org to buying organisation name)
+      operationId: listPurchasingOrgs
+      responses:
+        '200':
+          description: Purchasing orgs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/PurchasingOrg'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/plants:
+    get:
+      tags: [Reference Data]
+      summary: List plants (Jabil ship-to sites)
+      operationId: listPlants
+      parameters:
+        - name: site_code
+          in: query
+          schema: {type: string, example: US-AUBURN-HILLS}
+      responses:
+        '200':
+          description: Plants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/Plant'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/plants/{plantCode}:
+    get:
+      tags: [Reference Data]
+      summary: Get plant address
+      operationId: getPlant
+      parameters:
+        - name: plantCode
+          in: path
+          required: true
+          schema: {type: string, example: '1101'}
+      responses:
+        '200':
+          description: Plant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/Plant'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/purchase-orders:
+    get:
+      tags: [Purchase Orders]
+      summary: List purchase order headers
+      operationId: listPurchaseOrders
+      parameters:
+        - name: vendor_id
+          in: query
+          description: ERP vendor number(s), comma separated.
+          schema: {type: string, example: '0000710245'}
+        - name: status
+          in: query
+          description: Status code(s), comma separated.
+          schema: {type: string, example: '01,02'}
+        - name: changed_since
+          in: query
+          description: '`YYYYMMDDhhmmss` (UTC) or ISO-8601.'
+          schema: {type: string, example: '20260901000000'}
+        - name: plant
+          in: query
+          schema: {type: string, example: '1101'}
+        - name: purch_org
+          in: query
+          schema: {type: string, example: JBUS}
+        - name: po_number
+          in: query
+          description: One or more PO numbers, comma separated.
+          schema: {type: string}
+        - name: include
+          in: query
+          description: Set to `items` to embed items (avoids fan-out).
+          schema: {type: string, enum: [items]}
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Page of PO headers
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PurchaseOrderPage'}
+              example:
+                data:
+                  - po_number: '4500123456'
+                    vendor_id: '0000710245'
+                    purch_org: JBUS
+                    doc_date: '20260915'
+                    currency: USD
+                    status_code: '01'
+                    status_text: Open
+                    delivery_date: '20261005'
+                    plant: '1101'
+                    incoterms: FCA
+                    payment_terms: NET60
+                    buyer_name: Maria Alvarez
+                    revision: 1
+                    created_at: '20260915130500'
+                    changed_at: '20260923142231'
+                    item_count: 1
+                pagination: {total: 1, page: 1, limit: 25, totalPages: 1, hasNext: false, hasPrev: false}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+    post:
+      tags: [Purchase Orders]
+      summary: Create a purchase order (demo data entry)
+      operationId: createPurchaseOrder
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PurchaseOrderCreate'}
+            example:
+              vendor_id: '0000710245'
+              purch_org: JBUS
+              currency: USD
+              delivery_date: '20261115'
+              plant: '1101'
+              incoterms: FCA
+              payment_terms: NET60
+              buyer_name: Maria Alvarez
+              items:
+                - material: MAT-778210
+                  short_text: Industrial controller assembly
+                  quantity: 120
+                  uom: EA
+                  net_price: 84.5
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location: {schema: {type: string}}
+            ETag: {schema: {type: string}}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+  /v1/purchase-orders/{poNumber}:
+    parameters:
+      - $ref: '#/components/parameters/PoNumber'
+    get:
+      tags: [Purchase Orders]
+      summary: Get a purchase order with items
+      operationId: getPurchaseOrder
+      responses:
+        '200':
+          description: Purchase order
+          headers:
+            ETag:
+              description: 'Weak ETag `W/"<po>-r<revision>"`; send as If-Match on confirmations.'
+              schema: {type: string}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+              example:
+                data:
+                  po_number: '4500123456'
+                  vendor_id: '0000710245'
+                  purch_org: JBUS
+                  doc_date: '20260915'
+                  currency: USD
+                  status_code: '01'
+                  status_text: Open
+                  delivery_date: '20261005'
+                  plant: '1101'
+                  incoterms: FCA
+                  payment_terms: NET60
+                  buyer_name: Maria Alvarez
+                  revision: 1
+                  created_at: '20260915130500'
+                  changed_at: '20260923142231'
+                  items:
+                    - item_no: '00010'
+                      material: MAT-778210
+                      short_text: Industrial controller assembly
+                      quantity: '250.000'
+                      uom: EA
+                      net_price: '84.50'
+                      price_unit: 1
+                      confirmed_qty: '0.000'
+                      confirmed_date: null
+                      shipped_qty: '0.000'
+                      open_qty: '250.000'
+                      reject_reason: null
+        '304':
+          description: Not modified (If-None-Match matched)
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+    patch:
+      tags: [Purchase Orders]
+      summary: Buyer change - creates a new revision (demo control)
+      description: Changing a PO increments `revision`, which allows the supplier to confirm again. `status_code` accepts `05` (close) or `09` (cancel).
+      operationId: changePurchaseOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PurchaseOrderChange'}
+            example:
+              delivery_date: '20261010'
+              items:
+                - item_no: '00010'
+                  quantity: 300
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+  /v1/purchase-orders/{poNumber}/items:
+    parameters:
+      - $ref: '#/components/parameters/PoNumber'
+    get:
+      tags: [Purchase Orders]
+      summary: List items of a purchase order
+      operationId: listPurchaseOrderItems
+      responses:
+        '200':
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/PurchaseOrderItem'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/purchase-orders/{poNumber}/confirmations:
+    parameters:
+      - $ref: '#/components/parameters/PoNumber'
+    get:
+      tags: [Confirmations]
+      summary: List confirmations for a PO
+      operationId: listConfirmations
+      responses:
+        '200':
+          description: Confirmations (newest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/Confirmation'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Confirmations]
+      summary: Post a supplier confirmation for the current PO revision
+      description: |
+        Business rules:
+        * One confirmation per PO revision (`409 CONFIRMATION_EXISTS`).
+        * PO must not be closed/cancelled (`422 PO_NOT_CONFIRMABLE`).
+        * `confirmed_qty` may not exceed ordered quantity (`422`).
+        * `AB` requires full quantity and requested date; `RJ` requires `confirmed_qty: 0`.
+        * `AC` with reduced quantity or later date -> status `IN_REVIEW`, otherwise `POSTED`.
+        * Optional `If-Match` (ETag from GET) -> `412 REVISION_MISMATCH` when stale.
+      operationId: createConfirmation
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: If-Match
+          in: header
+          schema: {type: string, example: 'W/"4500123456-r1"'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ConfirmationRequest'}
+            examples:
+              acceptWithChanges:
+                summary: Accept with a later delivery date
+                value:
+                  conf_category: AC
+                  vendor_reference: SUP-ACK-88419
+                  note: Confirmed with revised delivery date.
+                  items:
+                    - item_no: '00010'
+                      confirmed_qty: 250
+                      confirmed_date: '20261008'
+              accept:
+                summary: Accept as ordered
+                value:
+                  conf_category: AB
+                  items:
+                    - item_no: '00010'
+                      confirmed_qty: 250
+              reject:
+                summary: Reject
+                value:
+                  conf_category: RJ
+                  note: Capacity not available
+                  items:
+                    - item_no: '00010'
+                      confirmed_qty: 0
+                      reject_reason: NO_CAPACITY
+      responses:
+        '201':
+          description: Confirmation posted
+          headers:
+            Location: {schema: {type: string}}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/Confirmation'}
+              example:
+                data:
+                  confirmation_no: '7100000101'
+                  po_number: '4500123456'
+                  po_revision: 1
+                  conf_category: AC
+                  conf_category_text: Order acknowledgement - accepted with changes
+                  vendor_reference: SUP-ACK-88419
+                  note: Confirmed with revised delivery date.
+                  status: IN_REVIEW
+                  items:
+                    - {item_no: '00010', confirmed_qty: '250.000', confirmed_date: '20261008', reject_reason: null}
+                  posted_at: '20260923164510'
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '412': {$ref: '#/components/responses/PreconditionFailed'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+  /v1/confirmations/{confirmationNo}:
+    get:
+      tags: [Confirmations]
+      summary: Get a confirmation
+      operationId: getConfirmation
+      parameters:
+        - name: confirmationNo
+          in: path
+          required: true
+          schema: {type: string, example: '7100000011'}
+      responses:
+        '200':
+          description: Confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/Confirmation'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/inbound-deliveries:
+    get:
+      tags: [Inbound Deliveries]
+      summary: List inbound deliveries
+      operationId: listInboundDeliveries
+      parameters:
+        - {name: asn_reference, in: query, schema: {type: string}}
+        - {name: vendor_id, in: query, schema: {type: string}}
+        - {name: po_number, in: query, schema: {type: string}}
+        - {name: status, in: query, schema: {type: string, enum: [POSTED, REVERSED]}}
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Page of inbound deliveries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: {$ref: '#/components/schemas/InboundDelivery'}
+                  pagination: {$ref: '#/components/schemas/Pagination'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Inbound Deliveries]
+      summary: Post an inbound delivery (reserve open quantity for an ASN)
+      description: |
+        Validates every item atomically: PO exists, belongs to `vendor_id`, is not closed/cancelled,
+        item exists, and quantity <= open quantity (`422 SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY`).
+        One POSTED delivery per vendor + ASN (`409 DELIVERY_EXISTS`).
+      operationId: createInboundDelivery
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/InboundDeliveryRequest'}
+            example:
+              asn_reference: ASN-440882
+              vendor_id: '0000710245'
+              items:
+                - {po_number: '4500123456', item_no: '00010', quantity: 250}
+      responses:
+        '201':
+          description: Posted
+          headers:
+            Location: {schema: {type: string}}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/InboundDelivery'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+  /v1/inbound-deliveries/{deliveryNo}:
+    get:
+      tags: [Inbound Deliveries]
+      summary: Get an inbound delivery
+      operationId: getInboundDelivery
+      parameters:
+        - {name: deliveryNo, in: path, required: true, schema: {type: string, example: '180000121'}}
+      responses:
+        '200':
+          description: Inbound delivery
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/InboundDelivery'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/inbound-deliveries/{deliveryNo}/reverse:
+    post:
+      tags: [Inbound Deliveries]
+      summary: Reverse an inbound delivery (compensation)
+      operationId: reverseInboundDelivery
+      parameters:
+        - {name: deliveryNo, in: path, required: true, schema: {type: string}}
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Reversed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/InboundDelivery'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Default key `erp-demo-key` (set `ERP_API_KEY`). Disabled when `ERP_AUTH_MODE=none`.
+  parameters:
+    PoNumber:
+      name: poNumber
+      in: path
+      required: true
+      description: 10-digit ERP PO number (no `PO-` prefix).
+      schema: {type: string, pattern: '^[0-9]{10}$', example: '4500123456'}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: "Optional. Same key + same body replays the original response (`Idempotent-Replayed: true`)."
+      schema: {type: string, minLength: 8, maxLength: 128}
+    Page:
+      name: page
+      in: query
+      schema: {type: integer, minimum: 1, default: 1}
+    Limit:
+      name: limit
+      in: query
+      schema: {type: integer, minimum: 1, maximum: 200, default: 25}
+  schemas:
+    Health:
+      type: object
+      properties:
+        status: {type: string, example: ok}
+        service: {type: string, example: erp}
+        database: {type: string, example: up}
+        timestamp: {type: string, format: date-time}
+    PurchasingOrg:
+      type: object
+      properties:
+        code: {type: string, example: JBUS}
+        name: {type: string, example: Jabil-US}
+        company_code: {type: string, example: US01}
+    Plant:
+      type: object
+      properties:
+        plant_code: {type: string, example: '1101'}
+        site_code: {type: string, example: US-AUBURN-HILLS}
+        name: {type: string, example: Jabil Manufacturing Site}
+        street: {type: string, example: 100 Manufacturing Way}
+        city: {type: string, example: Auburn Hills}
+        region: {type: string, example: MI}
+        postal_code: {type: string, example: '48326'}
+        country: {type: string, example: US}
+    PurchaseOrderHeader:
+      type: object
+      properties:
+        po_number: {type: string, example: '4500123456'}
+        vendor_id: {type: string, example: '0000710245'}
+        purch_org: {type: string, example: JBUS}
+        doc_date: {type: string, description: YYYYMMDD, example: '20260915'}
+        currency: {type: string, example: USD}
+        status_code: {type: string, enum: ['01', '02', '03', '04', '05', '09']}
+        status_text: {type: string, example: Open}
+        delivery_date: {type: string, description: YYYYMMDD, example: '20261005'}
+        plant: {type: string, example: '1101'}
+        incoterms: {type: string, nullable: true, example: FCA}
+        payment_terms: {type: string, nullable: true, example: NET60}
+        buyer_name: {type: string, nullable: true, example: Maria Alvarez}
+        revision: {type: integer, example: 1}
+        created_at: {type: string, description: YYYYMMDDhhmmss UTC, example: '20260915130500'}
+        changed_at: {type: string, description: YYYYMMDDhhmmss UTC, example: '20260923142231'}
+        item_count: {type: integer, description: Present on list responses, example: 1}
+    PurchaseOrderItem:
+      type: object
+      properties:
+        item_no: {type: string, example: '00010'}
+        material: {type: string, example: MAT-778210}
+        short_text: {type: string, example: Industrial controller assembly}
+        quantity: {type: string, example: '250.000'}
+        uom: {type: string, example: EA}
+        net_price: {type: string, example: '84.50'}
+        price_unit: {type: integer, example: 1}
+        confirmed_qty: {type: string, example: '0.000'}
+        confirmed_date: {type: string, nullable: true, example: null}
+        shipped_qty: {type: string, example: '0.000'}
+        open_qty: {type: string, description: quantity - shipped_qty, example: '250.000'}
+        reject_reason: {type: string, nullable: true, example: null}
+    PurchaseOrder:
+      allOf:
+        - $ref: '#/components/schemas/PurchaseOrderHeader'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: {$ref: '#/components/schemas/PurchaseOrderItem'}
+    PurchaseOrderPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {$ref: '#/components/schemas/PurchaseOrder'}
+        pagination: {$ref: '#/components/schemas/Pagination'}
+    PurchaseOrderCreate:
+      type: object
+      required: [vendor_id, purch_org, currency, delivery_date, plant, items]
+      properties:
+        po_number: {type: string, pattern: '^[0-9]{10}$', description: Optional; generated when omitted}
+        vendor_id: {type: string, pattern: '^[0-9]{10}$'}
+        purch_org: {type: string}
+        doc_date: {type: string, description: YYYYMMDD or YYYY-MM-DD; defaults to today}
+        currency: {type: string, pattern: '^[A-Z]{3}$'}
+        delivery_date: {type: string, description: YYYYMMDD or YYYY-MM-DD}
+        plant: {type: string}
+        incoterms: {type: string}
+        payment_terms: {type: string}
+        buyer_name: {type: string}
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [material, short_text, quantity, uom]
+            properties:
+              item_no: {type: string, pattern: '^[0-9]{5}$', description: Defaults to 00010, 00020, ...}
+              material: {type: string}
+              short_text: {type: string}
+              quantity: {type: number, exclusiveMinimum: true, minimum: 0}
+              uom: {type: string}
+              net_price: {type: number, minimum: 0}
+    PurchaseOrderChange:
+      type: object
+      properties:
+        delivery_date: {type: string}
+        status_code: {type: string, enum: ['05', '09']}
+        buyer_name: {type: string}
+        items:
+          type: array
+          items:
+            type: object
+            required: [item_no]
+            properties:
+              item_no: {type: string, pattern: '^[0-9]{5}$'}
+              quantity: {type: number}
+              net_price: {type: number}
+    ConfirmationRequest:
+      type: object
+      required: [conf_category, items]
+      properties:
+        conf_category: {type: string, enum: [AB, AC, RJ]}
+        vendor_reference: {type: string, maxLength: 80}
+        note: {type: string, maxLength: 1000}
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [item_no, confirmed_qty]
+            properties:
+              item_no: {type: string, pattern: '^[0-9]{5}$', example: '00010'}
+              confirmed_qty: {type: number, minimum: 0, example: 250}
+              confirmed_date: {type: string, description: YYYYMMDD or YYYY-MM-DD; defaults to PO delivery date, example: '20261008'}
+              reject_reason: {type: string, maxLength: 60}
+    Confirmation:
+      type: object
+      properties:
+        confirmation_no: {type: string, example: '7100000101'}
+        po_number: {type: string, example: '4500123456'}
+        po_revision: {type: integer, example: 1}
+        conf_category: {type: string, enum: [AB, AC, RJ]}
+        conf_category_text: {type: string}
+        vendor_reference: {type: string, nullable: true}
+        note: {type: string, nullable: true}
+        status: {type: string, enum: [POSTED, IN_REVIEW]}
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              item_no: {type: string}
+              confirmed_qty: {type: string}
+              confirmed_date: {type: string, nullable: true}
+              reject_reason: {type: string, nullable: true}
+        posted_at: {type: string, example: '20260923164510'}
+    InboundDeliveryRequest:
+      type: object
+      required: [asn_reference, vendor_id, items]
+      properties:
+        asn_reference: {type: string, maxLength: 80}
+        vendor_id: {type: string, pattern: '^[0-9]{10}$'}
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [po_number, item_no, quantity]
+            properties:
+              po_number: {type: string, pattern: '^[0-9]{10}$'}
+              item_no: {type: string, pattern: '^[0-9]{5}$'}
+              quantity: {type: number}
+    InboundDelivery:
+      type: object
+      properties:
+        delivery_no: {type: string, example: '180000201'}
+        vendor_id: {type: string, example: '0000710245'}
+        asn_reference: {type: string, example: ASN-440882}
+        status: {type: string, enum: [POSTED, REVERSED]}
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              po_number: {type: string}
+              item_no: {type: string}
+              quantity: {type: string}
+        posted_at: {type: string}
+        reversed_at: {type: string, nullable: true}
+    Pagination:
+      type: object
+      properties:
+        total: {type: integer}
+        page: {type: integer}
+        limit: {type: integer}
+        totalPages: {type: integer}
+        hasNext: {type: boolean}
+        hasPrev: {type: boolean}
+    ErpError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: {type: string, example: PO_NOT_FOUND}
+            message: {type: string}
+            timestamp: {type: string, example: '20260923165000'}
+            correlation_id: {type: string}
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: {type: string}
+                  message: {type: string}
+  responses:
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+          example:
+            error:
+              code: VALIDATION_FAILED
+              message: Request validation failed
+              timestamp: '20260923165000'
+              details: [{field: 'items[0].item_no', message: 'must match pattern /^[0-9]{5}$/'}]
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+          example:
+            error: {code: API_KEY_INVALID, message: The supplied API key is not valid for this service., timestamp: '20260923165000'}
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+          example:
+            error: {code: PO_NOT_FOUND, message: Purchase order 4500999999 does not exist, timestamp: '20260923165000'}
+    Conflict:
+      description: State conflict
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+          example:
+            error: {code: CONFIRMATION_EXISTS, message: Confirmation 7100000101 already exists for revision 1 of PO 4500123456, timestamp: '20260923165000'}
+    PreconditionFailed:
+      description: If-Match does not match the current revision
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+    UnprocessableEntity:
+      description: Business rule violation
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+          example:
+            error:
+              code: SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY
+              message: Shipped quantity exceeds the remaining open quantity
+              timestamp: '20260923165000'
+              details: [{field: 'items[0].quantity', message: 'exceeds open quantity 250.000 for 4500123456/00010'}]
+    TooManyRequests:
+      description: Rate limited
+      headers:
+        Retry-After: {schema: {type: integer}}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}
+    ServiceUnavailable:
+      description: Unavailable (or simulated via x-mock-status)
+      headers:
+        Retry-After: {schema: {type: integer}}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ErpError'}

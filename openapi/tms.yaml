@@ -1,0 +1,539 @@
+openapi: 3.0.3
+info:
+  title: Logistics / TMS API (mock)
+  version: 1.0.0
+  description: |
+    Mock **Transportation Management System**. Owns advance shipment notices (ASNs), carrier
+    tendering, milestones and tracking events. It knows nothing about purchase-order quantities
+    (the ERP does) and nothing about supplier entitlements (the SRM does) — the iPaaS has to
+    orchestrate those checks around it.
+
+    Differences from the façade the iPaaS must handle:
+    * Carriers are identified by **SCAC** (`UPSN`, `FDEG`, `DHLE`, `XPOL`, `ODFL`, `MAEU`), not the
+      façade's `carrierCode` (`UPS`, `FEDEX`, ...). Use `GET /v1/carriers?code=UPS` to map.
+    * Status is a **milestone code**: `PLN` planned, `TND` tendered, `ITR` in transit,
+      `DLV` delivered, `EXC` exception, `CXL` cancelled.
+    * PO references use the **raw 10-digit ERP number** (`4500123456`) and integer `poLine`.
+    * Quantities/weights are nested (`quantity.value/uom`, `weight.value/unit` with lowercase `kg|lb`).
+    * Handling-unit types are `PLT | CTN | CRT | OTH`.
+    * Addresses use `locationCode, name, street, city, state, zip, country`.
+    * **Cursor pagination**: `{ count, results, nextCursor }` — pass `cursor=<nextCursor>`.
+    * Error dialect: `{ "fault": { "faultCode": "tms.X", "faultString", "httpStatus", "detail":[{path,issue}], "correlationId" } }`.
+
+    **Demo headers** (when `CHAOS_ENABLED=true`): `x-mock-status` (force an error status),
+    `x-mock-delay-ms` (add latency). POSTs accept an optional `Idempotency-Key` header.
+servers:
+  - url: /tms
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Shipments
+  - name: Tracking
+  - name: Reference Data
+  - name: Health
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check (no auth)
+      security: []
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string, example: ok}
+                  service: {type: string, example: tms}
+                  database: {type: string, example: up}
+        '503':
+          description: Database unavailable
+  /v1/carriers:
+    get:
+      tags: [Reference Data]
+      summary: List carriers (map façade carrierCode -> SCAC)
+      operationId: listCarriers
+      parameters:
+        - {name: code, in: query, description: 'Façade carrier code(s), comma separated (e.g. UPS,FEDEX)', schema: {type: string}}
+        - {name: scac, in: query, description: 'SCAC(s), comma separated', schema: {type: string}}
+      responses:
+        '200':
+          description: Carriers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: {type: integer}
+                  results:
+                    type: array
+                    items: {$ref: '#/components/schemas/Carrier'}
+              example:
+                count: 1
+                results:
+                  - carrierCode: UPS
+                    scac: UPSN
+                    name: United Parcel Service
+                    mode: PARCEL
+                    trackingUrlTemplate: 'https://www.ups.com/track?tracknum={trackingId}'
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/milestones:
+    get:
+      tags: [Reference Data]
+      summary: Milestone code list
+      operationId: listMilestones
+      responses:
+        '200':
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: {type: integer}
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code: {$ref: '#/components/schemas/MilestoneCode'}
+                        description: {type: string}
+  /v1/event-codes:
+    get:
+      tags: [Reference Data]
+      summary: Tracking event codes and the milestone they move a shipment to
+      operationId: listEventCodes
+      responses:
+        '200':
+          description: Event codes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: {type: integer}
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code: {$ref: '#/components/schemas/EventCode'}
+                        description: {type: string}
+                        resultingMilestone: {$ref: '#/components/schemas/MilestoneCode'}
+  /v1/shipments:
+    get:
+      tags: [Shipments]
+      summary: List shipments (cursor pagination, newest first)
+      operationId: listShipments
+      parameters:
+        - {name: supplierCode, in: query, description: 'SUP-xxxxxx, comma separated', schema: {type: string, example: SUP-100245}}
+        - {name: status, in: query, description: 'Milestone codes, comma separated (PLN,TND,ITR,DLV,EXC,CXL)', schema: {type: string, example: 'TND,ITR'}}
+        - {name: poNumber, in: query, description: 10-digit ERP PO number contained in the shipment, schema: {type: string, pattern: '^[0-9]{10}$', example: '4500123458'}}
+        - {name: asnNumber, in: query, schema: {type: string, example: ASN-439901}}
+        - {name: updatedSince, in: query, schema: {type: string, format: date-time}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 200, default: 25}}
+        - {name: cursor, in: query, description: nextCursor from the previous page, schema: {type: string}}
+      responses:
+        '200':
+          description: Page of shipments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: {type: integer}
+                  results:
+                    type: array
+                    items: {$ref: '#/components/schemas/Shipment'}
+                  nextCursor: {type: string, nullable: true}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+    post:
+      tags: [Shipments]
+      summary: Create an ASN / shipment
+      description: |
+        Creates the shipment and (by default) tenders it to the carrier (`TND`). Send
+        `"tender": false` to create it as planned (`PLN`, façade `DRAFT`).
+        TMS does **not** validate PO quantities — the ERP inbound delivery does.
+      operationId: createShipment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateShipment'}
+            example:
+              asnNumber: ASN-440882
+              supplierCode: SUP-100245
+              carrier: {scac: UPSN, trackingId: 1Z999AA10123456784}
+              route:
+                origin: {locationCode: SUP-ATL-01, name: Supplier Distribution Center, city: Atlanta, state: GA, zip: '30301', country: US}
+                destination: {locationCode: US-AUBURN-HILLS, name: Jabil Manufacturing Site, street: 100 Manufacturing Way, city: Auburn Hills, state: MI, zip: '48326', country: US}
+              schedule: {plannedShipDate: '2026-10-03T12:00:00Z', estimatedArrival: '2026-10-07T15:00:00Z'}
+              contents:
+                - {poNumber: '4500123456', poLine: 10, quantity: {value: 250, uom: EA}, lotNumber: LOT-88291}
+              handlingUnits:
+                - {huId: PALLET-1001, type: PLT, weight: {value: 240, unit: kg}}
+      responses:
+        '201':
+          description: Shipment created
+          headers:
+            Location: {schema: {type: string}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409':
+          description: DUPLICATE_ASN (same asnNumber already exists for supplier)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TmsFault'}
+              example:
+                fault: {faultCode: tms.DUPLICATE_ASN, faultString: ASN ASN-439901 already exists for SUP-100245 as SHP-20260918-00121, httpStatus: 409, correlationId: 5f754b61-2038-4978-a7cb-6d6a97afd501}
+        '422':
+          description: UNKNOWN_CARRIER or INVALID_SCHEDULE
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/TmsFault'}
+              example:
+                fault:
+                  faultCode: tms.UNKNOWN_CARRIER
+                  faultString: Carrier SCAC UPS is not configured in TMS (see GET /tms/v1/carriers)
+                  httpStatus: 422
+                  detail: [{path: carrier.scac, issue: unknown SCAC}]
+        '429': {$ref: '#/components/responses/TooManyRequests'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+  /v1/shipments/{shipmentId}:
+    parameters:
+      - $ref: '#/components/parameters/ShipmentId'
+    get:
+      tags: [Shipments]
+      summary: Get a shipment
+      operationId: getShipment
+      parameters:
+        - {name: include, in: query, description: '`events` to embed tracking history', schema: {type: string, enum: [events]}}
+      responses:
+        '200':
+          description: Shipment
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/shipments/{shipmentId}/events:
+    parameters:
+      - $ref: '#/components/parameters/ShipmentId'
+    get:
+      tags: [Tracking]
+      summary: Tracking history
+      operationId: listShipmentEvents
+      responses:
+        '200':
+          description: Events (oldest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shipmentId: {type: string}
+                  milestone: {$ref: '#/components/schemas/MilestoneCode'}
+                  count: {type: integer}
+                  results:
+                    type: array
+                    items: {$ref: '#/components/schemas/TrackingEvent'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Tracking]
+      summary: Post a carrier tracking event (demo control)
+      description: |
+        Simulates a carrier update. `PU/DEP/ARR/OFD/RES` → `ITR`, `EXC` → `EXC` (façade `DELAYED`),
+        `DLV` → `DLV`. Optionally revises the ETA. Returns 409 `NOT_TENDERED` for `PLN` and
+        `SHIPMENT_CLOSED` for `DLV`/`CXL`.
+      operationId: postShipmentEvent
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventCode]
+              properties:
+                eventCode: {$ref: '#/components/schemas/EventCode'}
+                description: {type: string, maxLength: 240}
+                location: {type: string, maxLength: 120, example: 'Toledo, OH, US'}
+                occurredAt: {type: string, format: date-time}
+                newEstimatedArrival: {type: string, format: date-time}
+            example: {eventCode: EXC, description: Weather delay at Toledo hub, location: 'Toledo, OH, US', newEstimatedArrival: '2026-10-09T15:00:00Z'}
+      responses:
+        '201':
+          description: Event recorded; returns shipment with events
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /v1/shipments/{shipmentId}/tender:
+    parameters:
+      - $ref: '#/components/parameters/ShipmentId'
+    post:
+      tags: [Shipments]
+      summary: Tender a planned shipment (PLN → TND)
+      operationId: tenderShipment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Tendered
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /v1/shipments/{shipmentId}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/ShipmentId'
+    post:
+      tags: [Shipments]
+      summary: Cancel a shipment (business cancel or saga compensation)
+      operationId: cancelShipment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: {type: string, maxLength: 240, example: 'Compensation: ERP inbound delivery rejected'}
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Default key `tms-demo-key` (set `TMS_API_KEY`). Disabled when `TMS_AUTH_MODE=none`.
+  parameters:
+    ShipmentId:
+      name: shipmentId
+      in: path
+      required: true
+      schema: {type: string, pattern: '^SHP-[0-9]{8}-[0-9]{5}$', example: SHP-20260918-00121}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Optional. Replays return the original response with `Idempotent-Replayed true`; reuse with a different body returns 422.
+      schema: {type: string, minLength: 8, maxLength: 128}
+  schemas:
+    MilestoneCode:
+      type: string
+      enum: [PLN, TND, ITR, DLV, EXC, CXL]
+    EventCode:
+      type: string
+      enum: [PU, DEP, ARR, OFD, RES, DLV, EXC]
+    Carrier:
+      type: object
+      properties:
+        carrierCode: {type: string, example: UPS}
+        scac: {type: string, example: UPSN}
+        name: {type: string}
+        mode: {type: string, example: PARCEL}
+        trackingUrlTemplate: {type: string, nullable: true}
+    Location:
+      type: object
+      required: [locationCode, name, country]
+      properties:
+        locationCode: {type: string, maxLength: 40, example: SUP-ATL-01}
+        name: {type: string, maxLength: 120}
+        street: {type: string, nullable: true, maxLength: 120}
+        city: {type: string, nullable: true, maxLength: 80}
+        state: {type: string, nullable: true, maxLength: 80}
+        zip: {type: string, nullable: true, maxLength: 20}
+        country: {type: string, pattern: '^[A-Z]{2}$', example: US}
+    Content:
+      type: object
+      required: [poNumber, poLine, quantity]
+      properties:
+        poNumber: {type: string, pattern: '^[0-9]{10}$', example: '4500123456'}
+        poLine: {type: integer, minimum: 1, example: 10}
+        quantity:
+          type: object
+          required: [value, uom]
+          properties:
+            value: {type: number, example: 250}
+            uom: {type: string, example: EA}
+        lotNumber: {type: string, nullable: true, example: LOT-88291}
+    HandlingUnit:
+      type: object
+      required: [huId, type]
+      properties:
+        huId: {type: string, example: PALLET-1001}
+        type: {type: string, enum: [PLT, CTN, CRT, OTH]}
+        weight:
+          type: object
+          nullable: true
+          properties:
+            value: {type: number, example: 240}
+            unit: {type: string, enum: [kg, lb]}
+    CreateShipment:
+      type: object
+      required: [asnNumber, supplierCode, carrier, route, schedule, contents]
+      properties:
+        asnNumber: {type: string, maxLength: 80}
+        supplierCode: {type: string, pattern: '^SUP-[0-9]{6}$'}
+        carrier:
+          type: object
+          required: [scac]
+          properties:
+            scac: {type: string, maxLength: 4, example: UPSN}
+            trackingId: {type: string, maxLength: 100}
+        route:
+          type: object
+          required: [origin, destination]
+          properties:
+            origin: {$ref: '#/components/schemas/Location'}
+            destination: {$ref: '#/components/schemas/Location'}
+        schedule:
+          type: object
+          required: [plannedShipDate, estimatedArrival]
+          properties:
+            plannedShipDate: {type: string, format: date-time}
+            estimatedArrival: {type: string, format: date-time}
+        contents:
+          type: array
+          minItems: 1
+          items: {$ref: '#/components/schemas/Content'}
+        handlingUnits:
+          type: array
+          items: {$ref: '#/components/schemas/HandlingUnit'}
+        tender: {type: boolean, default: true, description: false creates the shipment as PLN}
+    TrackingEvent:
+      type: object
+      properties:
+        eventId: {type: integer}
+        code: {type: string, example: ARR}
+        description: {type: string}
+        location: {type: string, nullable: true}
+        occurredAt: {type: string, format: date-time}
+        recordedAt: {type: string, format: date-time}
+    Shipment:
+      type: object
+      properties:
+        shipmentId: {type: string, example: SHP-20260918-00121}
+        asnNumber: {type: string, example: ASN-439901}
+        supplierCode: {type: string, example: SUP-100245}
+        carrier:
+          type: object
+          properties:
+            scac: {type: string, example: UPSN}
+            carrierCode: {type: string, example: UPS}
+            name: {type: string}
+            trackingId: {type: string, nullable: true}
+            trackingUrl: {type: string, nullable: true}
+        milestone:
+          type: object
+          properties:
+            code: {$ref: '#/components/schemas/MilestoneCode'}
+            description: {type: string}
+            since: {type: string, format: date-time}
+        route:
+          type: object
+          properties:
+            origin: {$ref: '#/components/schemas/Location'}
+            destination: {$ref: '#/components/schemas/Location'}
+        schedule:
+          type: object
+          properties:
+            plannedShipDate: {type: string, format: date-time}
+            estimatedArrival: {type: string, format: date-time}
+        contents:
+          type: array
+          items: {$ref: '#/components/schemas/Content'}
+        handlingUnits:
+          type: array
+          items: {$ref: '#/components/schemas/HandlingUnit'}
+        cancelReason: {type: string, nullable: true}
+        audit:
+          type: object
+          properties:
+            createdAt: {type: string, format: date-time}
+            updatedAt: {type: string, format: date-time}
+        events:
+          type: array
+          description: Present when include=events (and on POST events)
+          items: {$ref: '#/components/schemas/TrackingEvent'}
+    TmsFault:
+      type: object
+      properties:
+        fault:
+          type: object
+          properties:
+            faultCode: {type: string, example: tms.SHIPMENT_NOT_FOUND}
+            faultString: {type: string}
+            httpStatus: {type: integer}
+            detail:
+              type: array
+              items:
+                type: object
+                properties:
+                  path: {type: string}
+                  issue: {type: string}
+            correlationId: {type: string}
+  responses:
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+          example:
+            fault:
+              faultCode: tms.VALIDATION_FAILED
+              faultString: Request validation failed
+              httpStatus: 400
+              detail: [{path: 'contents[0].poNumber', issue: 'must match ^[0-9]{10}$'}]
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+          example:
+            fault: {faultCode: tms.SHIPMENT_NOT_FOUND, faultString: Shipment SHP-20260923-99999 does not exist, httpStatus: 404}
+    Conflict:
+      description: State conflict (NOT_TENDERED, SHIPMENT_CLOSED, ALREADY_TENDERED)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+    TooManyRequests:
+      description: Rate limited
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+    ServiceUnavailable:
+      description: Unavailable (or simulated via chaos)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}

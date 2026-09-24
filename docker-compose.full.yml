@@ -1,0 +1,39 @@
+# Postgres + the API in containers:  docker compose -f docker-compose.full.yml up --build
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: po-backends-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: api_user
+      POSTGRES_PASSWORD: api_pass
+      POSTGRES_DB: po_backends_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U api_user -d po_backends_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: po-backends-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://api_user:api_pass@postgres:5432/po_backends_db
+      SERVICE_MODE: ${SERVICE_MODE:-combined}
+      PORT: 3000
+      AUTH_MODE: ${AUTH_MODE:-apikey}
+      CHAOS_ENABLED: ${CHAOS_ENABLED:-true}
+      LOG_FORMAT: combined
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
