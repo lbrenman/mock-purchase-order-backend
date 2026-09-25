@@ -123,7 +123,7 @@ paths:
         content:
           application/json:
             schema: {$ref: '#/components/schemas/PurchasingOrg'}
-            example: {code: JBBR, name: Jabil-BR, company_code: BR01}
+            example: {code: AMBR, name: Acme-BR, company_code: BR01}
       responses:
         '201':
           description: Created
@@ -141,7 +141,7 @@ paths:
       - name: code
         in: path
         required: true
-        schema: {type: string, example: JBUS}
+        schema: {type: string, example: AMUS}
     get:
       tags: [Reference Data]
       summary: Get a purchasing organisation
@@ -170,7 +170,7 @@ paths:
               properties:
                 name: {type: string}
                 company_code: {type: string}
-            example: {name: Jabil-US Procurement}
+            example: {name: Acme-US Procurement}
       responses:
         '200':
           description: Updated
@@ -195,7 +195,7 @@ paths:
   /v1/plants:
     get:
       tags: [Reference Data]
-      summary: List plants (Jabil ship-to sites)
+      summary: List plants (Acme ship-to sites)
       operationId: listPlants
       parameters:
         - name: site_code
@@ -227,7 +227,7 @@ paths:
             example:
               plant_code: '1105'
               site_code: US-AUSTIN
-              name: Jabil Austin Test Site
+              name: Acme Austin Test Site
               street: 1 Demo Way
               city: Austin
               region: TX
@@ -280,7 +280,7 @@ paths:
         content:
           application/json:
             schema: {$ref: '#/components/schemas/PlantChange'}
-            example: {name: Jabil Auburn Hills Campus}
+            example: {name: Acme Auburn Hills Campus}
       responses:
         '200':
           description: Updated
@@ -331,7 +331,7 @@ paths:
           schema: {type: string, example: '1101'}
         - name: purch_org
           in: query
-          schema: {type: string, example: JBUS}
+          schema: {type: string, example: AMUS}
         - name: po_number
           in: query
           description: One or more PO numbers, comma separated.
@@ -353,8 +353,8 @@ paths:
                 data:
                   - po_number: '4500123456'
                     vendor_id: '0000710245'
-                    purch_org: JBUS
-                    purch_org_name: Jabil-US
+                    purch_org: AMUS
+                    purch_org_name: Acme-US
                     doc_date: '20260915'
                     currency: USD
                     status_code: '01'
@@ -363,7 +363,7 @@ paths:
                     plant: '1101'
                     ship_to:
                       site_code: US-AUBURN-HILLS
-                      name: Jabil Manufacturing Site
+                      name: Acme Manufacturing Site
                       street: 100 Manufacturing Way
                       city: Auburn Hills
                       region: MI
@@ -407,7 +407,7 @@ paths:
             schema: {$ref: '#/components/schemas/PurchaseOrderCreate'}
             example:
               vendor_id: '0000710245'
-              purch_org: JBUS
+              purch_org: AMUS
               currency: USD
               delivery_date: '20261115'
               plant: '1101'
@@ -460,8 +460,8 @@ paths:
                 data:
                   po_number: '4500123456'
                   vendor_id: '0000710245'
-                  purch_org: JBUS
-                  purch_org_name: Jabil-US
+                  purch_org: AMUS
+                  purch_org_name: Acme-US
                   doc_date: '20260915'
                   currency: USD
                   status_code: '01'
@@ -470,7 +470,7 @@ paths:
                   plant: '1101'
                   ship_to:
                     site_code: US-AUBURN-HILLS
-                    name: Jabil Manufacturing Site
+                    name: Acme Manufacturing Site
                     street: 100 Manufacturing Way
                     city: Auburn Hills
                     region: MI
@@ -931,15 +931,15 @@ components:
     PurchasingOrg:
       type: object
       properties:
-        code: {type: string, example: JBUS}
-        name: {type: string, example: Jabil-US}
+        code: {type: string, example: AMUS}
+        name: {type: string, example: Acme-US}
         company_code: {type: string, example: US01}
     Plant:
       type: object
       properties:
         plant_code: {type: string, example: '1101'}
         site_code: {type: string, example: US-AUBURN-HILLS}
-        name: {type: string, example: Jabil Manufacturing Site}
+        name: {type: string, example: Acme Manufacturing Site}
         street: {type: string, example: 100 Manufacturing Way}
         city: {type: string, example: Auburn Hills}
         region: {type: string, example: MI}
@@ -949,7 +949,7 @@ components:
       type: object
       properties:
         site_code: {type: string, example: US-AUBURN-HILLS}
-        name: {type: string, example: Jabil Manufacturing Site}
+        name: {type: string, example: Acme Manufacturing Site}
         street: {type: string, nullable: true, example: 100 Manufacturing Way}
         city: {type: string, nullable: true, example: Auburn Hills}
         region: {type: string, nullable: true, example: MI}
@@ -960,8 +960,8 @@ components:
       properties:
         po_number: {type: string, example: '4500123456'}
         vendor_id: {type: string, example: '0000710245'}
-        purch_org: {type: string, example: JBUS}
-        purch_org_name: {type: string, nullable: true, description: 'Buying organisation name (from the purchasing org master)', example: Jabil-US}
+        purch_org: {type: string, example: AMUS}
+        purch_org_name: {type: string, nullable: true, description: 'Buying organisation name (from the purchasing org master)', example: Acme-US}
         doc_date: {type: string, description: YYYYMMDD, example: '20260915'}
         currency: {type: string, example: USD}
         status_code: {type: string, enum: ['01', '02', '03', '04', '05', '09']}

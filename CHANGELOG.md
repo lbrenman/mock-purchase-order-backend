@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.2.3
+
+All references to the original customer are gone from the repository. "Acme" is the fictitious buying company.
+
+- Seed data (`src/data/*.json`, `tools/seed/base/*.json`, `tools/seed/expand_seed.py`):
+  - plant names such as `Acme Tampa Bay`;
+  - buying organisations `Acme-US`, `Acme-CN`, ...;
+  - purchasing-org codes `JBxx` → `AMxx` (`AMUS`, `AMCN`, ...);
+  - consumer IDs `acme-ops-console`, `acme-procurement-workbench`, ...;
+  - contact e-mails `@acme.example.com`.
+- Façade spec `Supplier_Order_Collaboration_OpenAPI_3_1.yaml`:
+  - title *Supplier Order Collaboration API*;
+  - extensions `x-acme-*`;
+  - neutral wording in the info block, license and security descriptions;
+  - example site names. Paths and schemas are unchanged.
+- Backend spec examples, Postman collection (regenerated), smoke test, dashboard copy, MAPPING.md, README,
+  CLAUDE.md and the schema comment follow suit.
+- **Existing databases keep the old rows.** Seeding never overwrites existing rows, so run
+  `npm run seed:reset` once after updating.
+
 ## 2.2.2
 
 - Added the façade (front-end) spec `Supplier_Order_Collaboration_OpenAPI_3_1.yaml` to the repository root, kept apart from

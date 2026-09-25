@@ -28,37 +28,37 @@ def sapd(d): return d.strftime('%Y%m%d')
 
 # ─── ERP reference data ────────────────────────────────────────────────
 erp['purchasing_orgs'] += [
-    {"code": "JBCN", "name": "Jabil-CN", "company_code": "CN01"},
-    {"code": "JBMY", "name": "Jabil-MY", "company_code": "MY01"},
-    {"code": "JBVN", "name": "Jabil-VN", "company_code": "VN01"},
-    {"code": "JBPL", "name": "Jabil-PL", "company_code": "PL01"},
-    {"code": "JBHU", "name": "Jabil-HU", "company_code": "HU01"},
+    {"code": "AMCN", "name": "Acme-CN", "company_code": "CN01"},
+    {"code": "AMMY", "name": "Acme-MY", "company_code": "MY01"},
+    {"code": "AMVN", "name": "Acme-VN", "company_code": "VN01"},
+    {"code": "AMPL", "name": "Acme-PL", "company_code": "PL01"},
+    {"code": "AMHU", "name": "Acme-HU", "company_code": "HU01"},
 ]
 erp['plants'] += [
-    {"plant_code": "1103", "site_code": "US-MEMPHIS", "name": "Jabil Memphis Repair & Distribution", "street": "4600 Distriplex Farms Dr", "city": "Memphis", "region": "TN", "postal_code": "38141", "country": "US"},
-    {"plant_code": "1104", "site_code": "US-SAN-JOSE", "name": "Jabil San Jose Blue Sky Center", "street": "30 Great Oaks Blvd", "city": "San Jose", "region": "CA", "postal_code": "95119", "country": "US"},
-    {"plant_code": "2102", "site_code": "MX-CHIHUAHUA", "name": "Jabil Chihuahua Operations", "street": "Av. de las Industrias 8901", "city": "Chihuahua", "region": "CHH", "postal_code": "31136", "country": "MX"},
-    {"plant_code": "3102", "site_code": "HU-TISZAUJVAROS", "name": "Jabil Tiszaujvaros Plant", "street": "Huszar Andor ut 1", "city": "Tiszaujvaros", "region": "BZ", "postal_code": "3580", "country": "HU"},
-    {"plant_code": "3103", "site_code": "PL-KWIDZYN", "name": "Jabil Kwidzyn Campus", "street": "ul. Mickiewicza 49", "city": "Kwidzyn", "region": "PM", "postal_code": "82-500", "country": "PL"},
-    {"plant_code": "4102", "site_code": "MY-PENANG", "name": "Jabil Penang Operations", "street": "56 Hilir Sungai Keluang 1", "city": "Bayan Lepas", "region": "PNG", "postal_code": "11900", "country": "MY"},
-    {"plant_code": "4103", "site_code": "CN-WUXI", "name": "Jabil Wuxi Campus", "street": "8 Xinhua Road, New District", "city": "Wuxi", "region": "JS", "postal_code": "214028", "country": "CN"},
-    {"plant_code": "4104", "site_code": "VN-HCMC", "name": "Jabil Vietnam Saigon Hi-Tech Park", "street": "Lot I-9, D1 Street", "city": "Ho Chi Minh City", "region": "HCM", "postal_code": "700000", "country": "VN"},
+    {"plant_code": "1103", "site_code": "US-MEMPHIS", "name": "Acme Memphis Repair & Distribution", "street": "4600 Distriplex Farms Dr", "city": "Memphis", "region": "TN", "postal_code": "38141", "country": "US"},
+    {"plant_code": "1104", "site_code": "US-SAN-JOSE", "name": "Acme San Jose Blue Sky Center", "street": "30 Great Oaks Blvd", "city": "San Jose", "region": "CA", "postal_code": "95119", "country": "US"},
+    {"plant_code": "2102", "site_code": "MX-CHIHUAHUA", "name": "Acme Chihuahua Operations", "street": "Av. de las Industrias 8901", "city": "Chihuahua", "region": "CHH", "postal_code": "31136", "country": "MX"},
+    {"plant_code": "3102", "site_code": "HU-TISZAUJVAROS", "name": "Acme Tiszaujvaros Plant", "street": "Huszar Andor ut 1", "city": "Tiszaujvaros", "region": "BZ", "postal_code": "3580", "country": "HU"},
+    {"plant_code": "3103", "site_code": "PL-KWIDZYN", "name": "Acme Kwidzyn Campus", "street": "ul. Mickiewicza 49", "city": "Kwidzyn", "region": "PM", "postal_code": "82-500", "country": "PL"},
+    {"plant_code": "4102", "site_code": "MY-PENANG", "name": "Acme Penang Operations", "street": "56 Hilir Sungai Keluang 1", "city": "Bayan Lepas", "region": "PNG", "postal_code": "11900", "country": "MY"},
+    {"plant_code": "4103", "site_code": "CN-WUXI", "name": "Acme Wuxi Campus", "street": "8 Xinhua Road, New District", "city": "Wuxi", "region": "JS", "postal_code": "214028", "country": "CN"},
+    {"plant_code": "4104", "site_code": "VN-HCMC", "name": "Acme Vietnam Saigon Hi-Tech Park", "street": "Lot I-9, D1 Street", "city": "Ho Chi Minh City", "region": "HCM", "postal_code": "700000", "country": "VN"},
 ]
 PLANTS = {p['plant_code']: p for p in erp['plants']}
-PLANT_ORG = {'1101': 'JBUS', '1102': 'JBUS', '1103': 'JBUS', '1104': 'JBUS', '2101': 'JBMX', '2102': 'JBMX',
-             '3101': 'JBDE', '3102': 'JBHU', '3103': 'JBPL', '4101': 'JBSG', '4102': 'JBMY', '4103': 'JBCN', '4104': 'JBVN'}
-ORG_CCY = {'JBUS': 'USD', 'JBMX': 'USD', 'JBDE': 'EUR', 'JBHU': 'EUR', 'JBPL': 'PLN', 'JBSG': 'USD', 'JBMY': 'USD', 'JBCN': 'CNY', 'JBVN': 'USD'}
+PLANT_ORG = {'1101': 'AMUS', '1102': 'AMUS', '1103': 'AMUS', '1104': 'AMUS', '2101': 'AMMX', '2102': 'AMMX',
+             '3101': 'AMDE', '3102': 'AMHU', '3103': 'AMPL', '4101': 'AMSG', '4102': 'AMMY', '4103': 'AMCN', '4104': 'AMVN'}
+ORG_CCY = {'AMUS': 'USD', 'AMMX': 'USD', 'AMDE': 'EUR', 'AMHU': 'EUR', 'AMPL': 'PLN', 'AMSG': 'USD', 'AMMY': 'USD', 'AMCN': 'CNY', 'AMVN': 'USD'}
 CCY_FX = {'USD': 1.0, 'EUR': 0.92, 'PLN': 3.95, 'CNY': 7.15}
 ORG_BUYERS = {
-    'JBUS': ['Maria Alvarez', 'Daniel Okafor', 'Heather Lindqvist', 'Marcus Webb'],
-    'JBMX': ['Luis Hernández', 'Sofia Castañeda'],
-    'JBDE': ['Katrin Vogel', 'Florian Maier'],
-    'JBHU': ['Eszter Nagy'], 'JBPL': ['Tomasz Wiśniewski'],
-    'JBSG': ['Wei Ling Tan', 'Rajesh Pillai'], 'JBMY': ['Nurul Aisyah', 'Kenneth Lim'],
-    'JBCN': ['Zhang Min', 'Li Hua'], 'JBVN': ['Nguyen Thi Mai'],
+    'AMUS': ['Maria Alvarez', 'Daniel Okafor', 'Heather Lindqvist', 'Marcus Webb'],
+    'AMMX': ['Luis Hernández', 'Sofia Castañeda'],
+    'AMDE': ['Katrin Vogel', 'Florian Maier'],
+    'AMHU': ['Eszter Nagy'], 'AMPL': ['Tomasz Wiśniewski'],
+    'AMSG': ['Wei Ling Tan', 'Rajesh Pillai'], 'AMMY': ['Nurul Aisyah', 'Kenneth Lim'],
+    'AMCN': ['Zhang Min', 'Li Hua'], 'AMVN': ['Nguyen Thi Mai'],
 }
-ORG_TERMS = {'JBUS': ('FCA', 'NET60'), 'JBMX': ('DAP', 'NET45'), 'JBDE': ('DAP', 'NET45'), 'JBHU': ('DAP', 'NET45'),
-             'JBPL': ('DAP', 'NET45'), 'JBSG': ('FOB', 'NET90'), 'JBMY': ('FOB', 'NET90'), 'JBCN': ('FOB', 'NET90'), 'JBVN': ('CIP', 'NET60')}
+ORG_TERMS = {'AMUS': ('FCA', 'NET60'), 'AMMX': ('DAP', 'NET45'), 'AMDE': ('DAP', 'NET45'), 'AMHU': ('DAP', 'NET45'),
+             'AMPL': ('DAP', 'NET45'), 'AMSG': ('FOB', 'NET90'), 'AMMY': ('FOB', 'NET90'), 'AMCN': ('FOB', 'NET90'), 'AMVN': ('CIP', 'NET60')}
 
 # ─── SRM suppliers ─────────────────────────────────────────────────────
 NEW_SUPPLIERS = [
@@ -150,12 +150,12 @@ srm['entitlements'] += [
     {"consumer_id": "hanbit-portal", "display_name": "Hanbit Display - Portal (read only)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100884"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "EXT-SUP-100884", "contact_email": "scm@hanbit-display.example.kr"},
     {"consumer_id": "asia-pacific-edi-network", "display_name": "APAC Supplier EDI Network (multi-supplier VAN)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100866", "SUP-100957", "SUP-100962", "SUP-100871"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": True, "cost_center": "EXT-VAN-APAC", "contact_email": "onboarding@apac-edi-network.example.com"},
     {"consumer_id": "europe-supplier-hub", "display_name": "Europe Supplier Hub (multi-supplier)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100903", "SUP-100917", "SUP-100926"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": True, "cost_center": "EXT-HUB-EU", "contact_email": "support@eu-supplier-hub.example.com"},
-    {"consumer_id": "americas-supplier-portal", "display_name": "Americas Supplier Portal", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100944", "SUP-100975", "SUP-100989", "SUP-100938"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": True, "cost_center": "EXT-PORTAL-AMER", "contact_email": "portal-support@jabil.example.com"},
+    {"consumer_id": "americas-supplier-portal", "display_name": "Americas Supplier Portal", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100944", "SUP-100975", "SUP-100989", "SUP-100938"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": True, "cost_center": "EXT-PORTAL-AMER", "contact_email": "portal-support@acme.example.com"},
     {"consumer_id": "tristar-portal", "display_name": "Tri-Star Surplus Portal (revoked)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100951"], "scopes": ["supplier-orders.read"], "active": False, "cost_center": "EXT-SUP-100951", "contact_email": "it@tristar-surplus.example.com"},
     {"consumer_id": "rm-sensorik-onboarding", "display_name": "RM Sensorik - Integration (pending activation)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100996"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": False, "cost_center": "EXT-SUP-100996", "contact_email": "it@rm-sensorik.example.de"},
-    {"consumer_id": "jabil-logistics-control-tower", "display_name": "Jabil Logistics Control Tower", "consumer_type": "internal-application", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4460-LOG", "contact_email": "control-tower@jabil.example.com"},
-    {"consumer_id": "jabil-spend-analytics", "display_name": "Jabil Spend Analytics", "consumer_type": "internal-application", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4480-FIN", "contact_email": "spend-analytics@jabil.example.com"},
-    {"consumer_id": "jabil-l2-support-desk", "display_name": "Supplier Platform L2 Support Desk", "consumer_type": "operations-support", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4420-SCO", "contact_email": "supplier-platform-l2@jabil.example.com"},
+    {"consumer_id": "acme-logistics-control-tower", "display_name": "Acme Logistics Control Tower", "consumer_type": "internal-application", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4460-LOG", "contact_email": "control-tower@acme.example.com"},
+    {"consumer_id": "acme-spend-analytics", "display_name": "Acme Spend Analytics", "consumer_type": "internal-application", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4480-FIN", "contact_email": "spend-analytics@acme.example.com"},
+    {"consumer_id": "acme-l2-support-desk", "display_name": "Supplier Platform L2 Support Desk", "consumer_type": "operations-support", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": True, "cost_center": "CC-4420-SCO", "contact_email": "supplier-platform-l2@acme.example.com"},
 ]
 
 # ─── Materials catalog per category (material, text, uom, usd price) ────

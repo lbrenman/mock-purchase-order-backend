@@ -86,7 +86,7 @@ health = lambda n: {"status": "ok", "service": n, "database": "up", "timestamp":
 stub = lambda path, q=None: S['route']('GET', path, q or {}, {})[1]
 
 # ═══ ERP ═══════════════════════════════════════════════════════════════
-po_body = {"vendor_id": "0000710245", "purch_org": "JBUS", "plant": "1101", "currency": "USD", "delivery_date": "20261215", "buyer_name": "Postman Buyer", "incoterms": "FCA", "payment_terms": "NET60",
+po_body = {"vendor_id": "0000710245", "purch_org": "AMUS", "plant": "1101", "currency": "USD", "delivery_date": "20261215", "buyer_name": "Postman Buyer", "incoterms": "FCA", "payment_terms": "NET60",
            "items": [{"material": "MAT-778210", "short_text": "Industrial controller assembly", "quantity": 100, "uom": "EA", "net_price": 84.5}]}
 
 
@@ -95,7 +95,7 @@ def item_row(no, material, text, qty, price, conf=0, conf_date=None, shipped=0, 
             "confirmed_qty": f"{conf:.3f}", "confirmed_date": conf_date, "shipped_qty": f"{shipped:.3f}", "open_qty": f"{max(qty - shipped, 0):.3f}", "reject_reason": reject}
 
 
-base = S['map_po'](PO('4500123456'))  # plant 1101 / JBUS: gives ship_to and purch_org_name
+base = S['map_po'](PO('4500123456'))  # plant 1101 / AMUS: gives ship_to and purch_org_name
 
 
 def po_state(number='4500123530', revision=1, status='01', items=None, **hdr):
@@ -139,7 +139,7 @@ erp_items = [
         req('Change purchasing org', 'PATCH', 'erp', '/v1/reference/purchasing-orgs/{{orgCode}}', body={"name": "Postman Test Org (renamed)"},
             example=(200, {"data": {**pm_org, "name": "Postman Test Org (renamed)"}})),
         req('Delete purchasing org', 'DELETE', 'erp', '/v1/reference/purchasing-orgs/{{orgCode}}', expect=204),
-        req('Delete purchasing org in use (409)', 'DELETE', 'erp', '/v1/reference/purchasing-orgs/JBUS', expect=409, example=(409, erpErr('PURCH_ORG_IN_USE', 'Purchasing organisation JBUS is used by 20 purchase order(s)'))),
+        req('Delete purchasing org in use (409)', 'DELETE', 'erp', '/v1/reference/purchasing-orgs/AMUS', expect=409, example=(409, erpErr('PURCH_ORG_IN_USE', 'Purchasing organisation AMUS is used by 20 purchase order(s)'))),
     ], desc='Code lists and purchasing organisations. Purchase orders already carry purch_org_name, so the façade does not need these at runtime.'),
     folder('Plants', [
         req('List plants', 'GET', 'erp', '/v1/plants', example=(200, {"data": erp['plants'][:3]})),
@@ -667,9 +667,9 @@ If this call fails, the façade cancels the TMS shipment before answering (scena
               example=(200, chk('prc-edi-bridge', scope='supplier-orders.read', supplierCode=shp107['supplierCode'])), desc='Step 2 of 2.'), SC_SRM),
     ], desc='Two calls: TMS, then SRM.'),
     folder('7. Governance: blocked and on-hold suppliers', [
-        a(req('Write for an on-hold supplier', 'GET', 'srm', '/v1/entitlements/jabil-ops-console/check', query={"scope": "supplier-orders.write", "supplierCode": "SUP-100518"},
+        a(req('Write for an on-hold supplier', 'GET', 'srm', '/v1/entitlements/acme-ops-console/check', query={"scope": "supplier-orders.write", "supplierCode": "SUP-100518"},
               tests=["pm.test('SUPPLIER_ON_HOLD', () => pm.expect(pm.response.json().reason).to.eql('SUPPLIER_ON_HOLD'));"],
-              example=(200, chk('jabil-ops-console', scope='supplier-orders.write', supplierCode='SUP-100518')), desc='An internal consumer with access to every supplier still cannot write for one on hold.'), SC_SRM),
+              example=(200, chk('acme-ops-console', scope='supplier-orders.write', supplierCode='SUP-100518')), desc='An internal consumer with access to every supplier still cannot write for one on hold.'), SC_SRM),
         a(req('Revoked consumer', 'GET', 'srm', '/v1/entitlements/mmw-legacy-portal/check', query={"scope": "supplier-orders.read", "supplierCode": "SUP-100627"},
               tests=["pm.test('CONSUMER_INACTIVE', () => pm.expect(pm.response.json().reason).to.eql('CONSUMER_INACTIVE'));"],
               example=(200, chk('mmw-legacy-portal', scope='supplier-orders.read', supplierCode='SUP-100627'))), SC_SRM),

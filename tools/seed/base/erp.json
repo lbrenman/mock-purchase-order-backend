@@ -1,20 +1,20 @@
 {
   "purchasing_orgs": [
-    { "code": "JBUS", "name": "Jabil-US", "company_code": "US01" },
-    { "code": "JBMX", "name": "Jabil-MX", "company_code": "MX01" },
-    { "code": "JBDE", "name": "Jabil-DE", "company_code": "DE01" },
-    { "code": "JBSG", "name": "Jabil-SG", "company_code": "SG01" }
+    { "code": "AMUS", "name": "Acme-US", "company_code": "US01" },
+    { "code": "AMMX", "name": "Acme-MX", "company_code": "MX01" },
+    { "code": "AMDE", "name": "Acme-DE", "company_code": "DE01" },
+    { "code": "AMSG", "name": "Acme-SG", "company_code": "SG01" }
   ],
   "plants": [
-    { "plant_code": "1101", "site_code": "US-AUBURN-HILLS", "name": "Jabil Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postal_code": "48326", "country": "US" },
-    { "plant_code": "1102", "site_code": "US-ST-PETERSBURG", "name": "Jabil Tampa Bay Operations", "street": "2400 Gateway Centre Blvd", "city": "St. Petersburg", "region": "FL", "postal_code": "33716", "country": "US" },
-    { "plant_code": "2101", "site_code": "MX-GUADALAJARA", "name": "Jabil Guadalajara Campus", "street": "Av. Industrial 500", "city": "Zapopan", "region": "JAL", "postal_code": "45100", "country": "MX" },
-    { "plant_code": "3101", "site_code": "DE-NUREMBERG", "name": "Jabil Nuremberg Engineering Center", "street": "Industriestrasse 12", "city": "Nuremberg", "region": "BY", "postal_code": "90411", "country": "DE" },
-    { "plant_code": "4101", "site_code": "SG-SINGAPORE", "name": "Jabil Singapore Operations", "street": "20 Loyang Way", "city": "Singapore", "region": "SG", "postal_code": "508774", "country": "SG" }
+    { "plant_code": "1101", "site_code": "US-AUBURN-HILLS", "name": "Acme Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postal_code": "48326", "country": "US" },
+    { "plant_code": "1102", "site_code": "US-ST-PETERSBURG", "name": "Acme Tampa Bay Operations", "street": "2400 Gateway Centre Blvd", "city": "St. Petersburg", "region": "FL", "postal_code": "33716", "country": "US" },
+    { "plant_code": "2101", "site_code": "MX-GUADALAJARA", "name": "Acme Guadalajara Campus", "street": "Av. Industrial 500", "city": "Zapopan", "region": "JAL", "postal_code": "45100", "country": "MX" },
+    { "plant_code": "3101", "site_code": "DE-NUREMBERG", "name": "Acme Nuremberg Engineering Center", "street": "Industriestrasse 12", "city": "Nuremberg", "region": "BY", "postal_code": "90411", "country": "DE" },
+    { "plant_code": "4101", "site_code": "SG-SINGAPORE", "name": "Acme Singapore Operations", "street": "20 Loyang Way", "city": "Singapore", "region": "SG", "postal_code": "508774", "country": "SG" }
   ],
   "purchase_orders": [
     {
-      "po_number": "4500123456", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-15", "currency": "USD",
+      "po_number": "4500123456", "vendor_id": "0000710245", "purch_org": "AMUS", "doc_date": "2026-09-15", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-10-05", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
       "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-09-15T13:05:00Z", "changed_at": "2026-09-23T14:22:31Z",
       "items": [
@@ -22,7 +22,7 @@
       ]
     },
     {
-      "po_number": "4500123457", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-10", "currency": "USD",
+      "po_number": "4500123457", "vendor_id": "0000710245", "purch_org": "AMUS", "doc_date": "2026-09-10", "currency": "USD",
       "status_code": "03", "delivery_date": "2026-10-12", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
       "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-09-10T15:40:00Z", "changed_at": "2026-09-11T09:12:44Z",
       "items": [
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "po_number": "4500123458", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-02", "currency": "USD",
+      "po_number": "4500123458", "vendor_id": "0000710245", "purch_org": "AMUS", "doc_date": "2026-09-02", "currency": "USD",
       "status_code": "04", "delivery_date": "2026-09-26", "plant": "1102", "incoterms": "FCA", "payment_terms": "NET60",
       "buyer_name": "Daniel Okafor", "revision": 2, "created_at": "2026-09-02T12:00:00Z", "changed_at": "2026-09-18T19:05:10Z",
       "items": [
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "po_number": "4500123459", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-08-12", "currency": "USD",
+      "po_number": "4500123459", "vendor_id": "0000710245", "purch_org": "AMUS", "doc_date": "2026-08-12", "currency": "USD",
       "status_code": "05", "delivery_date": "2026-08-30", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
       "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-08-12T14:30:00Z", "changed_at": "2026-08-31T10:00:00Z",
       "items": [
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "po_number": "4500123460", "vendor_id": "0000710311", "purch_org": "JBDE", "doc_date": "2026-09-18", "currency": "EUR",
+      "po_number": "4500123460", "vendor_id": "0000710311", "purch_org": "AMDE", "doc_date": "2026-09-18", "currency": "EUR",
       "status_code": "01", "delivery_date": "2026-10-20", "plant": "3101", "incoterms": "DAP", "payment_terms": "NET45",
       "buyer_name": "Katrin Vogel", "revision": 1, "created_at": "2026-09-18T08:15:00Z", "changed_at": "2026-09-18T08:15:00Z",
       "items": [
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "po_number": "4500123461", "vendor_id": "0000710311", "purch_org": "JBDE", "doc_date": "2026-09-05", "currency": "EUR",
+      "po_number": "4500123461", "vendor_id": "0000710311", "purch_org": "AMDE", "doc_date": "2026-09-05", "currency": "EUR",
       "status_code": "02", "delivery_date": "2026-10-02", "plant": "3101", "incoterms": "DAP", "payment_terms": "NET45",
       "buyer_name": "Katrin Vogel", "revision": 1, "created_at": "2026-09-05T07:50:00Z", "changed_at": "2026-09-08T11:31:02Z",
       "items": [
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "po_number": "4500123462", "vendor_id": "0000710402", "purch_org": "JBSG", "doc_date": "2026-08-25", "currency": "USD",
+      "po_number": "4500123462", "vendor_id": "0000710402", "purch_org": "AMSG", "doc_date": "2026-08-25", "currency": "USD",
       "status_code": "04", "delivery_date": "2026-09-22", "plant": "4101", "incoterms": "FOB", "payment_terms": "NET90",
       "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-08-25T02:10:00Z", "changed_at": "2026-09-01T04:45:00Z",
       "items": [
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "po_number": "4500123463", "vendor_id": "0000710402", "purch_org": "JBSG", "doc_date": "2026-09-20", "currency": "USD",
+      "po_number": "4500123463", "vendor_id": "0000710402", "purch_org": "AMSG", "doc_date": "2026-09-20", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-10-25", "plant": "4101", "incoterms": "FOB", "payment_terms": "NET90",
       "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-09-20T03:00:00Z", "changed_at": "2026-09-20T03:00:00Z",
       "items": [
@@ -84,7 +84,7 @@
       ]
     },
     {
-      "po_number": "4500123464", "vendor_id": "0000710518", "purch_org": "JBUS", "doc_date": "2026-09-16", "currency": "USD",
+      "po_number": "4500123464", "vendor_id": "0000710518", "purch_org": "AMUS", "doc_date": "2026-09-16", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-10-09", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET30",
       "buyer_name": "Daniel Okafor", "revision": 1, "created_at": "2026-09-16T16:20:00Z", "changed_at": "2026-09-16T16:20:00Z",
       "items": [
@@ -92,7 +92,7 @@
       ]
     },
     {
-      "po_number": "4500123465", "vendor_id": "0000710627", "purch_org": "JBMX", "doc_date": "2026-08-20", "currency": "USD",
+      "po_number": "4500123465", "vendor_id": "0000710627", "purch_org": "AMMX", "doc_date": "2026-08-20", "currency": "USD",
       "status_code": "09", "delivery_date": "2026-09-15", "plant": "2101", "incoterms": "DAP", "payment_terms": "NET30",
       "buyer_name": "Luis Hernández", "revision": 2, "created_at": "2026-08-20T17:00:00Z", "changed_at": "2026-09-03T15:30:00Z",
       "items": [
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "po_number": "4500123466", "vendor_id": "0000710733", "purch_org": "JBSG", "doc_date": "2026-09-19", "currency": "USD",
+      "po_number": "4500123466", "vendor_id": "0000710733", "purch_org": "AMSG", "doc_date": "2026-09-19", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-10-30", "plant": "4101", "incoterms": "CIP", "payment_terms": "NET60",
       "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-09-19T05:30:00Z", "changed_at": "2026-09-19T05:30:00Z",
       "items": [
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "po_number": "4500123467", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-22", "currency": "USD",
+      "po_number": "4500123467", "vendor_id": "0000710245", "purch_org": "AMUS", "doc_date": "2026-09-22", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-10-19", "plant": "1102", "incoterms": "FCA", "payment_terms": "NET60",
       "buyer_name": "Daniel Okafor", "revision": 1, "created_at": "2026-09-22T18:45:00Z", "changed_at": "2026-09-22T18:45:00Z",
       "items": [
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "po_number": "4500123468", "vendor_id": "0000710311", "purch_org": "JBMX", "doc_date": "2026-09-21", "currency": "USD",
+      "po_number": "4500123468", "vendor_id": "0000710311", "purch_org": "AMMX", "doc_date": "2026-09-21", "currency": "USD",
       "status_code": "01", "delivery_date": "2026-11-03", "plant": "2101", "incoterms": "DAP", "payment_terms": "NET45",
       "buyer_name": "Luis Hernández", "revision": 1, "created_at": "2026-09-21T14:10:00Z", "changed_at": "2026-09-21T14:10:00Z",
       "items": [

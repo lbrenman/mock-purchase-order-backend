@@ -4,7 +4,7 @@ Guidance for AI assistants (Claude Code, Claude projects) and humans changing th
 
 ## What this is
 
-Three deliberately different mock backends (ERP, SRM, TMS) behind the Jabil *Supplier Order Collaboration
+Three deliberately different mock backends (ERP, SRM, TMS) behind the *Supplier Order Collaboration
 API* façade (spec: `Supplier_Order_Collaboration_OpenAPI_3_1.yaml` in the repo root; `openapi/` holds only the three backend specs),
 which is implemented in Axway Amplify Fusion. The point is to make the iPaaS **orchestrate,
 transform and aggregate** visibly. No backend may answer a façade request on its own, and the dialects must

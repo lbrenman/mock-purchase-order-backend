@@ -1,31 +1,31 @@
 openapi: 3.1.0
 jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/base
 info:
-  title: Jabil Supplier Order Collaboration API
+  title: Supplier Order Collaboration API
   version: 1.0.0-draft
   summary: Governed collaboration for purchase orders and supplier shipments
   description: |
-    Illustrative API for the Jabil demonstration journey. It enables approved internal
+    Illustrative API for a supplier collaboration demonstration. It enables approved internal
     applications and supplier partners to discover purchase orders, acknowledge or reject
     them, create advance shipment notices, and track shipment status.
 
     This draft is intentionally business-oriented and is not a representation of an
-    existing production Jabil interface. Resource names, identifiers, security patterns,
-    ownership, classifications, and support contacts should be validated with Jabil before
+    existing production interface. Resource names, identifiers, security patterns,
+    ownership, classifications, and support contacts should be validated with the API owner before
     implementation.
   contact:
-    name: Jabil API Center for Enablement
-    url: https://example.invalid/jabil/api-support
+    name: API Center for Enablement
+    url: https://example.invalid/acme/api-support
     email: api-enablement@example.invalid
   license:
-    name: Jabil Internal and Authorized Partner Use
-    identifier: LicenseRef-Jabil-Authorized-Use
-  x-jabil-ownership:
+    name: Internal and Authorized Partner Use
+    identifier: LicenseRef-Internal-Authorized-Use
+  x-acme-ownership:
     businessOwner: Global Supply Chain Operations
     productOwner: Enterprise Integration and API Enablement
     technicalOwner: Supplier Collaboration Platform Team
     dataSteward: Procurement Data Governance
-  x-jabil-audience:
+  x-acme-audience:
     primary:
       - internal-application
       - supplier-partner
@@ -33,27 +33,27 @@ info:
       - operations-support
     excluded:
       - public-anonymous
-  x-jabil-classification:
+  x-acme-classification:
     businessCriticality: high
     dataClassification: confidential
     pii: limited-business-contact-data
     regulatedData: none-intended
     availabilityTier: tier-2
-  x-jabil-support:
+  x-acme-support:
     serviceDeskCatalogItem: API - Supplier Order Collaboration
     supportModel: follow-the-sun
     supportEmail: supplier-api-support@example.invalid
-    documentationUrl: https://example.invalid/jabil/apis/supplier-order-collaboration
-    statusPageUrl: https://status.example.invalid/jabil/supplier-order-collaboration
+    documentationUrl: https://example.invalid/acme/apis/supplier-order-collaboration
+    statusPageUrl: https://status.example.invalid/acme/supplier-order-collaboration
     escalationPolicy: API Platform L1 -> Supplier Platform L2 -> Product Engineering L3
-  x-jabil-lifecycle:
+  x-acme-lifecycle:
     status: proposed
     targetConsumers:
       - Supplier portals
       - Supplier integration applications
       - Internal procurement applications
     deprecationNoticeDays: 180
-  x-jabil-consumption-metadata:
+  x-acme-consumption-metadata:
     registrationFields:
       - consumerOrganization
       - projectName
@@ -64,7 +64,7 @@ info:
     chargebackReady: true
 externalDocs:
   description: Business onboarding and support guide
-  url: https://example.invalid/jabil/apis/supplier-order-collaboration/guide
+  url: https://example.invalid/acme/apis/supplier-order-collaboration/guide
 servers:
   - url: https://api.sandbox.example.invalid/supplier-collaboration/v1
     description: Illustrative sandbox endpoint
@@ -79,21 +79,21 @@ security:
 tags:
   - name: Purchase Orders
     description: Purchase orders made available to approved consumers.
-    x-jabil-audience:
+    x-acme-audience:
       - internal-application
       - supplier-partner
-    x-jabil-classification: confidential
+    x-acme-classification: confidential
   - name: Acknowledgements
     description: Supplier responses to purchase orders.
-    x-jabil-audience:
+    x-acme-audience:
       - supplier-partner
-    x-jabil-classification: confidential
+    x-acme-classification: confidential
   - name: Shipments
     description: Advance shipment notices and shipment status.
-    x-jabil-audience:
+    x-acme-audience:
       - internal-application
       - supplier-partner
-    x-jabil-classification: confidential
+    x-acme-classification: confidential
 
 paths:
   /purchase-orders:
@@ -104,11 +104,11 @@ paths:
       description: |
         Returns purchase orders the authenticated consumer is authorized to view. The
         provider must filter records by supplier, consumer application, and approved scope.
-      x-jabil-business-capability: Supplier order visibility
-      x-jabil-owner: Global Supply Chain Operations
-      x-jabil-audience: [internal-application, supplier-partner]
-      x-jabil-classification: confidential
-      x-jabil-support-tier: business-hours-plus-on-call
+      x-acme-business-capability: Supplier order visibility
+      x-acme-owner: Global Supply Chain Operations
+      x-acme-audience: [internal-application, supplier-partner]
+      x-acme-classification: confidential
+      x-acme-support-tier: business-hours-plus-on-call
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
         - name: supplierId
@@ -150,14 +150,14 @@ paths:
                     items:
                       - purchaseOrderId: PO-4500123456
                         supplierId: SUP-100245
-                        buyingOrganization: Jabil-US
+                        buyingOrganization: Acme-US
                         orderDate: '2026-09-15'
                         currency: USD
                         status: OPEN
                         requestedDeliveryDate: '2026-10-05'
                         shipTo:
                           siteCode: US-AUBURN-HILLS
-                          name: Jabil Manufacturing Site
+                          name: Acme Manufacturing Site
                           countryCode: US
                         lines:
                           - lineNumber: 10
@@ -184,10 +184,10 @@ paths:
       operationId: getPurchaseOrder
       summary: Get a purchase order
       description: Returns a purchase order and its lines when the consumer is authorized for the owning supplier or business unit.
-      x-jabil-business-capability: Supplier order visibility
-      x-jabil-owner: Global Supply Chain Operations
-      x-jabil-audience: [internal-application, supplier-partner]
-      x-jabil-classification: confidential
+      x-acme-business-capability: Supplier order visibility
+      x-acme-owner: Global Supply Chain Operations
+      x-acme-audience: [internal-application, supplier-partner]
+      x-acme-classification: confidential
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
       responses:
@@ -222,11 +222,11 @@ paths:
       description: |
         Records the supplier response to the current purchase-order revision. An idempotency
         key is required to prevent duplicate acknowledgements when clients retry.
-      x-jabil-business-capability: Supplier order acknowledgement
-      x-jabil-owner: Global Supply Chain Operations
-      x-jabil-audience: [supplier-partner]
-      x-jabil-classification: confidential
-      x-jabil-approval-required: false
+      x-acme-business-capability: Supplier order acknowledgement
+      x-acme-owner: Global Supply Chain Operations
+      x-acme-audience: [supplier-partner]
+      x-acme-classification: confidential
+      x-acme-approval-required: false
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
         - $ref: '#/components/parameters/IdempotencyKeyHeader'
@@ -283,11 +283,11 @@ paths:
       operationId: createAdvanceShipmentNotice
       summary: Create an advance shipment notice
       description: Creates a shipment notice against one or more authorized purchase-order lines.
-      x-jabil-business-capability: Inbound shipment visibility
-      x-jabil-owner: Global Logistics Operations
-      x-jabil-audience: [supplier-partner]
-      x-jabil-classification: confidential
-      x-jabil-event-published: shipment.notice.created
+      x-acme-business-capability: Inbound shipment visibility
+      x-acme-owner: Global Logistics Operations
+      x-acme-audience: [supplier-partner]
+      x-acme-classification: confidential
+      x-acme-event-published: shipment.notice.created
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
         - $ref: '#/components/parameters/IdempotencyKeyHeader'
@@ -327,10 +327,10 @@ paths:
       operationId: listShipments
       summary: List shipments
       description: Returns shipments authorized for the supplier or internal consumer.
-      x-jabil-business-capability: Inbound shipment visibility
-      x-jabil-owner: Global Logistics Operations
-      x-jabil-audience: [internal-application, supplier-partner]
-      x-jabil-classification: confidential
+      x-acme-business-capability: Inbound shipment visibility
+      x-acme-owner: Global Logistics Operations
+      x-acme-audience: [internal-application, supplier-partner]
+      x-acme-classification: confidential
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
         - name: purchaseOrderId
@@ -383,10 +383,10 @@ paths:
       tags: [Shipments]
       operationId: getShipment
       summary: Get shipment status and details
-      x-jabil-business-capability: Inbound shipment visibility
-      x-jabil-owner: Global Logistics Operations
-      x-jabil-audience: [internal-application, supplier-partner]
-      x-jabil-classification: confidential
+      x-acme-business-capability: Inbound shipment visibility
+      x-acme-owner: Global Logistics Operations
+      x-acme-audience: [internal-application, supplier-partner]
+      x-acme-classification: confidential
       parameters:
         - $ref: '#/components/parameters/CorrelationIdHeader'
       responses:
@@ -417,7 +417,7 @@ components:
       description: Current-state compatible API-key option for approved clients.
     OAuth2ClientCredentials:
       type: oauth2
-      description: Target OAuth 2.0 client-credentials pattern to validate with Jabil identity architecture.
+      description: Target OAuth 2.0 client-credentials pattern to validate with the enterprise identity architecture.
       flows:
         clientCredentials:
           tokenUrl: https://identity.example.invalid/oauth2/token
@@ -840,14 +840,14 @@ components:
       value:
         purchaseOrderId: PO-4500123456
         supplierId: SUP-100245
-        buyingOrganization: Jabil-US
+        buyingOrganization: Acme-US
         orderDate: '2026-09-15'
         currency: USD
         status: OPEN
         requestedDeliveryDate: '2026-10-05'
         shipTo:
           siteCode: US-AUBURN-HILLS
-          name: Jabil Manufacturing Site
+          name: Acme Manufacturing Site
           addressLine1: 100 Manufacturing Way
           city: Auburn Hills
           region: MI
@@ -878,7 +878,7 @@ components:
           countryCode: US
         shipTo:
           siteCode: US-AUBURN-HILLS
-          name: Jabil Manufacturing Site
+          name: Acme Manufacturing Site
           city: Auburn Hills
           region: MI
           postalCode: '48326'
@@ -913,7 +913,7 @@ components:
           countryCode: US
         shipTo:
           siteCode: US-AUBURN-HILLS
-          name: Jabil Manufacturing Site
+          name: Acme Manufacturing Site
           city: Auburn Hills
           region: MI
           postalCode: '48326'

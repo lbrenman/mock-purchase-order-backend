@@ -304,7 +304,7 @@ shipments have reversed deliveries.
 
 | System | Entity | Count | Highlights |
 |---|---|---|---|
-| ERP | Purchasing orgs | 9 | JBUS, JBMX, JBDE, JBSG, JBCN, JBMY, JBVN, JBPL, JBHU |
+| ERP | Purchasing orgs | 9 | AMUS, AMMX, AMDE, AMSG, AMCN, AMMY, AMVN, AMPL, AMHU |
 | ERP | Plants | 13 | US, MX, DE, HU, PL, SG, MY, CN, VN sites |
 | ERP | Purchase orders | 74 | all statuses: 16 open, 6 partially confirmed, 16 confirmed, 23 in delivery, 8 closed, 5 cancelled; USD, EUR, PLN, CNY |
 | ERP | Confirmations | 54 | AB, AC (incl. IN_REVIEW) and RJ |
@@ -615,6 +615,7 @@ mock-purchase-order-backend/
 | Dashboard calls return 401 | You changed the API keys: enter them in *Connection settings* (keys are pre-filled only for the demo defaults). |
 | Postman run fails on the chaos requests | Keep `CHAOS_ENABLED=true`, or skip the *Errors & security* folders. |
 | Postman: *"{{poNumber}} is empty. Send … first"* | The request uses an ID created earlier in its folder. Send the named request first, or run the whole folder. |
+| After updating to 2.2.3, Postman or the dashboard still shows old names or `JBUS` codes, or *Delete purchasing org in use* deletes instead of answering 409 | The database still holds the old seed rows (seeding never overwrites). Run `npm run seed:reset` once. |
 | Postman `409` on create after an interrupted run | Run the backend folder from its first request (it generates a new `runId`) or `npm run seed:reset`. |
 | TMS `409` on an ASN whose shipment was cancelled | You are on a database created before v2.2: restart the server once so the migration replaces the old unique constraint. |
 | Postgres container won't start after a crash | `docker rm -f po-backends-postgres && npm run db:start`; as a last resort delete `.pgdata/` (data is re-seeded). |

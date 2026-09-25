@@ -1214,8 +1214,8 @@
       "contact_email": "it@mmw.example.mx"
     },
     {
-      "consumer_id": "jabil-procurement-workbench",
-      "display_name": "Jabil Procurement Workbench",
+      "consumer_id": "acme-procurement-workbench",
+      "display_name": "Acme Procurement Workbench",
       "consumer_type": "internal-application",
       "supplier_codes": [
         "*"
@@ -1225,11 +1225,11 @@
       ],
       "active": true,
       "cost_center": "CC-4410-PROC",
-      "contact_email": "procurement-apps@jabil.example.com"
+      "contact_email": "procurement-apps@acme.example.com"
     },
     {
-      "consumer_id": "jabil-ops-console",
-      "display_name": "Jabil Supplier Ops Console",
+      "consumer_id": "acme-ops-console",
+      "display_name": "Acme Supplier Ops Console",
       "consumer_type": "operations-support",
       "supplier_codes": [
         "*"
@@ -1240,7 +1240,7 @@
       ],
       "active": true,
       "cost_center": "CC-4420-SCO",
-      "contact_email": "supplier-ops@jabil.example.com"
+      "contact_email": "supplier-ops@acme.example.com"
     },
     {
       "consumer_id": "keystone-edi-gateway",
@@ -1352,7 +1352,7 @@
       ],
       "active": true,
       "cost_center": "EXT-PORTAL-AMER",
-      "contact_email": "portal-support@jabil.example.com"
+      "contact_email": "portal-support@acme.example.com"
     },
     {
       "consumer_id": "tristar-portal",
@@ -1384,8 +1384,8 @@
       "contact_email": "it@rm-sensorik.example.de"
     },
     {
-      "consumer_id": "jabil-logistics-control-tower",
-      "display_name": "Jabil Logistics Control Tower",
+      "consumer_id": "acme-logistics-control-tower",
+      "display_name": "Acme Logistics Control Tower",
       "consumer_type": "internal-application",
       "supplier_codes": [
         "*"
@@ -1395,11 +1395,11 @@
       ],
       "active": true,
       "cost_center": "CC-4460-LOG",
-      "contact_email": "control-tower@jabil.example.com"
+      "contact_email": "control-tower@acme.example.com"
     },
     {
-      "consumer_id": "jabil-spend-analytics",
-      "display_name": "Jabil Spend Analytics",
+      "consumer_id": "acme-spend-analytics",
+      "display_name": "Acme Spend Analytics",
       "consumer_type": "internal-application",
       "supplier_codes": [
         "*"
@@ -1409,10 +1409,10 @@
       ],
       "active": true,
       "cost_center": "CC-4480-FIN",
-      "contact_email": "spend-analytics@jabil.example.com"
+      "contact_email": "spend-analytics@acme.example.com"
     },
     {
-      "consumer_id": "jabil-l2-support-desk",
+      "consumer_id": "acme-l2-support-desk",
       "display_name": "Supplier Platform L2 Support Desk",
       "consumer_type": "operations-support",
       "supplier_codes": [
@@ -1423,7 +1423,7 @@
       ],
       "active": true,
       "cost_center": "CC-4420-SCO",
-      "contact_email": "supplier-platform-l2@jabil.example.com"
+      "contact_email": "supplier-platform-l2@acme.example.com"
     }
   ]
 }

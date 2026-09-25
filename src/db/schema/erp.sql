@@ -2,8 +2,8 @@
 CREATE SCHEMA IF NOT EXISTS erp;
 
 CREATE TABLE IF NOT EXISTS erp.purchasing_orgs (
-  code          TEXT PRIMARY KEY,               -- e.g. JBUS
-  name          TEXT NOT NULL,                  -- e.g. Jabil-US
+  code          TEXT PRIMARY KEY,               -- e.g. AMUS
+  name          TEXT NOT NULL,                  -- e.g. Acme-US
   company_code  TEXT NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -1,48 +1,48 @@
 {
   "purchasing_orgs": [
     {
-      "code": "JBUS",
-      "name": "Jabil-US",
+      "code": "AMUS",
+      "name": "Acme-US",
       "company_code": "US01"
     },
     {
-      "code": "JBMX",
-      "name": "Jabil-MX",
+      "code": "AMMX",
+      "name": "Acme-MX",
       "company_code": "MX01"
     },
     {
-      "code": "JBDE",
-      "name": "Jabil-DE",
+      "code": "AMDE",
+      "name": "Acme-DE",
       "company_code": "DE01"
     },
     {
-      "code": "JBSG",
-      "name": "Jabil-SG",
+      "code": "AMSG",
+      "name": "Acme-SG",
       "company_code": "SG01"
     },
     {
-      "code": "JBCN",
-      "name": "Jabil-CN",
+      "code": "AMCN",
+      "name": "Acme-CN",
       "company_code": "CN01"
     },
     {
-      "code": "JBMY",
-      "name": "Jabil-MY",
+      "code": "AMMY",
+      "name": "Acme-MY",
       "company_code": "MY01"
     },
     {
-      "code": "JBVN",
-      "name": "Jabil-VN",
+      "code": "AMVN",
+      "name": "Acme-VN",
       "company_code": "VN01"
     },
     {
-      "code": "JBPL",
-      "name": "Jabil-PL",
+      "code": "AMPL",
+      "name": "Acme-PL",
       "company_code": "PL01"
     },
     {
-      "code": "JBHU",
-      "name": "Jabil-HU",
+      "code": "AMHU",
+      "name": "Acme-HU",
       "company_code": "HU01"
     }
   ],
@@ -50,7 +50,7 @@
     {
       "plant_code": "1101",
       "site_code": "US-AUBURN-HILLS",
-      "name": "Jabil Manufacturing Site",
+      "name": "Acme Manufacturing Site",
       "street": "100 Manufacturing Way",
       "city": "Auburn Hills",
       "region": "MI",
@@ -60,7 +60,7 @@
     {
       "plant_code": "1102",
       "site_code": "US-ST-PETERSBURG",
-      "name": "Jabil Tampa Bay Operations",
+      "name": "Acme Tampa Bay Operations",
       "street": "2400 Gateway Centre Blvd",
       "city": "St. Petersburg",
       "region": "FL",
@@ -70,7 +70,7 @@
     {
       "plant_code": "2101",
       "site_code": "MX-GUADALAJARA",
-      "name": "Jabil Guadalajara Campus",
+      "name": "Acme Guadalajara Campus",
       "street": "Av. Industrial 500",
       "city": "Zapopan",
       "region": "JAL",
@@ -80,7 +80,7 @@
     {
       "plant_code": "3101",
       "site_code": "DE-NUREMBERG",
-      "name": "Jabil Nuremberg Engineering Center",
+      "name": "Acme Nuremberg Engineering Center",
       "street": "Industriestrasse 12",
       "city": "Nuremberg",
       "region": "BY",
@@ -90,7 +90,7 @@
     {
       "plant_code": "4101",
       "site_code": "SG-SINGAPORE",
-      "name": "Jabil Singapore Operations",
+      "name": "Acme Singapore Operations",
       "street": "20 Loyang Way",
       "city": "Singapore",
       "region": "SG",
@@ -100,7 +100,7 @@
     {
       "plant_code": "1103",
       "site_code": "US-MEMPHIS",
-      "name": "Jabil Memphis Repair & Distribution",
+      "name": "Acme Memphis Repair & Distribution",
       "street": "4600 Distriplex Farms Dr",
       "city": "Memphis",
       "region": "TN",
@@ -110,7 +110,7 @@
     {
       "plant_code": "1104",
       "site_code": "US-SAN-JOSE",
-      "name": "Jabil San Jose Blue Sky Center",
+      "name": "Acme San Jose Blue Sky Center",
       "street": "30 Great Oaks Blvd",
       "city": "San Jose",
       "region": "CA",
@@ -120,7 +120,7 @@
     {
       "plant_code": "2102",
       "site_code": "MX-CHIHUAHUA",
-      "name": "Jabil Chihuahua Operations",
+      "name": "Acme Chihuahua Operations",
       "street": "Av. de las Industrias 8901",
       "city": "Chihuahua",
       "region": "CHH",
@@ -130,7 +130,7 @@
     {
       "plant_code": "3102",
       "site_code": "HU-TISZAUJVAROS",
-      "name": "Jabil Tiszaujvaros Plant",
+      "name": "Acme Tiszaujvaros Plant",
       "street": "Huszar Andor ut 1",
       "city": "Tiszaujvaros",
       "region": "BZ",
@@ -140,7 +140,7 @@
     {
       "plant_code": "3103",
       "site_code": "PL-KWIDZYN",
-      "name": "Jabil Kwidzyn Campus",
+      "name": "Acme Kwidzyn Campus",
       "street": "ul. Mickiewicza 49",
       "city": "Kwidzyn",
       "region": "PM",
@@ -150,7 +150,7 @@
     {
       "plant_code": "4102",
       "site_code": "MY-PENANG",
-      "name": "Jabil Penang Operations",
+      "name": "Acme Penang Operations",
       "street": "56 Hilir Sungai Keluang 1",
       "city": "Bayan Lepas",
       "region": "PNG",
@@ -160,7 +160,7 @@
     {
       "plant_code": "4103",
       "site_code": "CN-WUXI",
-      "name": "Jabil Wuxi Campus",
+      "name": "Acme Wuxi Campus",
       "street": "8 Xinhua Road, New District",
       "city": "Wuxi",
       "region": "JS",
@@ -170,7 +170,7 @@
     {
       "plant_code": "4104",
       "site_code": "VN-HCMC",
-      "name": "Jabil Vietnam Saigon Hi-Tech Park",
+      "name": "Acme Vietnam Saigon Hi-Tech Park",
       "street": "Lot I-9, D1 Street",
       "city": "Ho Chi Minh City",
       "region": "HCM",
@@ -182,7 +182,7 @@
     {
       "po_number": "4500123456",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-15",
       "currency": "USD",
       "status_code": "01",
@@ -208,7 +208,7 @@
     {
       "po_number": "4500123457",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-10",
       "currency": "USD",
       "status_code": "03",
@@ -246,7 +246,7 @@
     {
       "po_number": "4500123458",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-02",
       "currency": "USD",
       "status_code": "04",
@@ -285,7 +285,7 @@
     {
       "po_number": "4500123459",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-12",
       "currency": "USD",
       "status_code": "05",
@@ -314,7 +314,7 @@
     {
       "po_number": "4500123460",
       "vendor_id": "0000710311",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-09-18",
       "currency": "EUR",
       "status_code": "01",
@@ -356,7 +356,7 @@
     {
       "po_number": "4500123461",
       "vendor_id": "0000710311",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-09-05",
       "currency": "EUR",
       "status_code": "02",
@@ -392,7 +392,7 @@
     {
       "po_number": "4500123462",
       "vendor_id": "0000710402",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-08-25",
       "currency": "USD",
       "status_code": "04",
@@ -421,7 +421,7 @@
     {
       "po_number": "4500123463",
       "vendor_id": "0000710402",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-09-20",
       "currency": "USD",
       "status_code": "01",
@@ -455,7 +455,7 @@
     {
       "po_number": "4500123464",
       "vendor_id": "0000710518",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-16",
       "currency": "USD",
       "status_code": "01",
@@ -481,7 +481,7 @@
     {
       "po_number": "4500123465",
       "vendor_id": "0000710627",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-08-20",
       "currency": "USD",
       "status_code": "09",
@@ -507,7 +507,7 @@
     {
       "po_number": "4500123466",
       "vendor_id": "0000710733",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-09-19",
       "currency": "USD",
       "status_code": "01",
@@ -541,7 +541,7 @@
     {
       "po_number": "4500123467",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-22",
       "currency": "USD",
       "status_code": "01",
@@ -575,7 +575,7 @@
     {
       "po_number": "4500123468",
       "vendor_id": "0000710311",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-09-21",
       "currency": "USD",
       "status_code": "01",
@@ -601,7 +601,7 @@
     {
       "po_number": "4500123469",
       "vendor_id": "0000710859",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-09-07",
       "currency": "CNY",
       "status_code": "03",
@@ -629,7 +629,7 @@
     {
       "po_number": "4500123470",
       "vendor_id": "0000710733",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-09-16",
       "currency": "USD",
       "status_code": "04",
@@ -669,7 +669,7 @@
     {
       "po_number": "4500123471",
       "vendor_id": "0000710859",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-09-20",
       "currency": "CNY",
       "status_code": "01",
@@ -698,7 +698,7 @@
     {
       "po_number": "4500123472",
       "vendor_id": "0000710884",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-08-09",
       "currency": "CNY",
       "status_code": "04",
@@ -738,7 +738,7 @@
     {
       "po_number": "4500123473",
       "vendor_id": "0000710866",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-09-16",
       "currency": "USD",
       "status_code": "04",
@@ -778,7 +778,7 @@
     {
       "po_number": "4500123474",
       "vendor_id": "0000710989",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-11",
       "currency": "USD",
       "status_code": "04",
@@ -829,7 +829,7 @@
     {
       "po_number": "4500123475",
       "vendor_id": "0000710859",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-08-21",
       "currency": "CNY",
       "status_code": "04",
@@ -880,7 +880,7 @@
     {
       "po_number": "4500123476",
       "vendor_id": "0000710903",
-      "purch_org": "JBHU",
+      "purch_org": "AMHU",
       "doc_date": "2026-08-12",
       "currency": "EUR",
       "status_code": "05",
@@ -920,7 +920,7 @@
     {
       "po_number": "4500123477",
       "vendor_id": "0000710859",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-07-29",
       "currency": "USD",
       "status_code": "09",
@@ -946,7 +946,7 @@
     {
       "po_number": "4500123478",
       "vendor_id": "0000710951",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-08",
       "currency": "USD",
       "status_code": "09",
@@ -972,7 +972,7 @@
     {
       "po_number": "4500123479",
       "vendor_id": "0000710845",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-09-02",
       "currency": "USD",
       "status_code": "04",
@@ -1012,7 +1012,7 @@
     {
       "po_number": "4500123480",
       "vendor_id": "0000710962",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-09-12",
       "currency": "USD",
       "status_code": "02",
@@ -1050,7 +1050,7 @@
     {
       "po_number": "4500123481",
       "vendor_id": "0000710989",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-02",
       "currency": "USD",
       "status_code": "04",
@@ -1089,7 +1089,7 @@
     {
       "po_number": "4500123482",
       "vendor_id": "0000710917",
-      "purch_org": "JBHU",
+      "purch_org": "AMHU",
       "doc_date": "2026-09-06",
       "currency": "EUR",
       "status_code": "02",
@@ -1128,7 +1128,7 @@
     {
       "po_number": "4500123483",
       "vendor_id": "0000710926",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-15",
       "currency": "USD",
       "status_code": "01",
@@ -1162,7 +1162,7 @@
     {
       "po_number": "4500123484",
       "vendor_id": "0000710975",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-22",
       "currency": "USD",
       "status_code": "01",
@@ -1196,7 +1196,7 @@
     {
       "po_number": "4500123485",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-07-24",
       "currency": "USD",
       "status_code": "04",
@@ -1235,7 +1235,7 @@
     {
       "po_number": "4500123486",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-26",
       "currency": "USD",
       "status_code": "03",
@@ -1273,7 +1273,7 @@
     {
       "po_number": "4500123487",
       "vendor_id": "0000710944",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-30",
       "currency": "USD",
       "status_code": "01",
@@ -1307,7 +1307,7 @@
     {
       "po_number": "4500123488",
       "vendor_id": "0000710871",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-09-14",
       "currency": "USD",
       "status_code": "03",
@@ -1355,7 +1355,7 @@
     {
       "po_number": "4500123489",
       "vendor_id": "0000710917",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-09-12",
       "currency": "EUR",
       "status_code": "01",
@@ -1389,7 +1389,7 @@
     {
       "po_number": "4500123490",
       "vendor_id": "0000710903",
-      "purch_org": "JBHU",
+      "purch_org": "AMHU",
       "doc_date": "2026-07-26",
       "currency": "EUR",
       "status_code": "04",
@@ -1418,7 +1418,7 @@
     {
       "po_number": "4500123491",
       "vendor_id": "0000710866",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-07-22",
       "currency": "USD",
       "status_code": "05",
@@ -1458,7 +1458,7 @@
     {
       "po_number": "4500123492",
       "vendor_id": "0000710871",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-08-23",
       "currency": "EUR",
       "status_code": "04",
@@ -1487,7 +1487,7 @@
     {
       "po_number": "4500123493",
       "vendor_id": "0000710866",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-08-20",
       "currency": "USD",
       "status_code": "03",
@@ -1515,7 +1515,7 @@
     {
       "po_number": "4500123494",
       "vendor_id": "0000710871",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-08-17",
       "currency": "EUR",
       "status_code": "05",
@@ -1555,7 +1555,7 @@
     {
       "po_number": "4500123495",
       "vendor_id": "0000710866",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-08-15",
       "currency": "USD",
       "status_code": "04",
@@ -1606,7 +1606,7 @@
     {
       "po_number": "4500123496",
       "vendor_id": "0000710845",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-09-09",
       "currency": "USD",
       "status_code": "04",
@@ -1645,7 +1645,7 @@
     {
       "po_number": "4500123497",
       "vendor_id": "0000710884",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-08-21",
       "currency": "CNY",
       "status_code": "05",
@@ -1696,7 +1696,7 @@
     {
       "po_number": "4500123498",
       "vendor_id": "0000710951",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-17",
       "currency": "USD",
       "status_code": "09",
@@ -1722,7 +1722,7 @@
     {
       "po_number": "4500123499",
       "vendor_id": "0000710962",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-09-18",
       "currency": "CNY",
       "status_code": "01",
@@ -1748,7 +1748,7 @@
     {
       "po_number": "4500123500",
       "vendor_id": "0000710938",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-08-10",
       "currency": "USD",
       "status_code": "03",
@@ -1786,7 +1786,7 @@
     {
       "po_number": "4500123501",
       "vendor_id": "0000710944",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-21",
       "currency": "USD",
       "status_code": "04",
@@ -1825,7 +1825,7 @@
     {
       "po_number": "4500123502",
       "vendor_id": "0000710311",
-      "purch_org": "JBHU",
+      "purch_org": "AMHU",
       "doc_date": "2026-09-01",
       "currency": "EUR",
       "status_code": "03",
@@ -1873,7 +1873,7 @@
     {
       "po_number": "4500123503",
       "vendor_id": "0000710903",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-08-17",
       "currency": "EUR",
       "status_code": "03",
@@ -1901,7 +1901,7 @@
     {
       "po_number": "4500123504",
       "vendor_id": "0000710402",
-      "purch_org": "JBCN",
+      "purch_org": "AMCN",
       "doc_date": "2026-09-10",
       "currency": "CNY",
       "status_code": "04",
@@ -1930,7 +1930,7 @@
     {
       "po_number": "4500123505",
       "vendor_id": "0000710845",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-08-25",
       "currency": "USD",
       "status_code": "04",
@@ -1970,7 +1970,7 @@
     {
       "po_number": "4500123506",
       "vendor_id": "0000710845",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-08-18",
       "currency": "USD",
       "status_code": "03",
@@ -2018,7 +2018,7 @@
     {
       "po_number": "4500123507",
       "vendor_id": "0000710733",
-      "purch_org": "JBVN",
+      "purch_org": "AMVN",
       "doc_date": "2026-08-23",
       "currency": "USD",
       "status_code": "03",
@@ -2046,7 +2046,7 @@
     {
       "po_number": "4500123508",
       "vendor_id": "0000710975",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-09-01",
       "currency": "USD",
       "status_code": "03",
@@ -2074,7 +2074,7 @@
     {
       "po_number": "4500123509",
       "vendor_id": "0000710518",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-07-24",
       "currency": "USD",
       "status_code": "03",
@@ -2102,7 +2102,7 @@
     {
       "po_number": "4500123510",
       "vendor_id": "0000710884",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-08-14",
       "currency": "USD",
       "status_code": "01",
@@ -2144,7 +2144,7 @@
     {
       "po_number": "4500123511",
       "vendor_id": "0000710812",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-03",
       "currency": "USD",
       "status_code": "01",
@@ -2170,7 +2170,7 @@
     {
       "po_number": "4500123512",
       "vendor_id": "0000710903",
-      "purch_org": "JBPL",
+      "purch_org": "AMPL",
       "doc_date": "2026-09-01",
       "currency": "PLN",
       "status_code": "01",
@@ -2196,7 +2196,7 @@
     {
       "po_number": "4500123513",
       "vendor_id": "0000710926",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-11",
       "currency": "USD",
       "status_code": "04",
@@ -2225,7 +2225,7 @@
     {
       "po_number": "4500123514",
       "vendor_id": "0000710957",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-08-25",
       "currency": "USD",
       "status_code": "04",
@@ -2254,7 +2254,7 @@
     {
       "po_number": "4500123515",
       "vendor_id": "0000710884",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-08-20",
       "currency": "USD",
       "status_code": "03",
@@ -2282,7 +2282,7 @@
     {
       "po_number": "4500123516",
       "vendor_id": "0000710859",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-08-20",
       "currency": "USD",
       "status_code": "04",
@@ -2321,7 +2321,7 @@
     {
       "po_number": "4500123517",
       "vendor_id": "0000710845",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-06",
       "currency": "USD",
       "status_code": "04",
@@ -2350,7 +2350,7 @@
     {
       "po_number": "4500123518",
       "vendor_id": "0000710989",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-07-23",
       "currency": "USD",
       "status_code": "05",
@@ -2379,7 +2379,7 @@
     {
       "po_number": "4500123519",
       "vendor_id": "0000710917",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-08-14",
       "currency": "EUR",
       "status_code": "02",
@@ -2407,7 +2407,7 @@
     {
       "po_number": "4500123520",
       "vendor_id": "0000710402",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-08-11",
       "currency": "USD",
       "status_code": "04",
@@ -2436,7 +2436,7 @@
     {
       "po_number": "4500123521",
       "vendor_id": "0000710884",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-08-30",
       "currency": "USD",
       "status_code": "03",
@@ -2484,7 +2484,7 @@
     {
       "po_number": "4500123522",
       "vendor_id": "0000710951",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-02",
       "currency": "USD",
       "status_code": "05",
@@ -2524,7 +2524,7 @@
     {
       "po_number": "4500123523",
       "vendor_id": "0000710938",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-08-15",
       "currency": "USD",
       "status_code": "09",
@@ -2558,7 +2558,7 @@
     {
       "po_number": "4500123524",
       "vendor_id": "0000710812",
-      "purch_org": "JBMX",
+      "purch_org": "AMMX",
       "doc_date": "2026-09-01",
       "currency": "USD",
       "status_code": "02",
@@ -2597,7 +2597,7 @@
     {
       "po_number": "4500123525",
       "vendor_id": "0000710245",
-      "purch_org": "JBUS",
+      "purch_org": "AMUS",
       "doc_date": "2026-09-12",
       "currency": "USD",
       "status_code": "04",
@@ -2626,7 +2626,7 @@
     {
       "po_number": "4500123526",
       "vendor_id": "0000710962",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-09-07",
       "currency": "USD",
       "status_code": "03",
@@ -2664,7 +2664,7 @@
     {
       "po_number": "4500123527",
       "vendor_id": "0000710962",
-      "purch_org": "JBMY",
+      "purch_org": "AMMY",
       "doc_date": "2026-08-08",
       "currency": "USD",
       "status_code": "05",
@@ -2715,7 +2715,7 @@
     {
       "po_number": "4500123528",
       "vendor_id": "0000710957",
-      "purch_org": "JBSG",
+      "purch_org": "AMSG",
       "doc_date": "2026-08-22",
       "currency": "USD",
       "status_code": "02",
@@ -2743,7 +2743,7 @@
     {
       "po_number": "4500123529",
       "vendor_id": "0000710311",
-      "purch_org": "JBDE",
+      "purch_org": "AMDE",
       "doc_date": "2026-08-28",
       "currency": "EUR",
       "status_code": "03",

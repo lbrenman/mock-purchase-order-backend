@@ -344,8 +344,8 @@ content type `application/problem+json`.
 | `greatlakes-portal` | SUP-100518 | read, write | supplier on hold → write denied |
 | `mmw-legacy-portal` | SUP-100627 | read, write | consumer inactive |
 | `asia-pacific-edi-network`, `europe-supplier-hub`, `americas-supplier-portal` | three each | read, write | one consumer, several suppliers |
-| `jabil-procurement-workbench`, `jabil-logistics-control-tower`, `jabil-spend-analytics`, `jabil-l2-support-desk` | `*` | read | internal applications |
-| `jabil-ops-console` | `*` | read, write | internal application |
+| `acme-procurement-workbench`, `acme-logistics-control-tower`, `acme-spend-analytics`, `acme-l2-support-desk` | `*` | read | internal applications |
+| `acme-ops-console` | `*` | read, write | internal application |
 | `tristar-portal`, `rm-sensorik-onboarding` | one each | | inactive |
 
 **Purchase orders**
@@ -363,7 +363,7 @@ content type `application/problem+json`.
 | 4500123464 | SUP-100518 Great Lakes (on hold) | 01 Open | write denied |
 | 4500123465 | SUP-100627 Monterrey (blocked) | 09 Cancelled | `CANCELLED`, blocked supplier |
 | 4500123466 | SUP-100733 Bharat | 01 Open | list, paging, filters |
-| 4500123471 | JBCN, CNY | 01 Open | supplier rejection (`RJ`) while still open |
+| 4500123471 | AMCN, CNY | 01 Open | supplier rejection (`RJ`) while still open |
 
 **Shipments**
 

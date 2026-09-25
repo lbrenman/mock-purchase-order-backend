@@ -257,7 +257,7 @@ paths:
               carrier: {carrierCode: UPS, trackingId: 1Z999AA10123456784}
               route:
                 origin: {locationCode: SUP-ATL-01, name: Supplier Distribution Center, city: Atlanta, state: GA, zip: '30301', country: US}
-                destination: {locationCode: US-AUBURN-HILLS, name: Jabil Manufacturing Site, street: 100 Manufacturing Way, city: Auburn Hills, state: MI, zip: '48326', country: US}
+                destination: {locationCode: US-AUBURN-HILLS, name: Acme Manufacturing Site, street: 100 Manufacturing Way, city: Auburn Hills, state: MI, zip: '48326', country: US}
               schedule: {plannedShipDate: '2026-10-03T12:00:00Z', estimatedArrival: '2026-10-07T15:00:00Z'}
               contents:
                 - {poNumber: '4500123456', poLine: 10, quantity: {value: 250, uom: EA}, lotNumber: LOT-88291}

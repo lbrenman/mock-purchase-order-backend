@@ -89,7 +89,7 @@ async function main() {
   check(`1. ERP PO -> ${one.status}, ship_to ${one.body && one.body.data && one.body.data.ship_to && one.body.data.ship_to.site_code}`, one.status === 200 && one.body.data.ship_to, one.body);
   const byVendor = await call('srm', 'GET', `/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.read&erpVendorNumber=${one.body && one.body.data && one.body.data.vendor_id}`);
   check(`2. SRM check by vendor -> ${byVendor.body && byVendor.body.supplierCode}, allowed=${byVendor.body && byVendor.body.allowed}`, byVendor.body && byVendor.body.supplierCode === 'SUP-100245' && byVendor.body.allowed === true, byVendor.body);
-  const wide = await call('srm', 'GET', '/v1/entitlements/jabil-procurement-workbench/check?scope=supplier-orders.read');
+  const wide = await call('srm', 'GET', '/v1/entitlements/acme-procurement-workbench/check?scope=supplier-orders.read');
   check(`   '*' consumer -> allowedVendors has ${wide.body && wide.body.allowedVendors && wide.body.allowedVendors.length} entries`, wide.body && wide.body.allowedVendors && wide.body.allowedVendors.length > 1, wide.body);
 
   console.log('\nNegative paths the façade must translate');

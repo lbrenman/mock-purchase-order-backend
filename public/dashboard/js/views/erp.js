@@ -667,7 +667,7 @@ const orgPage = {
   render(main, ctx) {
     return listPage(main, {
       id: this.id, sys: 'erp', paging: 'none',
-      lede: 'ERP purchasing org codes (JBUS) that the façade translates to buying organisations (Jabil-US).',
+      lede: 'ERP purchasing org codes (AMUS) that the façade translates to buying organisations (Acme-US).',
       dialect: 'ERP: {data}',
       actions: [h('button', { type: 'button', class: 'btn primary', 'data-sys': 'erp', onclick: () => this.create(ctx) }, 'New purchasing org')],
       load: async () => ({ rows: (await get('erp', '/v1/reference/purchasing-orgs')).data }),
@@ -684,8 +684,8 @@ const orgPage = {
     const ok = await formModal({
       sys: 'erp', title: 'New purchasing organisation', submitLabel: 'Create purchasing org',
       fields: [
-        { name: 'code', label: 'Code', required: true, placeholder: 'JBBR' },
-        { name: 'name', label: 'Buying organisation', required: true, placeholder: 'Jabil-BR' },
+        { name: 'code', label: 'Code', required: true, placeholder: 'AMBR' },
+        { name: 'name', label: 'Buying organisation', required: true, placeholder: 'Acme-BR' },
         { name: 'company_code', label: 'Company code', required: true, placeholder: 'BR01' },
       ],
       onSubmit: async (v) => (await post('erp', '/v1/reference/purchasing-orgs', { ...v, code: v.code.toUpperCase() })).data,
