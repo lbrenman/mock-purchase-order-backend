@@ -468,6 +468,93 @@ saga_dlv = {"delivery_no": "180000202", "vendor_id": "0000710245", "asn_referenc
             "items": [{"po_number": "4500123457", "item_no": "00010", "quantity": "10.000"}], "posted_at": NOW_SAP, "reversed_at": None}
 shp107 = S['map_shp'](SHP('SHP-20260915-00107'))
 
+
+# ─── Scenario: POST /shipments happy path, with the façade request/response mapping shown end to end ───
+FACADE_ASN_REQUEST = {
+    "supplierId": "SUP-100245", "shipmentNoticeNumber": "ASN-440882-{{runId}}", "carrierCode": "UPS", "trackingNumber": "1Z999AA10123456784",
+    "shipFrom": {"siteCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "region": "GA", "postalCode": "30301", "countryCode": "US"},
+    "shipTo": {"siteCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "addressLine1": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postalCode": "48326", "countryCode": "US"},
+    "plannedShipAt": "{{shipDate}}", "expectedArrivalAt": "{{etaDate}}",
+    "lines": [{"purchaseOrderId": "PO-4500123456", "lineNumber": 10, "shippedQuantity": 50, "unitOfMeasure": "EA", "lotNumber": "LOT-88291"},
+              {"purchaseOrderId": "PO-4500123467", "lineNumber": 20, "shippedQuantity": 120, "unitOfMeasure": "EA", "lotNumber": "LOT-88292"}],
+    "packages": [{"packageId": "PALLET-1001", "packageType": "PALLET", "grossWeight": 240, "weightUnit": "KG"}],
+}
+asn_origin = {"locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US"}
+asn_dest = {"locationCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "state": "MI", "zip": "48326", "country": "US"}
+asn_contents = [{"poNumber": "4500123456", "poLine": 10, "quantity": {"value": 50, "uom": "EA"}, "lotNumber": "LOT-88291"},
+                {"poNumber": "4500123467", "poLine": 20, "quantity": {"value": 120, "uom": "EA"}, "lotNumber": "LOT-88292"}]
+asn_hus = [{"huId": "PALLET-1001", "type": "PLT", "weight": {"value": 240, "unit": "kg"}}]
+asn_tms_body = {"asnNumber": "ASN-440882-{{runId}}", "supplierCode": "SUP-100245", "carrier": {"carrierCode": "UPS", "trackingId": "1Z999AA10123456784"},
+                "route": {"origin": asn_origin, "destination": asn_dest}, "schedule": {"plannedShipDate": "{{shipDate}}", "estimatedArrival": "{{etaDate}}"},
+                "contents": asn_contents, "handlingUnits": asn_hus, "tender": True}
+asn_erp_body = {"asn_reference": "ASN-440882-{{runId}}", "vendor_id": "{{scVendor}}",
+                "items": [{"po_number": "4500123456", "item_no": "00010", "quantity": 50}, {"po_number": "4500123467", "item_no": "00020", "quantity": 120}]}
+
+
+def asn_shipment(milestone='TND', cancel=None):
+    o = shipment('SHP-20260924-00205', 'ASN-440882-123456', milestone, tracking='1Z999AA10123456784', contents=asn_contents, cancel=cancel)
+    o['route'] = {"origin": {**{k: None for k in ('street', 'city', 'state', 'zip')}, **asn_origin}, "destination": asn_dest}
+    o['route']['origin'] = {k: o['route']['origin'][k] for k in ('locationCode', 'name', 'street', 'city', 'state', 'zip', 'country')}
+    o['handlingUnits'] = asn_hus
+    return o
+
+
+asn_dlv = {"delivery_no": "180000203", "vendor_id": "0000710245", "asn_reference": "ASN-440882-123456", "status": "POSTED",
+           "items": [{"po_number": "4500123456", "item_no": "00010", "quantity": "50.000"}, {"po_number": "4500123467", "item_no": "00020", "quantity": "120.000"}],
+           "posted_at": NOW_SAP, "reversed_at": None}
+
+# The façade response, built from the TMS shipment exactly like the script below does (used in the description).
+FACADE_ASN_RESPONSE = {
+    "shipmentId": "SHP-20260924-00205", "supplierId": "SUP-100245", "shipmentNoticeNumber": "ASN-440882-123456", "carrierCode": "UPS", "trackingNumber": "1Z999AA10123456784",
+    "shipFrom": {"siteCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "region": "GA", "postalCode": "30301", "countryCode": "US"},
+    "shipTo": {"siteCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "addressLine1": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postalCode": "48326", "countryCode": "US"},
+    "plannedShipAt": "2026-09-26T12:00:00.000Z", "expectedArrivalAt": "2026-09-30T12:00:00.000Z",
+    "lines": [{"purchaseOrderId": "PO-4500123456", "lineNumber": 10, "shippedQuantity": 50, "unitOfMeasure": "EA", "lotNumber": "LOT-88291"},
+              {"purchaseOrderId": "PO-4500123467", "lineNumber": 20, "shippedQuantity": 120, "unitOfMeasure": "EA", "lotNumber": "LOT-88292"}],
+    "packages": [{"packageId": "PALLET-1001", "packageType": "PALLET", "grossWeight": 240, "weightUnit": "KG"}],
+    "status": "SUBMITTED", "purchaseOrders": ["PO-4500123456", "PO-4500123467"], "createdAt": NOW_ISO, "lastUpdatedAt": NOW_ISO,
+}
+
+# Response mapping in JavaScript: TMS shipment -> façade Shipment. The same code an iPaaS mapping would express.
+FACADE_MAP_JS = [
+    "// Build the façade 201 response from the TMS shipment saved in step 2.",
+    "const s = JSON.parse(pm.collectionVariables.get('scShipmentJson'));",
+    "const STATUS = { PLN: 'DRAFT', TND: 'SUBMITTED', ITR: 'IN_TRANSIT', DLV: 'DELIVERED', EXC: 'DELAYED', CXL: 'CANCELLED' };",
+    "const PKG = { PLT: 'PALLET', CTN: 'CARTON', CRT: 'CRATE', OTH: 'OTHER' };",
+    "const clean = (o) => JSON.parse(JSON.stringify(o, (k, v) => (v === null ? undefined : v)));",
+    "const addr = (l) => clean({ siteCode: l.locationCode, name: l.name, addressLine1: l.street, city: l.city, region: l.state, postalCode: l.zip, countryCode: l.country });",
+    "const facade = clean({",
+    "  shipmentId: s.shipmentId, supplierId: s.supplierCode, shipmentNoticeNumber: s.asnNumber,",
+    "  carrierCode: s.carrier.carrierCode, trackingNumber: s.carrier.trackingId,",
+    "  shipFrom: addr(s.route.origin), shipTo: addr(s.route.destination),",
+    "  plannedShipAt: s.schedule.plannedShipDate, expectedArrivalAt: s.schedule.estimatedArrival,",
+    "  lines: s.contents.map((c) => ({ purchaseOrderId: 'PO-' + c.poNumber, lineNumber: c.poLine, shippedQuantity: c.quantity.value, unitOfMeasure: c.quantity.uom, lotNumber: c.lotNumber })),",
+    "  packages: (s.handlingUnits || []).map((h) => ({ packageId: h.huId, packageType: PKG[h.type], grossWeight: h.weight && h.weight.value, weightUnit: h.weight && h.weight.unit.toUpperCase() })),",
+    "  status: STATUS[s.milestone.code],",
+    "  purchaseOrders: [...new Set(s.contents.map((c) => 'PO-' + c.poNumber))],",
+    "  createdAt: s.audit.createdAt, lastUpdatedAt: s.audit.updatedAt,",
+    "});",
+    "pm.collectionVariables.set('facadeShipment', JSON.stringify(facade, null, 2));",
+    "console.log('Façade response 201 Created', facade);",
+    "pm.test('Façade status is SUBMITTED', () => pm.expect(facade.status).to.eql('SUBMITTED'));",
+    "pm.test('Façade lists both purchase orders', () => pm.expect(facade.purchaseOrders).to.eql(['PO-4500123456', 'PO-4500123467']));",
+    "pm.visualizer.set('<h3 style=\"font-family:sans-serif\">Façade response: 201 Created</h3><pre>{{json}}</pre>', { json: JSON.stringify(facade, null, 2) });",
+]
+
+md_json = lambda o: "```json\n" + json.dumps(o, indent=2, ensure_ascii=False) + "\n```"
+ASN_FOLDER_DESC = f"""The happy path of the façade's `POST /shipments`: one shipment for **two purchase orders**, three backend calls, then a clean-up so it can run again. Read the steps' descriptions for the field mappings; the last step's **Visualize** tab (and the Postman console) shows the façade response built from the backend answers.
+
+| Step | Call | Façade status if it fails |
+|---|---|---|
+| 1 | SRM check, scope write, `supplierCode` = `supplierId` | 403 when `allowed` is false; 422 when `supplier.asnEnabled` is false |
+| 2 | TMS `POST /shipments` | 409, 422 or 503 mapped from the TMS fault (nothing to compensate) |
+| 3 | ERP `POST /inbound-deliveries` | cancel the TMS shipment first (see scenario 5), then map the ERP error |
+
+**The façade request this scenario implements** (the façade spec's own example, with a unique ASN):
+
+{md_json(FACADE_ASN_REQUEST)}
+"""
+
 scenarios = [
     folder('1. Get one purchase order (GET /purchase-orders/{id})', [
         a(req('ERP: the purchase order', 'GET', 'erp', '/v1/purchase-orders/4500123458', pre=NEW_RUN, tests=[save('scVendor', 'pm.response.json().data.vendor_id')],
@@ -502,7 +589,54 @@ scenarios = [
               example=(409, erpErr('CONFIRMATION_EXISTS', 'Confirmation 7100000102 already exists for revision 1 of PO 4500123532')),
               desc='The façade returns 409 ACKNOWLEDGEMENT_ALREADY_EXISTS.'), SC_ERP),
     ], desc='Three calls: ERP read, SRM check, ERP write.'),
-    folder('4. Create an ASN with compensation (POST /shipments)', [
+    folder('4. Create an ASN (POST /shipments)', [
+        a(req('SRM: may apex-supplier-portal send ASNs for SUP-100245?', 'GET', 'srm', '/v1/entitlements/apex-supplier-portal/check',
+              query={"scope": "supplier-orders.write", "supplierCode": "SUP-100245"}, pre=NEW_RUN,
+              tests=["pm.test('Allowed and ASN-enabled', () => { const r = pm.response.json(); pm.expect(r.allowed).to.be.true; pm.expect(r.supplier.asnEnabled).to.be.true; });",
+                     save('scVendor', 'pm.response.json().supplier.erpVendorNumber')],
+              example=(200, chk('apex-supplier-portal', scope='supplier-orders.write', supplierCode='SUP-100245')),
+              desc="Step 1 of 3. `supplierId` goes in as `supplierCode`. Keep `supplier.erpVendorNumber` (`0000710245`) for step 3 and check `supplier.asnEnabled`."), SC_SRM),
+        a(req('TMS: create the shipment (façade body → TMS dialect)', 'POST', 'tms', '/v1/shipments', expect=201, body=asn_tms_body,
+              tests=[save('scShipment', 'pm.response.json().shipmentId'), save('scShipmentJson', 'JSON.stringify(pm.response.json())'),
+                     "pm.test('Tendered (façade SUBMITTED)', () => pm.expect(pm.response.json().milestone.code).to.eql('TND'));",
+                     "pm.test('UPS resolved to SCAC UPSN', () => pm.expect(pm.response.json().carrier.scac).to.eql('UPSN'));"],
+              example=(201, asn_shipment()),
+              desc="""Step 2 of 3. The request body is the façade request in the TMS dialect:
+
+| Façade | TMS |
+|---|---|
+| `shipmentNoticeNumber` | `asnNumber` |
+| `supplierId` | `supplierCode` (same value) |
+| `carrierCode`, `trackingNumber` | `carrier.carrierCode`, `carrier.trackingId` |
+| `shipFrom`, `shipTo` | `route.origin`, `route.destination`: `siteCode`→`locationCode`, `addressLine1`→`street`, `region`→`state`, `postalCode`→`zip`, `countryCode`→`country` |
+| `plannedShipAt`, `expectedArrivalAt` | `schedule.plannedShipDate`, `schedule.estimatedArrival` |
+| `lines[]` | `contents[]`: strip `PO-` into `poNumber`, `lineNumber`→`poLine`, `shippedQuantity` + `unitOfMeasure` → `quantity {value, uom}` |
+| `packages[]` | `handlingUnits[]`: `packageId`→`huId`, `PALLET`→`PLT` (`CARTON` `CTN`, `CRATE` `CRT`, `OTHER` `OTH`), `grossWeight` + `weightUnit` → `weight {value, unit}` in lower case |
+| (none) | `tender: true`, so the shipment is submitted to the carrier at once |
+
+Saves the shipment for the response mapping in step 3."""), SC_TMS),
+        a(req('ERP: post the inbound delivery (lines → PO items)', 'POST', 'erp', '/v1/inbound-deliveries', expect=201, body=asn_erp_body,
+              tests=[save('scDelivery', 'pm.response.json().data.delivery_no')] + FACADE_MAP_JS,
+              example=(201, {"data": asn_dlv}),
+              desc=f"""Step 3 of 3. Reserves the shipped quantity on both POs.
+
+| Façade | ERP |
+|---|---|
+| `shipmentNoticeNumber` | `asn_reference` |
+| `supplierId` | `vendor_id` = `supplier.erpVendorNumber` from step 1 |
+| `lines[].purchaseOrderId` | `items[].po_number` without `PO-` |
+| `lines[].lineNumber` | `items[].item_no`, zero-padded to 5 digits (`20` → `"00020"`) |
+| `lines[].shippedQuantity` | `items[].quantity` |
+
+If this call fails, the façade cancels the TMS shipment before answering (scenario 5). On success the façade answers **201** with the TMS shipment in façade shape. This request's test script does that mapping (milestone `TND` → status `SUBMITTED`, `PLT` → `PALLET`, `kg` → `KG`, `PO-` added back, `purchaseOrders` = distinct POs) and shows the result in the **Visualize** tab:
+
+{md_json(FACADE_ASN_RESPONSE)}"""), SC_ERP),
+        a(req('Clean up: reverse the delivery (not part of the façade flow)', 'POST', 'erp', '/v1/inbound-deliveries/{{scDelivery}}/reverse', body={"reason": "Postman scenario clean-up"},
+              example=(200, {"data": {**asn_dlv, "status": "REVERSED", "reversed_at": NOW_SAP}}), desc='Gives the 50 and 120 EA back to the two POs so the scenario can run again.'), SC_ERP),
+        a(req('Clean up: cancel the shipment (not part of the façade flow)', 'POST', 'tms', '/v1/shipments/{{scShipment}}/cancel', body={"reason": "Postman scenario clean-up"},
+              example=(200, asn_shipment('CXL', 'Postman scenario clean-up'))), SC_TMS),
+    ], desc=ASN_FOLDER_DESC),
+    folder('5. Create an ASN when the ERP step fails (POST /shipments, compensation)', [
         a(req('SRM: may apex-supplier-portal write for SUP-100245?', 'GET', 'srm', '/v1/entitlements/apex-supplier-portal/check', query={"scope": "supplier-orders.write", "supplierCode": "SUP-100245"}, pre=NEW_RUN,
               tests=["pm.test('Allowed and ASN-enabled', () => { const r = pm.response.json(); pm.expect(r.allowed).to.be.true; pm.expect(r.supplier.asnEnabled).to.be.true; });"],
               example=(200, chk('apex-supplier-portal', scope='supplier-orders.write', supplierCode='SUP-100245')),
@@ -525,14 +659,14 @@ scenarios = [
         a(req('Clean up: cancel the shipment (not part of the façade flow)', 'POST', 'tms', '/v1/shipments/{{sagaShipment}}/cancel', body={"reason": "Postman scenario clean-up"},
               example=(200, saga_ship('SHP-20260924-00204', 'CXL', 'Postman scenario clean-up'))), SC_TMS),
     ], desc='SRM check, TMS shipment, ERP delivery; if the ERP step fails, cancel the TMS shipment. Then a successful retry and a clean-up.'),
-    folder('5. Track a shipment (GET /shipments/{id})', [
+    folder('6. Track a shipment (GET /shipments/{id})', [
         a(req('TMS: the shipment', 'GET', 'tms', '/v1/shipments/SHP-20260915-00107', pre=NEW_RUN, tests=[save('scSupplier', 'pm.response.json().supplierCode')], example=(200, shp107),
               desc='Step 1 of 2. Milestone EXC becomes façade status DELAYED.'), SC_TMS),
         a(req('SRM: may prc-edi-bridge read it?', 'GET', 'srm', '/v1/entitlements/prc-edi-bridge/check', query={"scope": "supplier-orders.read", "supplierCode": "{{scSupplier}}"},
               tests=["pm.test('Allowed', () => pm.expect(pm.response.json().allowed).to.be.true);"],
               example=(200, chk('prc-edi-bridge', scope='supplier-orders.read', supplierCode=shp107['supplierCode'])), desc='Step 2 of 2.'), SC_SRM),
     ], desc='Two calls: TMS, then SRM.'),
-    folder('6. Governance: blocked and on-hold suppliers', [
+    folder('7. Governance: blocked and on-hold suppliers', [
         a(req('Write for an on-hold supplier', 'GET', 'srm', '/v1/entitlements/jabil-ops-console/check', query={"scope": "supplier-orders.write", "supplierCode": "SUP-100518"},
               tests=["pm.test('SUPPLIER_ON_HOLD', () => pm.expect(pm.response.json().reason).to.eql('SUPPLIER_ON_HOLD'));"],
               example=(200, chk('jabil-ops-console', scope='supplier-orders.write', supplierCode='SUP-100518')), desc='An internal consumer with access to every supplier still cannot write for one on hold.'), SC_SRM),

@@ -81,7 +81,7 @@ the backend calls for each façade operation (including the ASN saga with compen
   sites, contacts, entitlements, carriers, shipments) with realistic referential-integrity conflicts (409).
 - **Data dashboard** at `/dashboard/`: list and detail views for every entity, create/edit/delete forms,
   cross-system views of one record, and a live **wire log** of every backend call.
-- **Postman collection** covering all 74 operations: 159 requests, each with a description, tests and a saved
+- **Postman collection** covering all 74 operations: 164 requests, each with a description, tests and a saved
   example response, chained IDs with clear messages when a prerequisite is missing, plus one scenario folder
   per façade operation with exactly the calls the iPaaS makes.
 
@@ -235,7 +235,7 @@ and `TMS_PUBLIC_URL` to the tunnel URLs (without the `/erp` suffix).
 
 | File | Purpose |
 |---|---|
-| `mock-po-backends.postman_collection.json` | 159 requests covering **every operation** of all three backends (74), plus error and security cases and one scenario per façade operation |
+| `mock-po-backends.postman_collection.json` | 164 requests covering **every operation** of all three backends (74), plus error and security cases and one scenario per façade operation |
 | `local.postman_environment.json` | `baseUrl = http://localhost:3000` (combined mode) |
 | `local-separate.postman_environment.json` | `erpUrl`, `srmUrl`, `tmsUrl` on ports 3001/3002/3003 |
 | `tunnel.postman_environment.json` | Set `baseUrl` to your ngrok or Codespaces URL (`https://<codespace-name>-3000.app.github.dev`) |
@@ -262,10 +262,12 @@ collection variable).
   1. get one purchase order (ERP → SRM check by vendor number);
   2. list purchase orders (SRM check → ERP list for the allowed vendors);
   3. acknowledge a purchase order (ERP → SRM check → ERP confirmation, then the 409 on a repeat);
-  4. create an ASN: SRM check → TMS shipment → ERP delivery forced to fail with `x-mock-status: 503` →
+  4. create an ASN, happy path: SRM check → TMS shipment → ERP delivery for two POs, then the façade response
+     built from the backend answers by the test script (see the **Visualize** tab) → clean-up;
+  5. create an ASN when the ERP step fails: ERP delivery forced to fail with `x-mock-status: 503` →
      TMS cancel (compensation) → successful retry with the same ASN → clean-up;
-  5. track a shipment (TMS → SRM check);
-  6. governance decisions (supplier on hold, revoked consumer, multi-supplier network).
+  6. track a shipment (TMS → SRM check);
+  7. governance decisions (supplier on hold, revoked consumer, multi-supplier network).
 
 **Sending single requests:** requests on seed data (fixed IDs such as PO `4500123458`) work on their own.
 A request that uses an ID created by an earlier request stops before sending if that variable is still empty,

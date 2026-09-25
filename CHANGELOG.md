@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.2.1
+
+- **Postman:** new scenario *4. Create an ASN (POST /shipments)*, the happy path for one shipment covering two
+  purchase orders (4500123456 line 10 and 4500123467 line 20): SRM check → TMS shipment → ERP inbound delivery,
+  then clean-up. Each step's description has its field-mapping table; the ERP step's test script builds the
+  façade 201 response from the TMS shipment and shows it in the Visualize tab and the console. The compensation
+  scenario is now number 5 (later scenarios renumbered). 164 requests.
+- **docs/MAPPING.md:** worked example for `POST /shipments` with the façade request, all three backend request
+  bodies and the façade response.
+- `.devcontainer/devcontainer.json`: only ports 3000 and 5432 are forwarded up front, so the Ports panel no
+  longer lists 3001–3003 in combined mode (they are still labelled when separate mode opens them).
+
 ## 2.2.0
 
 Simpler façade mapping: every façade operation is now one SRM call plus one or two ERP or TMS calls.

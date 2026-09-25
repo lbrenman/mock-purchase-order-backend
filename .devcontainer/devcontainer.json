@@ -2,21 +2,45 @@
   "name": "Mock Purchase Order Backends",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false }
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    }
   },
-  "forwardPorts": [3000, 3001, 3002, 3003, 5432],
+  "forwardPorts": [
+    3000,
+    5432
+  ],
   "portsAttributes": {
-    "3000": { "label": "PO Backends (combined)", "onAutoForward": "notify" },
-    "3001": { "label": "ERP (separate mode)" },
-    "3002": { "label": "SRM (separate mode)" },
-    "3003": { "label": "TMS (separate mode)" },
-    "5432": { "label": "Postgres", "onAutoForward": "silent" }
+    "3000": {
+      "label": "PO Backends (combined)",
+      "onAutoForward": "notify"
+    },
+    "3001": {
+      "label": "ERP (separate mode)",
+      "onAutoForward": "notify"
+    },
+    "3002": {
+      "label": "SRM (separate mode)",
+      "onAutoForward": "notify"
+    },
+    "3003": {
+      "label": "TMS (separate mode)",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "Postgres",
+      "onAutoForward": "silent"
+    }
   },
   "postCreateCommand": "npm install && cp -n .env.example .env || true",
   "postStartCommand": "bash scripts/start-postgres.sh",
   "customizations": {
     "vscode": {
-      "extensions": ["42Crunch.vscode-openapi", "humao.rest-client", "ckolkman.vscode-postgres"]
+      "extensions": [
+        "42Crunch.vscode-openapi",
+        "humao.rest-client",
+        "ckolkman.vscode-postgres"
+      ]
     }
   }
 }

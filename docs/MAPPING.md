@@ -26,7 +26,8 @@ puts it in its errors). On POSTs, derive a per-backend `Idempotency-Key` from th
 | `GET /shipments` | SRM check (read) → TMS list |
 | `GET /shipments/{id}` | TMS get → SRM check (read) |
 
-Every one of these is a runnable folder in the Postman collection under **Scenarios - façade walkthroughs**.
+Every one of these is a runnable folder in the Postman collection under **Scenarios - façade walkthroughs**;
+`POST /shipments` has two, the happy path (with a full worked example below) and the compensation path.
 
 ### The one SRM call
 
@@ -178,6 +179,104 @@ A cancelled shipment frees its ASN number, so the client can retry the same ASN.
 failure: send `x-mock-status: 503` on step 3, set `ERP_ERROR_RATE=0.5`, or ship more than the open
 quantity (ERP 422). `POST /erp/v1/inbound-deliveries/{deliveryNo}/reverse` exists if you prefer an
 ERP-first saga.
+
+#### Worked example: `POST /shipments`
+
+Runnable as the Postman scenario **4. Create an ASN (POST /shipments)**. One ASN covering two purchase
+orders, consumer `apex-supplier-portal`.
+
+**Façade request**
+
+```json
+{
+  "supplierId": "SUP-100245",
+  "shipmentNoticeNumber": "ASN-440882",
+  "carrierCode": "UPS",
+  "trackingNumber": "1Z999AA10123456784",
+  "shipFrom": { "siteCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "region": "GA", "postalCode": "30301", "countryCode": "US" },
+  "shipTo": { "siteCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "addressLine1": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postalCode": "48326", "countryCode": "US" },
+  "plannedShipAt": "2026-10-03T12:00:00Z",
+  "expectedArrivalAt": "2026-10-07T15:00:00Z",
+  "lines": [
+    { "purchaseOrderId": "PO-4500123456", "lineNumber": 10, "shippedQuantity": 50, "unitOfMeasure": "EA", "lotNumber": "LOT-88291" },
+    { "purchaseOrderId": "PO-4500123467", "lineNumber": 20, "shippedQuantity": 120, "unitOfMeasure": "EA", "lotNumber": "LOT-88292" }
+  ],
+  "packages": [ { "packageId": "PALLET-1001", "packageType": "PALLET", "grossWeight": 240, "weightUnit": "KG" } ]
+}
+```
+
+**Step 1: SRM.** `GET /srm/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245`
+answers `allowed: true` and `supplier: { erpVendorNumber: "0000710245", asnEnabled: true }`.
+
+**Step 2: TMS.** `POST /tms/v1/shipments`
+
+```json
+{
+  "asnNumber": "ASN-440882",
+  "supplierCode": "SUP-100245",
+  "carrier": { "carrierCode": "UPS", "trackingId": "1Z999AA10123456784" },
+  "route": {
+    "origin": { "locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US" },
+    "destination": { "locationCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "state": "MI", "zip": "48326", "country": "US" }
+  },
+  "schedule": { "plannedShipDate": "2026-10-03T12:00:00Z", "estimatedArrival": "2026-10-07T15:00:00Z" },
+  "contents": [
+    { "poNumber": "4500123456", "poLine": 10, "quantity": { "value": 50, "uom": "EA" }, "lotNumber": "LOT-88291" },
+    { "poNumber": "4500123467", "poLine": 20, "quantity": { "value": 120, "uom": "EA" }, "lotNumber": "LOT-88292" }
+  ],
+  "handlingUnits": [ { "huId": "PALLET-1001", "type": "PLT", "weight": { "value": 240, "unit": "kg" } } ],
+  "tender": true
+}
+```
+
+The answer is the shipment with `shipmentId: "SHP-20260924-00205"`, `milestone.code: "TND"` and
+`carrier.scac: "UPSN"`. Keep it for the response.
+
+**Step 3: ERP.** `POST /erp/v1/inbound-deliveries`
+
+```json
+{
+  "asn_reference": "ASN-440882",
+  "vendor_id": "0000710245",
+  "items": [
+    { "po_number": "4500123456", "item_no": "00010", "quantity": 50 },
+    { "po_number": "4500123467", "item_no": "00020", "quantity": 120 }
+  ]
+}
+```
+
+A 201 means the quantities are reserved. Any error here triggers `POST /tms/v1/shipments/SHP-20260924-00205/cancel`
+before the façade answers.
+
+**Façade response** `201 Created`, `Location: /shipments/SHP-20260924-00205`, built from the step 2 answer:
+
+```json
+{
+  "shipmentId": "SHP-20260924-00205",
+  "supplierId": "SUP-100245",
+  "shipmentNoticeNumber": "ASN-440882",
+  "carrierCode": "UPS",
+  "trackingNumber": "1Z999AA10123456784",
+  "shipFrom": { "siteCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "city": "Atlanta", "region": "GA", "postalCode": "30301", "countryCode": "US" },
+  "shipTo": { "siteCode": "US-AUBURN-HILLS", "name": "Manufacturing Site", "addressLine1": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postalCode": "48326", "countryCode": "US" },
+  "plannedShipAt": "2026-10-03T12:00:00.000Z",
+  "expectedArrivalAt": "2026-10-07T15:00:00.000Z",
+  "lines": [
+    { "purchaseOrderId": "PO-4500123456", "lineNumber": 10, "shippedQuantity": 50, "unitOfMeasure": "EA", "lotNumber": "LOT-88291" },
+    { "purchaseOrderId": "PO-4500123467", "lineNumber": 20, "shippedQuantity": 120, "unitOfMeasure": "EA", "lotNumber": "LOT-88292" }
+  ],
+  "packages": [ { "packageId": "PALLET-1001", "packageType": "PALLET", "grossWeight": 240, "weightUnit": "KG" } ],
+  "status": "SUBMITTED",
+  "purchaseOrders": ["PO-4500123456", "PO-4500123467"],
+  "createdAt": "2026-09-24T16:55:00.000Z",
+  "lastUpdatedAt": "2026-09-24T16:55:00.000Z"
+}
+```
+
+Mapping points worth showing in the demo: `PO-` stripped on the way in and added back on the way out,
+`lineNumber` 20 becoming ERP `item_no` `"00020"`, `PALLET`/`KG` becoming `PLT`/`kg` and back, milestone
+`TND` becoming status `SUBMITTED`, drop `null` fields such as the missing `shipFrom.addressLine1`,
+and `purchaseOrders` derived as the distinct POs of the lines.
 
 ### `GET /shipments` and `GET /shipments/{shipmentId}`
 

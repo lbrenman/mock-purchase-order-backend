@@ -12471,7 +12471,656 @@
           "description": "Three calls: ERP read, SRM check, ERP write."
         },
         {
-          "name": "4. Create an ASN with compensation (POST /shipments)",
+          "name": "4. Create an ASN (POST /shipments)",
+          "item": [
+            {
+              "name": "SRM: may apex-supplier-portal send ASNs for SUP-100245?",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{srmUrl}}/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245",
+                  "host": [
+                    "{{srmUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "entitlements",
+                    "apex-supplier-portal",
+                    "check"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "supplier-orders.write"
+                    },
+                    {
+                      "key": "supplierCode",
+                      "value": "SUP-100245"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "key",
+                      "value": "x-api-key",
+                      "type": "string"
+                    },
+                    {
+                      "key": "value",
+                      "value": "{{srmApiKey}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "in",
+                      "value": "header",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Step 1 of 3. `supplierId` goes in as `supplierCode`. Keep `supplier.erpVendorNumber` (`0000710245`) for step 3 and check `supplier.asnEnabled`.\n\n**Expects:** `200 OK`\n\n**Saves:** `scVendor`"
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set('runId', String(Date.now()).slice(-6));",
+                      "console.log('runId', pm.collectionVariables.get('runId'));"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                      "pm.test('Allowed and ASN-enabled', () => { const r = pm.response.json(); pm.expect(r.allowed).to.be.true; pm.expect(r.supplier.asnEnabled).to.be.true; });",
+                      "pm.collectionVariables.set('scVendor', pm.response.json().supplier.erpVendorNumber);"
+                    ]
+                  }
+                }
+              ],
+              "response": [
+                {
+                  "name": "200 OK",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{srmUrl}}/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245",
+                      "host": [
+                        "{{srmUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "entitlements",
+                        "apex-supplier-portal",
+                        "check"
+                      ],
+                      "query": [
+                        {
+                          "key": "scope",
+                          "value": "supplier-orders.write"
+                        },
+                        {
+                          "key": "supplierCode",
+                          "value": "SUP-100245"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "body": "{\n  \"consumerId\": \"apex-supplier-portal\",\n  \"consumerType\": \"supplier-partner\",\n  \"scope\": \"supplier-orders.write\",\n  \"supplierCode\": \"SUP-100245\",\n  \"allowed\": true,\n  \"reason\": \"OK\",\n  \"supplier\": {\n    \"supplierCode\": \"SUP-100245\",\n    \"erpVendorNumber\": \"0000710245\",\n    \"legalName\": \"Apex Precision Components, Inc.\",\n    \"status\": \"ACTIVE\",\n    \"asnEnabled\": true\n  },\n  \"allowedSuppliers\": [\n    \"SUP-100245\"\n  ],\n  \"allowedVendors\": [\n    {\n      \"supplierCode\": \"SUP-100245\",\n      \"erpVendorNumber\": \"0000710245\"\n    }\n  ],\n  \"evaluatedAt\": \"2026-09-24T12:00:00.000Z\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "TMS: create the shipment (façade body → TMS dialect)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{$guid}}",
+                    "description": "Optional: same key + same body replays the first response"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tmsUrl}}/v1/shipments",
+                  "host": [
+                    "{{tmsUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "shipments"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"asnNumber\": \"ASN-440882-{{runId}}\",\n  \"supplierCode\": \"SUP-100245\",\n  \"carrier\": {\n    \"carrierCode\": \"UPS\",\n    \"trackingId\": \"1Z999AA10123456784\"\n  },\n  \"route\": {\n    \"origin\": {\n      \"locationCode\": \"SUP-ATL-01\",\n      \"name\": \"Supplier Distribution Center\",\n      \"city\": \"Atlanta\",\n      \"state\": \"GA\",\n      \"zip\": \"30301\",\n      \"country\": \"US\"\n    },\n    \"destination\": {\n      \"locationCode\": \"US-AUBURN-HILLS\",\n      \"name\": \"Manufacturing Site\",\n      \"street\": \"100 Manufacturing Way\",\n      \"city\": \"Auburn Hills\",\n      \"state\": \"MI\",\n      \"zip\": \"48326\",\n      \"country\": \"US\"\n    }\n  },\n  \"schedule\": {\n    \"plannedShipDate\": \"{{shipDate}}\",\n    \"estimatedArrival\": \"{{etaDate}}\"\n  },\n  \"contents\": [\n    {\n      \"poNumber\": \"4500123456\",\n      \"poLine\": 10,\n      \"quantity\": {\n        \"value\": 50,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"poNumber\": \"4500123467\",\n      \"poLine\": 20,\n      \"quantity\": {\n        \"value\": 120,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"handlingUnits\": [\n    {\n      \"huId\": \"PALLET-1001\",\n      \"type\": \"PLT\",\n      \"weight\": {\n        \"value\": 240,\n        \"unit\": \"kg\"\n      }\n    }\n  ],\n  \"tender\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "key",
+                      "value": "x-api-key",
+                      "type": "string"
+                    },
+                    {
+                      "key": "value",
+                      "value": "{{tmsApiKey}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "in",
+                      "value": "header",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Step 2 of 3. The request body is the façade request in the TMS dialect:\n\n| Façade | TMS |\n|---|---|\n| `shipmentNoticeNumber` | `asnNumber` |\n| `supplierId` | `supplierCode` (same value) |\n| `carrierCode`, `trackingNumber` | `carrier.carrierCode`, `carrier.trackingId` |\n| `shipFrom`, `shipTo` | `route.origin`, `route.destination`: `siteCode`→`locationCode`, `addressLine1`→`street`, `region`→`state`, `postalCode`→`zip`, `countryCode`→`country` |\n| `plannedShipAt`, `expectedArrivalAt` | `schedule.plannedShipDate`, `schedule.estimatedArrival` |\n| `lines[]` | `contents[]`: strip `PO-` into `poNumber`, `lineNumber`→`poLine`, `shippedQuantity` + `unitOfMeasure` → `quantity {value, uom}` |\n| `packages[]` | `handlingUnits[]`: `packageId`→`huId`, `PALLET`→`PLT` (`CARTON` `CTN`, `CRATE` `CRT`, `OTHER` `OTH`), `grossWeight` + `weightUnit` → `weight {value, unit}` in lower case |\n| (none) | `tender: true`, so the shipment is submitted to the carrier at once |\n\nSaves the shipment for the response mapping in step 3.\n\n**Expects:** `201 Created`\n\n**Saves:** `scShipment`, `scShipmentJson`"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                      "pm.collectionVariables.set('scShipment', pm.response.json().shipmentId);",
+                      "pm.collectionVariables.set('scShipmentJson', JSON.stringify(pm.response.json()));",
+                      "pm.test('Tendered (façade SUBMITTED)', () => pm.expect(pm.response.json().milestone.code).to.eql('TND'));",
+                      "pm.test('UPS resolved to SCAC UPSN', () => pm.expect(pm.response.json().carrier.scac).to.eql('UPSN'));"
+                    ]
+                  }
+                }
+              ],
+              "response": [
+                {
+                  "name": "201 Created",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Idempotency-Key",
+                        "value": "{{$guid}}",
+                        "description": "Optional: same key + same body replays the first response"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{tmsUrl}}/v1/shipments",
+                      "host": [
+                        "{{tmsUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "shipments"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"asnNumber\": \"ASN-440882-{{runId}}\",\n  \"supplierCode\": \"SUP-100245\",\n  \"carrier\": {\n    \"carrierCode\": \"UPS\",\n    \"trackingId\": \"1Z999AA10123456784\"\n  },\n  \"route\": {\n    \"origin\": {\n      \"locationCode\": \"SUP-ATL-01\",\n      \"name\": \"Supplier Distribution Center\",\n      \"city\": \"Atlanta\",\n      \"state\": \"GA\",\n      \"zip\": \"30301\",\n      \"country\": \"US\"\n    },\n    \"destination\": {\n      \"locationCode\": \"US-AUBURN-HILLS\",\n      \"name\": \"Manufacturing Site\",\n      \"street\": \"100 Manufacturing Way\",\n      \"city\": \"Auburn Hills\",\n      \"state\": \"MI\",\n      \"zip\": \"48326\",\n      \"country\": \"US\"\n    }\n  },\n  \"schedule\": {\n    \"plannedShipDate\": \"{{shipDate}}\",\n    \"estimatedArrival\": \"{{etaDate}}\"\n  },\n  \"contents\": [\n    {\n      \"poNumber\": \"4500123456\",\n      \"poLine\": 10,\n      \"quantity\": {\n        \"value\": 50,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"poNumber\": \"4500123467\",\n      \"poLine\": 20,\n      \"quantity\": {\n        \"value\": 120,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"handlingUnits\": [\n    {\n      \"huId\": \"PALLET-1001\",\n      \"type\": \"PLT\",\n      \"weight\": {\n        \"value\": 240,\n        \"unit\": \"kg\"\n      }\n    }\n  ],\n  \"tender\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "body": "{\n  \"shipmentId\": \"SHP-20260924-00205\",\n  \"asnNumber\": \"ASN-440882-123456\",\n  \"supplierCode\": \"SUP-100245\",\n  \"carrier\": {\n    \"scac\": \"UPSN\",\n    \"carrierCode\": \"UPS\",\n    \"name\": \"United Parcel Service\",\n    \"trackingId\": \"1Z999AA10123456784\",\n    \"trackingUrl\": \"https://www.ups.com/track?tracknum=1Z999AA10123456784\"\n  },\n  \"milestone\": {\n    \"code\": \"TND\",\n    \"description\": \"Tendered - ASN submitted to carrier\",\n    \"since\": \"2026-09-24T12:00:00.000Z\"\n  },\n  \"route\": {\n    \"origin\": {\n      \"locationCode\": \"SUP-ATL-01\",\n      \"name\": \"Supplier Distribution Center\",\n      \"street\": null,\n      \"city\": \"Atlanta\",\n      \"state\": \"GA\",\n      \"zip\": \"30301\",\n      \"country\": \"US\"\n    },\n    \"destination\": {\n      \"locationCode\": \"US-AUBURN-HILLS\",\n      \"name\": \"Manufacturing Site\",\n      \"street\": \"100 Manufacturing Way\",\n      \"city\": \"Auburn Hills\",\n      \"state\": \"MI\",\n      \"zip\": \"48326\",\n      \"country\": \"US\"\n    }\n  },\n  \"schedule\": {\n    \"plannedShipDate\": \"2026-09-26T12:00:00.000Z\",\n    \"estimatedArrival\": \"2026-09-30T12:00:00.000Z\"\n  },\n  \"contents\": [\n    {\n      \"poNumber\": \"4500123456\",\n      \"poLine\": 10,\n      \"quantity\": {\n        \"value\": 50,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"poNumber\": \"4500123467\",\n      \"poLine\": 20,\n      \"quantity\": {\n        \"value\": 120,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"handlingUnits\": [\n    {\n      \"huId\": \"PALLET-1001\",\n      \"type\": \"PLT\",\n      \"weight\": {\n        \"value\": 240,\n        \"unit\": \"kg\"\n      }\n    }\n  ],\n  \"cancelReason\": null,\n  \"audit\": {\n    \"createdAt\": \"2026-09-24T12:00:00.000Z\",\n    \"updatedAt\": \"2026-09-24T12:00:00.000Z\"\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "ERP: post the inbound delivery (lines → PO items)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{$guid}}",
+                    "description": "Optional: same key + same body replays the first response"
+                  }
+                ],
+                "url": {
+                  "raw": "{{erpUrl}}/v1/inbound-deliveries",
+                  "host": [
+                    "{{erpUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "inbound-deliveries"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"asn_reference\": \"ASN-440882-{{runId}}\",\n  \"vendor_id\": \"{{scVendor}}\",\n  \"items\": [\n    {\n      \"po_number\": \"4500123456\",\n      \"item_no\": \"00010\",\n      \"quantity\": 50\n    },\n    {\n      \"po_number\": \"4500123467\",\n      \"item_no\": \"00020\",\n      \"quantity\": 120\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "key",
+                      "value": "x-api-key",
+                      "type": "string"
+                    },
+                    {
+                      "key": "value",
+                      "value": "{{erpApiKey}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "in",
+                      "value": "header",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Step 3 of 3. Reserves the shipped quantity on both POs.\n\n| Façade | ERP |\n|---|---|\n| `shipmentNoticeNumber` | `asn_reference` |\n| `supplierId` | `vendor_id` = `supplier.erpVendorNumber` from step 1 |\n| `lines[].purchaseOrderId` | `items[].po_number` without `PO-` |\n| `lines[].lineNumber` | `items[].item_no`, zero-padded to 5 digits (`20` → `\"00020\"`) |\n| `lines[].shippedQuantity` | `items[].quantity` |\n\nIf this call fails, the façade cancels the TMS shipment before answering (scenario 5). On success the façade answers **201** with the TMS shipment in façade shape. This request's test script does that mapping (milestone `TND` → status `SUBMITTED`, `PLT` → `PALLET`, `kg` → `KG`, `PO-` added back, `purchaseOrders` = distinct POs) and shows the result in the **Visualize** tab:\n\n```json\n{\n  \"shipmentId\": \"SHP-20260924-00205\",\n  \"supplierId\": \"SUP-100245\",\n  \"shipmentNoticeNumber\": \"ASN-440882-123456\",\n  \"carrierCode\": \"UPS\",\n  \"trackingNumber\": \"1Z999AA10123456784\",\n  \"shipFrom\": {\n    \"siteCode\": \"SUP-ATL-01\",\n    \"name\": \"Supplier Distribution Center\",\n    \"city\": \"Atlanta\",\n    \"region\": \"GA\",\n    \"postalCode\": \"30301\",\n    \"countryCode\": \"US\"\n  },\n  \"shipTo\": {\n    \"siteCode\": \"US-AUBURN-HILLS\",\n    \"name\": \"Manufacturing Site\",\n    \"addressLine1\": \"100 Manufacturing Way\",\n    \"city\": \"Auburn Hills\",\n    \"region\": \"MI\",\n    \"postalCode\": \"48326\",\n    \"countryCode\": \"US\"\n  },\n  \"plannedShipAt\": \"2026-09-26T12:00:00.000Z\",\n  \"expectedArrivalAt\": \"2026-09-30T12:00:00.000Z\",\n  \"lines\": [\n    {\n      \"purchaseOrderId\": \"PO-4500123456\",\n      \"lineNumber\": 10,\n      \"shippedQuantity\": 50,\n      \"unitOfMeasure\": \"EA\",\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"purchaseOrderId\": \"PO-4500123467\",\n      \"lineNumber\": 20,\n      \"shippedQuantity\": 120,\n      \"unitOfMeasure\": \"EA\",\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"packages\": [\n    {\n      \"packageId\": \"PALLET-1001\",\n      \"packageType\": \"PALLET\",\n      \"grossWeight\": 240,\n      \"weightUnit\": \"KG\"\n    }\n  ],\n  \"status\": \"SUBMITTED\",\n  \"purchaseOrders\": [\n    \"PO-4500123456\",\n    \"PO-4500123467\"\n  ],\n  \"createdAt\": \"2026-09-24T12:00:00.000Z\",\n  \"lastUpdatedAt\": \"2026-09-24T12:00:00.000Z\"\n}\n```\n\n**Expects:** `201 Created`\n\n**Needs:** `{{scVendor}}` from *Scenarios - façade walkthroughs / 1. Get one purchase order (GET /purchase-orders/{id}) / ERP: the purchase order*. Run that request first, or run the folder in order.\n\n**Saves:** `scDelivery`, `facadeShipment`"
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const needed = {\"scVendor\": \"Scenarios - fa\\u00e7ade walkthroughs / 1. Get one purchase order (GET /purchase-orders/{id}) / ERP: the purchase order\"};",
+                      "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                      "pm.collectionVariables.set('scDelivery', pm.response.json().data.delivery_no);",
+                      "// Build the façade 201 response from the TMS shipment saved in step 2.",
+                      "const s = JSON.parse(pm.collectionVariables.get('scShipmentJson'));",
+                      "const STATUS = { PLN: 'DRAFT', TND: 'SUBMITTED', ITR: 'IN_TRANSIT', DLV: 'DELIVERED', EXC: 'DELAYED', CXL: 'CANCELLED' };",
+                      "const PKG = { PLT: 'PALLET', CTN: 'CARTON', CRT: 'CRATE', OTH: 'OTHER' };",
+                      "const clean = (o) => JSON.parse(JSON.stringify(o, (k, v) => (v === null ? undefined : v)));",
+                      "const addr = (l) => clean({ siteCode: l.locationCode, name: l.name, addressLine1: l.street, city: l.city, region: l.state, postalCode: l.zip, countryCode: l.country });",
+                      "const facade = clean({",
+                      "  shipmentId: s.shipmentId, supplierId: s.supplierCode, shipmentNoticeNumber: s.asnNumber,",
+                      "  carrierCode: s.carrier.carrierCode, trackingNumber: s.carrier.trackingId,",
+                      "  shipFrom: addr(s.route.origin), shipTo: addr(s.route.destination),",
+                      "  plannedShipAt: s.schedule.plannedShipDate, expectedArrivalAt: s.schedule.estimatedArrival,",
+                      "  lines: s.contents.map((c) => ({ purchaseOrderId: 'PO-' + c.poNumber, lineNumber: c.poLine, shippedQuantity: c.quantity.value, unitOfMeasure: c.quantity.uom, lotNumber: c.lotNumber })),",
+                      "  packages: (s.handlingUnits || []).map((h) => ({ packageId: h.huId, packageType: PKG[h.type], grossWeight: h.weight && h.weight.value, weightUnit: h.weight && h.weight.unit.toUpperCase() })),",
+                      "  status: STATUS[s.milestone.code],",
+                      "  purchaseOrders: [...new Set(s.contents.map((c) => 'PO-' + c.poNumber))],",
+                      "  createdAt: s.audit.createdAt, lastUpdatedAt: s.audit.updatedAt,",
+                      "});",
+                      "pm.collectionVariables.set('facadeShipment', JSON.stringify(facade, null, 2));",
+                      "console.log('Façade response 201 Created', facade);",
+                      "pm.test('Façade status is SUBMITTED', () => pm.expect(facade.status).to.eql('SUBMITTED'));",
+                      "pm.test('Façade lists both purchase orders', () => pm.expect(facade.purchaseOrders).to.eql(['PO-4500123456', 'PO-4500123467']));",
+                      "pm.visualizer.set('<h3 style=\"font-family:sans-serif\">Façade response: 201 Created</h3><pre>{{json}}</pre>', { json: JSON.stringify(facade, null, 2) });"
+                    ]
+                  }
+                }
+              ],
+              "response": [
+                {
+                  "name": "201 Created",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Idempotency-Key",
+                        "value": "{{$guid}}",
+                        "description": "Optional: same key + same body replays the first response"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{erpUrl}}/v1/inbound-deliveries",
+                      "host": [
+                        "{{erpUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "inbound-deliveries"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"asn_reference\": \"ASN-440882-{{runId}}\",\n  \"vendor_id\": \"{{scVendor}}\",\n  \"items\": [\n    {\n      \"po_number\": \"4500123456\",\n      \"item_no\": \"00010\",\n      \"quantity\": 50\n    },\n    {\n      \"po_number\": \"4500123467\",\n      \"item_no\": \"00020\",\n      \"quantity\": 120\n    }\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"delivery_no\": \"180000203\",\n    \"vendor_id\": \"0000710245\",\n    \"asn_reference\": \"ASN-440882-123456\",\n    \"status\": \"POSTED\",\n    \"items\": [\n      {\n        \"po_number\": \"4500123456\",\n        \"item_no\": \"00010\",\n        \"quantity\": \"50.000\"\n      },\n      {\n        \"po_number\": \"4500123467\",\n        \"item_no\": \"00020\",\n        \"quantity\": \"120.000\"\n      }\n    ],\n    \"posted_at\": \"20260924120000\",\n    \"reversed_at\": null\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Clean up: reverse the delivery (not part of the façade flow)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{$guid}}",
+                    "description": "Optional: same key + same body replays the first response"
+                  }
+                ],
+                "url": {
+                  "raw": "{{erpUrl}}/v1/inbound-deliveries/{{scDelivery}}/reverse",
+                  "host": [
+                    "{{erpUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "inbound-deliveries",
+                    "{{scDelivery}}",
+                    "reverse"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Postman scenario clean-up\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "key",
+                      "value": "x-api-key",
+                      "type": "string"
+                    },
+                    {
+                      "key": "value",
+                      "value": "{{erpApiKey}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "in",
+                      "value": "header",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Gives the 50 and 120 EA back to the two POs so the scenario can run again.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{scDelivery}}` from *Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / ERP: post the inbound delivery (lines → PO items)*. Run that request first, or run the folder in order."
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const needed = {\"scDelivery\": \"Scenarios - fa\\u00e7ade walkthroughs / 4. Create an ASN (POST /shipments) / ERP: post the inbound delivery (lines \\u2192 PO items)\"};",
+                      "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                    ]
+                  }
+                }
+              ],
+              "response": [
+                {
+                  "name": "200 OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Idempotency-Key",
+                        "value": "{{$guid}}",
+                        "description": "Optional: same key + same body replays the first response"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{erpUrl}}/v1/inbound-deliveries/{{scDelivery}}/reverse",
+                      "host": [
+                        "{{erpUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "inbound-deliveries",
+                        "{{scDelivery}}",
+                        "reverse"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"reason\": \"Postman scenario clean-up\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "body": "{\n  \"data\": {\n    \"delivery_no\": \"180000203\",\n    \"vendor_id\": \"0000710245\",\n    \"asn_reference\": \"ASN-440882-123456\",\n    \"status\": \"REVERSED\",\n    \"items\": [\n      {\n        \"po_number\": \"4500123456\",\n        \"item_no\": \"00010\",\n        \"quantity\": \"50.000\"\n      },\n      {\n        \"po_number\": \"4500123467\",\n        \"item_no\": \"00020\",\n        \"quantity\": \"120.000\"\n      }\n    ],\n    \"posted_at\": \"20260924120000\",\n    \"reversed_at\": \"20260924120000\"\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "Clean up: cancel the shipment (not part of the façade flow)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{$guid}}",
+                    "description": "Optional: same key + same body replays the first response"
+                  }
+                ],
+                "url": {
+                  "raw": "{{tmsUrl}}/v1/shipments/{{scShipment}}/cancel",
+                  "host": [
+                    "{{tmsUrl}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "shipments",
+                    "{{scShipment}}",
+                    "cancel"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Postman scenario clean-up\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "key",
+                      "value": "x-api-key",
+                      "type": "string"
+                    },
+                    {
+                      "key": "value",
+                      "value": "{{tmsApiKey}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "in",
+                      "value": "header",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "**Expects:** `200 OK`\n\n**Needs:** `{{scShipment}}` from *Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / TMS: create the shipment (façade body → TMS dialect)*. Run that request first, or run the folder in order."
+              },
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const needed = {\"scShipment\": \"Scenarios - fa\\u00e7ade walkthroughs / 4. Create an ASN (POST /shipments) / TMS: create the shipment (fa\\u00e7ade body \\u2192 TMS dialect)\"};",
+                      "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status is 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+                    ]
+                  }
+                }
+              ],
+              "response": [
+                {
+                  "name": "200 OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Idempotency-Key",
+                        "value": "{{$guid}}",
+                        "description": "Optional: same key + same body replays the first response"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{tmsUrl}}/v1/shipments/{{scShipment}}/cancel",
+                      "host": [
+                        "{{tmsUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "shipments",
+                        "{{scShipment}}",
+                        "cancel"
+                      ]
+                    },
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"reason\": \"Postman scenario clean-up\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                    }
+                  ],
+                  "body": "{\n  \"shipmentId\": \"SHP-20260924-00205\",\n  \"asnNumber\": \"ASN-440882-123456\",\n  \"supplierCode\": \"SUP-100245\",\n  \"carrier\": {\n    \"scac\": \"UPSN\",\n    \"carrierCode\": \"UPS\",\n    \"name\": \"United Parcel Service\",\n    \"trackingId\": \"1Z999AA10123456784\",\n    \"trackingUrl\": \"https://www.ups.com/track?tracknum=1Z999AA10123456784\"\n  },\n  \"milestone\": {\n    \"code\": \"CXL\",\n    \"description\": \"Cancelled\",\n    \"since\": \"2026-09-24T12:00:00.000Z\"\n  },\n  \"route\": {\n    \"origin\": {\n      \"locationCode\": \"SUP-ATL-01\",\n      \"name\": \"Supplier Distribution Center\",\n      \"street\": null,\n      \"city\": \"Atlanta\",\n      \"state\": \"GA\",\n      \"zip\": \"30301\",\n      \"country\": \"US\"\n    },\n    \"destination\": {\n      \"locationCode\": \"US-AUBURN-HILLS\",\n      \"name\": \"Manufacturing Site\",\n      \"street\": \"100 Manufacturing Way\",\n      \"city\": \"Auburn Hills\",\n      \"state\": \"MI\",\n      \"zip\": \"48326\",\n      \"country\": \"US\"\n    }\n  },\n  \"schedule\": {\n    \"plannedShipDate\": \"2026-09-26T12:00:00.000Z\",\n    \"estimatedArrival\": \"2026-09-30T12:00:00.000Z\"\n  },\n  \"contents\": [\n    {\n      \"poNumber\": \"4500123456\",\n      \"poLine\": 10,\n      \"quantity\": {\n        \"value\": 50,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"poNumber\": \"4500123467\",\n      \"poLine\": 20,\n      \"quantity\": {\n        \"value\": 120,\n        \"uom\": \"EA\"\n      },\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"handlingUnits\": [\n    {\n      \"huId\": \"PALLET-1001\",\n      \"type\": \"PLT\",\n      \"weight\": {\n        \"value\": 240,\n        \"unit\": \"kg\"\n      }\n    }\n  ],\n  \"cancelReason\": \"Postman scenario clean-up\",\n  \"audit\": {\n    \"createdAt\": \"2026-09-24T12:00:00.000Z\",\n    \"updatedAt\": \"2026-09-24T12:00:00.000Z\"\n  }\n}"
+                }
+              ]
+            }
+          ],
+          "description": "The happy path of the façade's `POST /shipments`: one shipment for **two purchase orders**, three backend calls, then a clean-up so it can run again. Read the steps' descriptions for the field mappings; the last step's **Visualize** tab (and the Postman console) shows the façade response built from the backend answers.\n\n| Step | Call | Façade status if it fails |\n|---|---|---|\n| 1 | SRM check, scope write, `supplierCode` = `supplierId` | 403 when `allowed` is false; 422 when `supplier.asnEnabled` is false |\n| 2 | TMS `POST /shipments` | 409, 422 or 503 mapped from the TMS fault (nothing to compensate) |\n| 3 | ERP `POST /inbound-deliveries` | cancel the TMS shipment first (see scenario 5), then map the ERP error |\n\n**The façade request this scenario implements** (the façade spec's own example, with a unique ASN):\n\n```json\n{\n  \"supplierId\": \"SUP-100245\",\n  \"shipmentNoticeNumber\": \"ASN-440882-{{runId}}\",\n  \"carrierCode\": \"UPS\",\n  \"trackingNumber\": \"1Z999AA10123456784\",\n  \"shipFrom\": {\n    \"siteCode\": \"SUP-ATL-01\",\n    \"name\": \"Supplier Distribution Center\",\n    \"city\": \"Atlanta\",\n    \"region\": \"GA\",\n    \"postalCode\": \"30301\",\n    \"countryCode\": \"US\"\n  },\n  \"shipTo\": {\n    \"siteCode\": \"US-AUBURN-HILLS\",\n    \"name\": \"Manufacturing Site\",\n    \"addressLine1\": \"100 Manufacturing Way\",\n    \"city\": \"Auburn Hills\",\n    \"region\": \"MI\",\n    \"postalCode\": \"48326\",\n    \"countryCode\": \"US\"\n  },\n  \"plannedShipAt\": \"{{shipDate}}\",\n  \"expectedArrivalAt\": \"{{etaDate}}\",\n  \"lines\": [\n    {\n      \"purchaseOrderId\": \"PO-4500123456\",\n      \"lineNumber\": 10,\n      \"shippedQuantity\": 50,\n      \"unitOfMeasure\": \"EA\",\n      \"lotNumber\": \"LOT-88291\"\n    },\n    {\n      \"purchaseOrderId\": \"PO-4500123467\",\n      \"lineNumber\": 20,\n      \"shippedQuantity\": 120,\n      \"unitOfMeasure\": \"EA\",\n      \"lotNumber\": \"LOT-88292\"\n    }\n  ],\n  \"packages\": [\n    {\n      \"packageId\": \"PALLET-1001\",\n      \"packageType\": \"PALLET\",\n      \"grossWeight\": 240,\n      \"weightUnit\": \"KG\"\n    }\n  ]\n}\n```\n"
+        },
+        {
+          "name": "5. Create an ASN when the ERP step fails (POST /shipments, compensation)",
           "item": [
             {
               "name": "SRM: may apex-supplier-portal write for SUP-100245?",
@@ -12883,7 +13532,7 @@
                     }
                   ]
                 },
-                "description": "The façade then returns 503 DOWNSTREAM_SERVICE_UNAVAILABLE.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{sagaShipment}}` from *Scenarios - façade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / TMS: create the shipment*. Run that request first, or run the folder in order."
+                "description": "The façade then returns 503 DOWNSTREAM_SERVICE_UNAVAILABLE.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{sagaShipment}}` from *Scenarios - façade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / TMS: create the shipment*. Run that request first, or run the folder in order."
               },
               "event": [
                 {
@@ -12891,7 +13540,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const needed = {\"sagaShipment\": \"Scenarios - fa\\u00e7ade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / TMS: create the shipment\"};",
+                      "const needed = {\"sagaShipment\": \"Scenarios - fa\\u00e7ade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / TMS: create the shipment\"};",
                       "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
                     ]
                   }
@@ -13248,7 +13897,7 @@
                     }
                   ]
                 },
-                "description": "Gives the quantity back so the scenario can run again.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{sagaDelivery}}` from *Scenarios - façade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / Retry: ERP inbound delivery succeeds*. Run that request first, or run the folder in order."
+                "description": "Gives the quantity back so the scenario can run again.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{sagaDelivery}}` from *Scenarios - façade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / Retry: ERP inbound delivery succeeds*. Run that request first, or run the folder in order."
               },
               "event": [
                 {
@@ -13256,7 +13905,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const needed = {\"sagaDelivery\": \"Scenarios - fa\\u00e7ade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / Retry: ERP inbound delivery succeeds\"};",
+                      "const needed = {\"sagaDelivery\": \"Scenarios - fa\\u00e7ade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / Retry: ERP inbound delivery succeeds\"};",
                       "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
                     ]
                   }
@@ -13378,7 +14027,7 @@
                     }
                   ]
                 },
-                "description": "**Expects:** `200 OK`\n\n**Needs:** `{{sagaShipment}}` from *Scenarios - façade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / TMS: create the shipment*. Run that request first, or run the folder in order."
+                "description": "**Expects:** `200 OK`\n\n**Needs:** `{{sagaShipment}}` from *Scenarios - façade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / TMS: create the shipment*. Run that request first, or run the folder in order."
               },
               "event": [
                 {
@@ -13386,7 +14035,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const needed = {\"sagaShipment\": \"Scenarios - fa\\u00e7ade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / TMS: create the shipment\"};",
+                      "const needed = {\"sagaShipment\": \"Scenarios - fa\\u00e7ade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / TMS: create the shipment\"};",
                       "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
                     ]
                   }
@@ -13456,7 +14105,7 @@
           "description": "SRM check, TMS shipment, ERP delivery; if the ERP step fails, cancel the TMS shipment. Then a successful retry and a clean-up."
         },
         {
-          "name": "5. Track a shipment (GET /shipments/{id})",
+          "name": "6. Track a shipment (GET /shipments/{id})",
           "item": [
             {
               "name": "TMS: the shipment",
@@ -13596,7 +14245,7 @@
                     }
                   ]
                 },
-                "description": "Step 2 of 2.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{scSupplier}}` from *Scenarios - façade walkthroughs / 5. Track a shipment (GET /shipments/{id}) / TMS: the shipment*. Run that request first, or run the folder in order."
+                "description": "Step 2 of 2.\n\n**Expects:** `200 OK`\n\n**Needs:** `{{scSupplier}}` from *Scenarios - façade walkthroughs / 6. Track a shipment (GET /shipments/{id}) / TMS: the shipment*. Run that request first, or run the folder in order."
               },
               "event": [
                 {
@@ -13604,7 +14253,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "const needed = {\"scSupplier\": \"Scenarios - fa\\u00e7ade walkthroughs / 5. Track a shipment (GET /shipments/{id}) / TMS: the shipment\"};",
+                      "const needed = {\"scSupplier\": \"Scenarios - fa\\u00e7ade walkthroughs / 6. Track a shipment (GET /shipments/{id}) / TMS: the shipment\"};",
                       "Object.entries(needed).forEach(([v, from]) => { if (!pm.variables.get(v)) throw new Error(`{{${v}}} is empty. Send \"${from}\" first, or run the folder in order.`); });"
                     ]
                   }
@@ -13666,7 +14315,7 @@
           "description": "Two calls: TMS, then SRM."
         },
         {
-          "name": "6. Governance: blocked and on-hold suppliers",
+          "name": "7. Governance: blocked and on-hold suppliers",
           "item": [
             {
               "name": "Write for an on-hold supplier",
@@ -14092,6 +14741,12 @@
       "description": "Set by ERP - Purchasing / Inbound deliveries / Post inbound delivery"
     },
     {
+      "key": "facadeShipment",
+      "value": "",
+      "type": "string",
+      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / ERP: post the inbound delivery (lines → PO items)"
+    },
+    {
       "key": "newScac",
       "value": "",
       "type": "string",
@@ -14125,13 +14780,19 @@
       "key": "sagaDelivery",
       "value": "",
       "type": "string",
-      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / Retry: ERP inbound delivery succeeds"
+      "description": "Set by Scenarios - façade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / Retry: ERP inbound delivery succeeds"
     },
     {
       "key": "sagaShipment",
       "value": "",
       "type": "string",
-      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN with compensation (POST /shipments) / TMS: create the shipment"
+      "description": "Set by Scenarios - façade walkthroughs / 5. Create an ASN when the ERP step fails (POST /shipments, compensation) / TMS: create the shipment"
+    },
+    {
+      "key": "scDelivery",
+      "value": "",
+      "type": "string",
+      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / ERP: post the inbound delivery (lines → PO items)"
     },
     {
       "key": "scEtag",
@@ -14146,10 +14807,22 @@
       "description": "Set by Scenarios - façade walkthroughs / 3. Acknowledge a purchase order (POST /purchase-orders/{id}/acknowledgements) / Setup: create a fresh PO (not part of the façade flow)"
     },
     {
+      "key": "scShipment",
+      "value": "",
+      "type": "string",
+      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / TMS: create the shipment (façade body → TMS dialect)"
+    },
+    {
+      "key": "scShipmentJson",
+      "value": "",
+      "type": "string",
+      "description": "Set by Scenarios - façade walkthroughs / 4. Create an ASN (POST /shipments) / TMS: create the shipment (façade body → TMS dialect)"
+    },
+    {
       "key": "scSupplier",
       "value": "",
       "type": "string",
-      "description": "Set by Scenarios - façade walkthroughs / 5. Track a shipment (GET /shipments/{id}) / TMS: the shipment"
+      "description": "Set by Scenarios - façade walkthroughs / 6. Track a shipment (GET /shipments/{id}) / TMS: the shipment"
     },
     {
       "key": "scVendor",
