@@ -36,6 +36,9 @@ step-by-step orchestration recipes (including saga compensation) for each façad
 - [Quick start — GitHub Codespaces](#quick-start--github-codespaces)
 - [Quick start — local machine + ngrok](#quick-start--local-machine--ngrok)
 - [Other ways to run](#other-ways-to-run)
+- [Data dashboard](#data-dashboard)
+- [Postman collection](#postman-collection)
+- [Seed data](#seed-data)
 - [Configuration](#configuration)
 - [Authentication](#authentication)
 - [API reference](#api-reference)
@@ -62,7 +65,14 @@ step-by-step orchestration recipes (including saga compensation) for each façad
 - **Idempotency-Key** support on every POST (safe retries; replays flagged with `Idempotent-Replayed: true`).
 - **X-Correlation-Id** accepted/generated and echoed in headers and errors (end-to-end tracing).
 - **Chaos & latency controls** to show retries, timeouts, parallel fan-out and circuit breaking.
-- Consistent seed data across the three systems (the same PO/supplier/shipment IDs line up everywhere).
+- **Rich, consistent seed data**: 23 suppliers, 74 purchase orders, 40 shipments and every status, milestone
+  and governance case, with the same PO / supplier / ASN identifiers lining up across all three systems.
+- **Full CRUD maintenance endpoints** on every entity (plants, purchasing orgs, POs and items, suppliers,
+  sites, contacts, entitlements, carriers, shipments) with realistic referential-integrity conflicts (409).
+- **Data dashboard** at `/dashboard/`: list and detail views for every entity, create/edit/delete forms,
+  cross-system views of one record, and a live **wire log** of every backend call.
+- **Postman collection** covering all 74 operations with example bodies, saved example responses, tests
+  and chained IDs, plus orchestration scenarios (aggregation, ASN saga with compensation, governance).
 
 ---
 
@@ -82,6 +92,7 @@ step-by-step orchestration recipes (including saga compensation) for each façad
    - `https://<codespace-name>-3000.app.github.dev/` — landing page with links
    - `…/erp/api-docs`, `…/srm/api-docs`, `…/tms/api-docs` — Swagger UI
    - `…/health` — aggregate health (no auth)
+   - `…/dashboard/` — the data dashboard (browse and edit all three backends)
 
    ```bash
    curl -H "x-api-key: erp-demo-key" \
@@ -122,6 +133,9 @@ Use the `https://<id>.ngrok-free.app` forwarding URL as the base URL in Fusion:
 | ERP | `https://<id>.ngrok-free.app/erp/v1` | `https://<id>.ngrok-free.app/erp/api-docs` |
 | SRM | `https://<id>.ngrok-free.app/srm/v1` | `https://<id>.ngrok-free.app/srm/api-docs` |
 | TMS | `https://<id>.ngrok-free.app/tms/v1` | `https://<id>.ngrok-free.app/tms/api-docs` |
+
+The dashboard is at `https://<id>.ngrok-free.app/dashboard/` and the Postman **Tunnel** environment only needs
+`baseUrl` set to the forwarding URL.
 
 Notes:
 - Free ngrok domains show a browser interstitial. API clients (Fusion, curl) are unaffected, but you can
@@ -167,6 +181,114 @@ Each backend can also live in its own database to make the "separate systems" st
 
 ---
 
+## Data dashboard
+
+Open **`/dashboard/`** on the same host (for example `http://localhost:3000/dashboard/` or
+`https://<codespace-name>-3000.app.github.dev/dashboard/`). It is plain HTML/JS served by the backend,
+with no build step, and it talks to the three backends through their public REST APIs exactly like any other
+consumer, so everything you do there shows up in the ERP/SRM/TMS data the iPaaS sees.
+
+| Area | Pages | What you can do |
+|---|---|---|
+| **Overview** | Order-to-dock pipeline | PO status counts (ERP), shipment milestones (TMS), supplier statuses (SRM); exceptions, confirmations in review, overdue POs, and open orders with suppliers on hold or blocked (a cross-system join). Every count opens the filtered list. |
+| **ERP** | Purchase orders, Confirmations, Inbound deliveries, Plants, Purchasing orgs | Create POs; edit header; add, edit and delete items; record supplier confirmations (AB/AC/RJ, optional `If-Match`); post and reverse inbound deliveries; close, cancel, delete; CRUD for plants and purchasing orgs |
+| **SRM** | Suppliers, Sites, Contacts, Entitlements | CRUD for all four; put a supplier on hold, block or reactivate it; run the entitlement **check** the façade uses |
+| **TMS** | Shipments, Carriers | Create shipments (origin picked from SRM sites, destination from ERP plants), tender, post tracking events, edit, cancel, delete drafts; CRUD for carriers |
+
+Every detail panel has four tabs worth showing in a demo:
+
+- **Details**: the record, with links to related records.
+- **Across systems**: the same business object as seen by the other two backends (for a PO: SRM supplier via
+  the vendor cross-reference and TMS shipments carrying the PO), with the exact call used to fetch it.
+- **Wire JSON**: the untouched backend payload, so the different dialects are visible side by side.
+- The **Wire log** bar at the bottom lists every call the dashboard made (backend, method, path, status,
+  latency) and expands to show request headers, request body and response body.
+
+**Connection settings** (bottom of the navigation rail) lets you point each backend at another base URL or
+API key; values are stored in your browser only. The page pre-fills the demo API keys only while the server
+still uses the published defaults (`DASHBOARD_PREFILL_DEMO_KEYS=true`). With custom keys, enter them once in
+Connection settings. Set `DASHBOARD_ENABLED=false` to turn the dashboard off.
+
+In `SERVICE_MODE=separate` the dashboard is served by each backend's port and calls the other two on their
+own ports (`http://<host>:3002/srm`, …). Behind three separate tunnels set `ERP_PUBLIC_URL`, `SRM_PUBLIC_URL`
+and `TMS_PUBLIC_URL` to the tunnel URLs (without the `/erp` suffix).
+
+> Errors are shown exactly as each backend reports them (the dashboard normalises the three error dialects
+> for display), so a 409 like `PLANT_IN_USE` or `SUPPLIER_HAS_ENTITLEMENTS` is a feature, not a bug.
+
+---
+
+## Postman collection
+
+`postman/` contains:
+
+| File | Purpose |
+|---|---|
+| `mock-po-backends.postman_collection.json` | 150 requests covering **every operation** of all three backends (74), plus error and security cases and orchestration scenarios |
+| `local.postman_environment.json` | `baseUrl = http://localhost:3000` (combined mode) |
+| `local-separate.postman_environment.json` | `erpUrl`, `srmUrl`, `tmsUrl` on ports 3001/3002/3003 |
+| `tunnel.postman_environment.json` | Set `baseUrl` to your ngrok or Codespaces URL (`https://<codespace-name>-3000.app.github.dev`) |
+
+**Import:** Postman → *Import* → drop the four files → select an environment.
+
+**Structure:**
+
+- **ERP / SRM / TMS folders**: one folder per backend with the right API key configured as folder auth
+  (`{{erpApiKey}}`, `{{srmApiKey}}`, `{{tmsApiKey}}`). Requests run top to bottom as a lifecycle: create
+  → read → change → business actions → negative cases → delete. IDs returned by create calls
+  (`poNumber`, `confirmationNo`, `deliveryNo`, `supplierCode`, `siteCode`, `contactId`, `consumerId`,
+  `carrierCode`, `shipmentId`, …) are captured into collection variables by test scripts, and every folder
+  cleans up what it created. A fresh `runId` is generated at the start of each backend folder so repeated runs
+  never collide.
+- **Tests** on every request (expected status plus business assertions such as "status is 04" or
+  "reason is SUPPLIER_ON_HOLD"). 59 requests carry a **saved example response**.
+- **Scenarios** folder: the multi-backend sequences the iPaaS implements:
+  1. aggregate `GET /purchase-orders/PO-4500123458` (ERP PO → SRM vendor xref → SRM entitlement check → ERP plant → ERP purchasing org → TMS shipments);
+  2. the **ASN saga**: ERP inbound delivery, TMS failure forced with `x-mock-status: 503`, ERP reversal (compensation), then a successful retry;
+  3. governance decisions (supplier on hold, revoked consumer, multi-supplier network).
+
+**Run from the command line** (Newman):
+
+```bash
+npx newman run postman/mock-po-backends.postman_collection.json \
+  -e postman/local.postman_environment.json
+# a single backend:
+npx newman run postman/mock-po-backends.postman_collection.json \
+  -e postman/local.postman_environment.json --folder "TMS - Logistics"
+```
+
+`npm run postman` is a shortcut for the first command. Some requests deliberately use `x-mock-status` and
+`x-mock-delay-ms`, so keep `CHAOS_ENABLED=true` (the default) for a green run. The saga scenario adds 10 EA to
+PO 4500123457 on each run; `npm run seed:reset` restores the original data.
+
+---
+
+## Seed data
+
+The seed files in `src/data/` are loaded automatically into empty databases (and on `npm run seed:reset`).
+Identifiers are consistent across systems: ERP vendor `0000710245` is SRM `SUP-100245`; every ERP inbound
+delivery has a TMS shipment with the same ASN; ERP `shipped_qty` equals the posted deliveries; cancelled
+shipments have reversed deliveries.
+
+| System | Entity | Count | Highlights |
+|---|---|---|---|
+| ERP | Purchasing orgs | 9 | JBUS, JBMX, JBDE, JBSG, JBCN, JBMY, JBVN, JBPL, JBHU |
+| ERP | Plants | 13 | US, MX, DE, HU, PL, SG, MY, CN, VN sites |
+| ERP | Purchase orders | 74 | all statuses: 16 open, 6 partially confirmed, 16 confirmed, 23 in delivery, 8 closed, 5 cancelled; USD, EUR, PLN, CNY |
+| ERP | Confirmations | 54 | AB, AC (incl. IN_REVIEW) and RJ |
+| ERP | Inbound deliveries | 34 | incl. 3 REVERSED (saga compensation) |
+| SRM | Suppliers | 23 | 19 active, 2 on hold, 2 blocked; 15 countries; one newly onboarded supplier with no orders |
+| SRM | Sites / contacts | 27 / 58 | ship-from, remit-to and manufacturing sites |
+| SRM | Entitlements | 19 | single-supplier portals, multi-supplier networks, internal apps, read-only and revoked consumers |
+| TMS | Carriers | 12 | parcel, LTL, FTL, air and ocean (UPS/UPSN, FedEx/FDEG, DHL, Maersk, CMA CGM, Kuehne+Nagel, …) |
+| TMS | Shipments / events | 40 / 137 | 6 planned, 5 tendered, 9 in transit, 4 exceptions, 13 delivered, 3 cancelled |
+
+The original demo records (POs 4500123456–4500123468, shipments 00088/00107/00121/00188) are unchanged; see
+the [seed cheat-sheet in docs/MAPPING.md](docs/MAPPING.md#5-seed-data-cheat-sheet) for which record to use
+for which demo.
+
+---
+
 ## Configuration
 
 All variables are documented in [`.env.example`](.env.example). Per-service variables override globals.
@@ -190,6 +312,9 @@ All variables are documented in [`.env.example`](.env.example). Per-service vari
 | `ERP_ERROR_RATE` … | `0` | Random 503 probability (0–1) per backend |
 | `RATE_LIMIT_WINDOW_MS` / `RATE_LIMIT_MAX` | `60000` / `300` | Rate limit per backend (per IP) |
 | `LOG_FORMAT` | `dev` | morgan format |
+| `DASHBOARD_ENABLED` | `true` | Serve the data dashboard at `/dashboard/` |
+| `DASHBOARD_PREFILL_DEMO_KEYS` | `true` | Let the dashboard pre-fill API keys, only while they are the published demo defaults |
+| `ERP_PUBLIC_URL` / `SRM_PUBLIC_URL` / `TMS_PUBLIC_URL` | *(empty)* | Browser-facing base URL of each backend for the dashboard (separate mode behind tunnels) |
 
 ---
 
@@ -220,15 +345,22 @@ Full request/response schemas and examples are in Swagger UI for each backend. S
 | GET | `/reference/status-codes` | `01`–`09` PO status codes |
 | GET | `/reference/confirmation-categories` | `AB` / `AC` / `RJ` |
 | GET | `/reference/purchasing-orgs` | `JBUS` → `Jabil-US`, … |
+| POST | `/reference/purchasing-orgs` | Create a purchasing org |
+| GET / PATCH / DELETE | `/reference/purchasing-orgs/{code}` | Read, change, delete (409 `PURCH_ORG_IN_USE`) |
 | GET | `/plants` `?site_code=` | Plants (`1101` ↔ `US-AUBURN-HILLS`) with addresses |
-| GET | `/plants/{plantCode}` | One plant |
+| POST | `/plants` | Create a plant |
+| GET / PATCH / DELETE | `/plants/{plantCode}` | Read, change, delete (409 `PLANT_IN_USE`) |
 | GET | `/purchase-orders` | Filters: `vendor_id`, `status`, `changed_since`, `plant`, `purch_org`, `po_number` (CSV); `page`, `limit`; `include=items` (headers only by default) |
 | POST | `/purchase-orders` | Create a PO (buyer side, for demos) |
 | GET | `/purchase-orders/{poNumber}` | Header + items, `ETag: W/"<po>-r<revision>"` |
-| PATCH | `/purchase-orders/{poNumber}` | Buyer change → **revision + 1** (or `status_code` `05`/`09`) |
+| PATCH | `/purchase-orders/{poNumber}` | Buyer change (`delivery_date`, `buyer_name`, `incoterms`, `payment_terms`, item qty/price) → **revision + 1** (or `status_code` `05`/`09`) |
+| DELETE | `/purchase-orders/{poNumber}` | Only without confirmations/deliveries (409 `PO_HAS_FOLLOW_ON_DOCUMENTS`) |
 | GET | `/purchase-orders/{poNumber}/items` | Items with `confirmed_qty`, `shipped_qty`, `open_qty` |
+| POST | `/purchase-orders/{poNumber}/items` | Add an item (next `item_no`), revision + 1 |
+| PATCH / DELETE | `/purchase-orders/{poNumber}/items/{itemNo}` | Change (422 `QUANTITY_BELOW_SHIPPED`) or delete (409 if confirmed/shipped, 422 `LAST_ITEM`) |
 | GET | `/purchase-orders/{poNumber}/confirmations` | Confirmation history |
 | POST | `/purchase-orders/{poNumber}/confirmations` | Vendor confirmation (`AB`/`AC`/`RJ`), optional `If-Match` → 409 per revision, 422 rules, 412 stale |
+| GET | `/confirmations` | All confirmations; filters `po_number`, `status`, `conf_category`, `vendor_id`; page/limit |
 | GET | `/confirmations/{confirmationNo}` | One confirmation |
 | GET | `/inbound-deliveries` | Filters: `asn_reference`, `vendor_id`, `po_number`, `status` |
 | POST | `/inbound-deliveries` | Post an ASN against PO items (reserves qty; **422 `SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY`**) |
@@ -243,14 +375,20 @@ Errors: `{ "error": { "code", "message", "details": [{field, message}], "timesta
 |---|---|---|
 | GET | `/suppliers` | Filters: `status`, `country`, `tier`, `supplierCode`, `erpVendorNumber`, `q`; `expand=contacts,sites`; `offset`, `limit` |
 | GET | `/suppliers/{supplierCode}` | Supplier with contacts & sites |
-| PATCH | `/suppliers/{supplierCode}` | Demo control: change `status` (`ACTIVE`/`ON_HOLD`/`BLOCKED`), capabilities |
-| GET | `/suppliers/{supplierCode}/sites` | Ship-from / remit-to / manufacturing sites |
-| GET | `/suppliers/{supplierCode}/contacts` | Contacts |
-| GET | `/sites/{siteCode}` | One site (e.g. `SUP-ATL-01`) |
+| POST | `/suppliers` | Create a supplier (`supplierCode` optional, auto-assigned) |
+| PATCH | `/suppliers/{supplierCode}` | Master data and demo control: `status` (`ACTIVE`/`ON_HOLD`/`BLOCKED`), classification, capabilities, names, country, DUNS |
+| DELETE | `/suppliers/{supplierCode}` | Delete with sites and contacts (409 `SUPPLIER_HAS_ENTITLEMENTS`) |
+| GET / POST | `/suppliers/{supplierCode}/sites` | List or add sites |
+| GET / POST | `/suppliers/{supplierCode}/contacts` | List or add contacts (`CNT-####` assigned) |
+| GET | `/sites` | All sites; filters `supplierCode`, `type`, `country`, `active`; offset paging |
+| GET / PATCH / DELETE | `/sites/{siteCode}` | One site (e.g. `SUP-ATL-01`) |
+| GET | `/contacts` | All contacts; filters `supplierCode`, `role`, `q`; offset paging |
+| GET / PATCH / DELETE | `/contacts/{contactId}` | One contact |
 | GET | `/vendor-xref` `?supplierCode=&erpVendorNumber=` | **Batch** SUP ↔ ERP vendor cross-reference (`items` + `unresolved`) |
 | GET | `/vendor-xref/{erpVendorNumber}` | Single lookup |
 | GET | `/entitlements` | Consumer applications and their supplier/scope grants |
-| GET | `/entitlements/{consumerId}` | One consumer |
+| POST | `/entitlements` | Register a consumer (`suppliers[]` or `allSuppliers`, `scopes[]`) |
+| GET / PATCH / DELETE | `/entitlements/{consumerId}` | One consumer |
 | GET/POST | `/entitlements/{consumerId}/check` | `{scope, supplierCode}` → always 200 `{allowed, reason}` |
 
 Errors: `{ "errors": [ { "code", "message", "field" } ], "traceId" }`
@@ -260,11 +398,15 @@ Errors: `{ "errors": [ { "code", "message", "field" } ], "traceId" }`
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/carriers` `?code=UPS` `&scac=` | Carrier directory, façade code ↔ SCAC |
+| POST | `/carriers` | Create a carrier |
+| GET / PATCH / DELETE | `/carriers/{carrierCode}` | By code or SCAC; GET adds `shipmentsByMilestone`; DELETE 409 `CARRIER_IN_USE` |
 | GET | `/milestones` | `PLN TND ITR DLV EXC CXL` |
 | GET | `/event-codes` | `PU DEP ARR OFD RES DLV EXC` → resulting milestone |
-| GET | `/shipments` | Filters: `supplierCode`, `status` (milestones), `poNumber`, `asnNumber`, `updatedSince`; `limit`, `cursor` |
+| GET | `/shipments` | Filters: `supplierCode`, `status` (milestones), `poNumber`, `asnNumber`, `carrier` (SCAC or code), `updatedSince`; `limit`, `cursor` |
 | POST | `/shipments` | Create ASN (`TND`; `"tender": false` → `PLN`), 409 duplicate ASN, 422 unknown carrier / bad schedule |
 | GET | `/shipments/{shipmentId}` | `?include=events` |
+| PATCH | `/shipments/{shipmentId}` | Tracking ID and ETA while open; carrier, route, ship date, handling units only in PLN/TND; contents and ASN only in PLN (409 `FIELD_LOCKED`) |
+| DELETE | `/shipments/{shipmentId}` | Planned (PLN) drafts only (409 `SHIPMENT_NOT_DRAFT`) |
 | GET | `/shipments/{shipmentId}/events` | Tracking history |
 | POST | `/shipments/{shipmentId}/events` | Demo control: carrier event, optional `newEstimatedArrival` |
 | POST | `/shipments/{shipmentId}/tender` | `PLN` → `TND` |
@@ -362,6 +504,8 @@ If your URL changes (new ngrok session / new Codespace), only the connection bas
 mock-purchase-order-backend/
 ├── .devcontainer/devcontainer.json     Codespaces: Node 20 + docker-in-docker, auto-starts Postgres
 ├── openapi/                            erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
+├── public/dashboard/                   data dashboard (index.html, css/, js/ ES modules, js/views/{erp,srm,tms,overview}.js)
+├── postman/                            collection + local / local-separate / tunnel environments
 ├── docs/MAPPING.md                     façade ↔ backend mappings & orchestration recipes
 ├── scripts/
 │   ├── start-postgres.sh               (re)creates the local Postgres container
@@ -397,6 +541,10 @@ mock-purchase-order-backend/
 | `409 CONFIRMATION_EXISTS` on a re-run | Acknowledgements are one-per-revision. `PATCH` the PO to bump the revision or `npm run seed:reset`. |
 | Swagger "Try it out" hits the wrong host | Set `PUBLIC_BASE_URL` in `.env`. |
 | Port already in use | Change `PORT` (or `ERP_PORT` etc.) in `.env`. |
+| Dashboard shows "Could not reach the ERP backend" | Check *Connection settings*: in separate mode behind tunnels set `ERP_PUBLIC_URL` etc., or type the URLs in the dialog. |
+| Dashboard calls return 401 | You changed the API keys: enter them in *Connection settings* (keys are pre-filled only for the demo defaults). |
+| Postman run fails on the chaos requests | Keep `CHAOS_ENABLED=true`, or skip the *Errors & security* folders. |
+| Postman `409` on create after an interrupted run | Run the backend folder from its first request (it generates a new `runId`) or `npm run seed:reset`. |
 | Postgres container won't start after a crash | `docker rm -f po-backends-postgres && npm run db:start`; as a last resort delete `.pgdata/` (data is re-seeded). |
 
 ---

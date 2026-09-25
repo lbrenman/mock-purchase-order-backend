@@ -16,7 +16,8 @@
     "seed": "node src/data/seed.js",
     "seed:reset": "node src/data/seed.js --reset",
     "db:start": "bash scripts/start-postgres.sh",
-    "smoke": "node scripts/smoke-test.js"
+    "smoke": "node scripts/smoke-test.js",
+    "postman": "npx --yes newman run postman/mock-po-backends.postman_collection.json -e postman/local.postman_environment.json"
   },
   "dependencies": {
     "cors": "^2.8.5",

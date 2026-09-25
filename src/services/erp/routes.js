@@ -336,14 +336,16 @@ module.exports = function buildErpRoutes({ pool, idem }) {
       const deliveryDate = v.date(b, 'delivery_date');
       const statusCode = v.string(b, 'status_code', { oneOf: ['05', '09'] });
       const buyer = v.string(b, 'buyer_name', { max: 80 });
+      const incoterms = v.string(b, 'incoterms', { max: 10 });
+      const paymentTerms = v.string(b, 'payment_terms', { max: 10 });
       const items = v.array(b, 'items') || [];
       items.forEach((it, i) => {
         v.string(it, 'item_no', { required: true, pattern: ITEM_RE, path: `items[${i}].item_no` });
         v.number(it, 'quantity', { exclusiveMin: 0, path: `items[${i}].quantity` });
         v.number(it, 'net_price', { min: 0, path: `items[${i}].net_price` });
       });
-      if (!deliveryDate && !statusCode && !buyer && !items.length) {
-        v.add('body', 'provide at least one of delivery_date, status_code, buyer_name, items');
+      if (!deliveryDate && !statusCode && !buyer && !incoterms && !paymentTerms && !items.length) {
+        v.add('body', 'provide at least one of delivery_date, status_code, buyer_name, incoterms, payment_terms, items');
       }
       v.throwIfErrors();
 
@@ -368,9 +370,10 @@ module.exports = function buildErpRoutes({ pool, idem }) {
         await c.query(
           `UPDATE erp.purchase_orders
               SET delivery_date = COALESCE($2, delivery_date), buyer_name = COALESCE($3, buyer_name),
-                  status_code = COALESCE($4, status_code), revision = revision + 1, changed_at = NOW()
+                  status_code = COALESCE($4, status_code), incoterms = COALESCE($5, incoterms),
+                  payment_terms = COALESCE($6, payment_terms), revision = revision + 1, changed_at = NOW()
             WHERE po_number = $1`,
-          [po.po_number, deliveryDate || null, buyer || null, statusCode || null]
+          [po.po_number, deliveryDate || null, buyer || null, statusCode || null, incoterms || null, paymentTerms || null]
         );
         if (!statusCode) await recomputeStatus(c, po.po_number);
       });
@@ -672,6 +675,298 @@ module.exports = function buildErpRoutes({ pool, idem }) {
         return upd.rows[0];
       });
       res.json({ data: mapDelivery(delivery) });
+    })
+  );
+
+
+  // ═══ Maintenance (CRUD) endpoints used by the dashboard and Postman ═══════
+
+  // ─── Purchasing organisations ────────────────────────────────────────────
+  const ORG_RE = /^[A-Z0-9]{2,10}$/;
+  async function loadOrg(code) {
+    const { rows } = await pool.query('SELECT code, name, company_code FROM erp.purchasing_orgs WHERE code = $1', [code]);
+    if (!rows[0]) throw new ApiError(404, 'PURCH_ORG_NOT_FOUND', `Purchasing organisation ${code} does not exist`);
+    return rows[0];
+  }
+
+  r.get(
+    '/reference/purchasing-orgs/:code',
+    asyncHandler(async (req, res) => {
+      res.json({ data: await loadOrg(req.params.code) });
+    })
+  );
+
+  r.post(
+    '/reference/purchasing-orgs',
+    idem,
+    asyncHandler(async (req, res) => {
+      const v = new Validator();
+      const b = req.body || {};
+      const code = v.string(b, 'code', { required: true, pattern: ORG_RE });
+      const name = v.string(b, 'name', { required: true, max: 80 });
+      const companyCode = v.string(b, 'company_code', { required: true, max: 10 });
+      v.throwIfErrors();
+      await pool.query('INSERT INTO erp.purchasing_orgs (code, name, company_code) VALUES ($1,$2,$3)', [code, name, companyCode]);
+      res.status(201).set('Location', `/erp/v1/reference/purchasing-orgs/${code}`).json({ data: await loadOrg(code) });
+    })
+  );
+
+  r.patch(
+    '/reference/purchasing-orgs/:code',
+    asyncHandler(async (req, res) => {
+      const v = new Validator();
+      const b = req.body || {};
+      const name = v.string(b, 'name', { max: 80 });
+      const companyCode = v.string(b, 'company_code', { max: 10 });
+      if (!name && !companyCode) v.add('body', 'provide name and/or company_code');
+      v.throwIfErrors();
+      await loadOrg(req.params.code);
+      await pool.query(
+        'UPDATE erp.purchasing_orgs SET name = COALESCE($2, name), company_code = COALESCE($3, company_code), updated_at = NOW() WHERE code = $1',
+        [req.params.code, name || null, companyCode || null]
+      );
+      res.json({ data: await loadOrg(req.params.code) });
+    })
+  );
+
+  r.delete(
+    '/reference/purchasing-orgs/:code',
+    asyncHandler(async (req, res) => {
+      await loadOrg(req.params.code);
+      const used = await pool.query('SELECT COUNT(*)::int AS n FROM erp.purchase_orders WHERE purch_org = $1', [req.params.code]);
+      if (used.rows[0].n) {
+        throw new ApiError(409, 'PURCH_ORG_IN_USE', `Purchasing organisation ${req.params.code} is used by ${used.rows[0].n} purchase order(s)`);
+      }
+      await pool.query('DELETE FROM erp.purchasing_orgs WHERE code = $1', [req.params.code]);
+      res.status(204).end();
+    })
+  );
+
+  // ─── Plants ──────────────────────────────────────────────────────────────
+  const PLANT_COLS = 'plant_code, site_code, name, street, city, region, postal_code, country';
+  async function loadPlant(code) {
+    const { rows } = await pool.query(`SELECT ${PLANT_COLS} FROM erp.plants WHERE plant_code = $1`, [code]);
+    if (!rows[0]) throw new ApiError(404, 'PLANT_NOT_FOUND', `Plant ${code} does not exist`);
+    return rows[0];
+  }
+  function plantFields(v, b, required) {
+    return {
+      site_code: v.string(b, 'site_code', { required, max: 40, pattern: /^[A-Z0-9-]+$/ }),
+      name: v.string(b, 'name', { required, max: 120 }),
+      street: v.string(b, 'street', { max: 120 }),
+      city: v.string(b, 'city', { max: 80 }),
+      region: v.string(b, 'region', { max: 80 }),
+      postal_code: v.string(b, 'postal_code', { max: 20 }),
+      country: v.string(b, 'country', { required, pattern: /^[A-Z]{2}$/ }),
+    };
+  }
+
+  r.post(
+    '/plants',
+    idem,
+    asyncHandler(async (req, res) => {
+      const v = new Validator();
+      const b = req.body || {};
+      const code = v.string(b, 'plant_code', { required: true, pattern: /^[0-9]{4}$/ });
+      const f = plantFields(v, b, true);
+      v.throwIfErrors();
+      await pool.query(
+        `INSERT INTO erp.plants (${PLANT_COLS}) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [code, f.site_code, f.name, f.street || null, f.city || null, f.region || null, f.postal_code || null, f.country]
+      );
+      res.status(201).set('Location', `/erp/v1/plants/${code}`).json({ data: await loadPlant(code) });
+    })
+  );
+
+  r.patch(
+    '/plants/:plantCode',
+    asyncHandler(async (req, res) => {
+      const v = new Validator();
+      const f = plantFields(v, req.body || {}, false);
+      if (Object.values(f).every((x) => x === undefined)) v.add('body', 'provide at least one plant field');
+      v.throwIfErrors();
+      await loadPlant(req.params.plantCode);
+      await pool.query(
+        `UPDATE erp.plants SET site_code = COALESCE($2, site_code), name = COALESCE($3, name), street = COALESCE($4, street),
+            city = COALESCE($5, city), region = COALESCE($6, region), postal_code = COALESCE($7, postal_code),
+            country = COALESCE($8, country), updated_at = NOW()
+          WHERE plant_code = $1`,
+        [req.params.plantCode, f.site_code || null, f.name || null, f.street || null, f.city || null, f.region || null,
+          f.postal_code || null, f.country || null]
+      );
+      res.json({ data: await loadPlant(req.params.plantCode) });
+    })
+  );
+
+  r.delete(
+    '/plants/:plantCode',
+    asyncHandler(async (req, res) => {
+      await loadPlant(req.params.plantCode);
+      const used = await pool.query('SELECT COUNT(*)::int AS n FROM erp.purchase_orders WHERE plant = $1', [req.params.plantCode]);
+      if (used.rows[0].n) {
+        throw new ApiError(409, 'PLANT_IN_USE', `Plant ${req.params.plantCode} is used by ${used.rows[0].n} purchase order(s)`);
+      }
+      await pool.query('DELETE FROM erp.plants WHERE plant_code = $1', [req.params.plantCode]);
+      res.status(204).end();
+    })
+  );
+
+  // ─── Purchase order delete & item maintenance ───────────────────────────
+  r.delete(
+    '/purchase-orders/:poNumber',
+    asyncHandler(async (req, res) => {
+      assertPoNumber(req.params.poNumber);
+      await withTransaction(pool, async (c) => {
+        const po = await loadPo(c, req.params.poNumber, { lock: true });
+        const conf = await c.query('SELECT COUNT(*)::int AS n FROM erp.confirmations WHERE po_number = $1', [po.po_number]);
+        const dels = await c.query('SELECT COUNT(*)::int AS n FROM erp.inbound_deliveries WHERE items @> $1::jsonb', [
+          JSON.stringify([{ po_number: po.po_number }]),
+        ]);
+        if (conf.rows[0].n || dels.rows[0].n) {
+          throw new ApiError(
+            409,
+            'PO_HAS_FOLLOW_ON_DOCUMENTS',
+            `PO ${po.po_number} has ${conf.rows[0].n} confirmation(s) and ${dels.rows[0].n} inbound deliverie(s); cancel it instead (PATCH status_code 09)`
+          );
+        }
+        await c.query('DELETE FROM erp.purchase_orders WHERE po_number = $1', [po.po_number]);
+      });
+      res.status(204).end();
+    })
+  );
+
+  async function assertChangeable(c, poNumber) {
+    const po = await loadPo(c, poNumber, { lock: true });
+    if (LOCKED.includes(po.status_code)) {
+      throw new ApiError(409, 'PO_LOCKED', `Purchase order is ${STATUS_CODES[po.status_code].toLowerCase()} and cannot be changed`);
+    }
+    return po;
+  }
+  const bumpRevision = (c, poNumber) =>
+    c.query('UPDATE erp.purchase_orders SET revision = revision + 1, changed_at = NOW() WHERE po_number = $1', [poNumber]);
+
+  r.post(
+    '/purchase-orders/:poNumber/items',
+    idem,
+    asyncHandler(async (req, res) => {
+      assertPoNumber(req.params.poNumber);
+      const b = req.body || {};
+      const v = new Validator();
+      const itemNo = v.string(b, 'item_no', { pattern: ITEM_RE });
+      const material = v.string(b, 'material', { required: true, max: 60 });
+      const text = v.string(b, 'short_text', { required: true, max: 240 });
+      const qty = v.number(b, 'quantity', { required: true, exclusiveMin: 0 });
+      const uom = v.string(b, 'uom', { required: true, max: 12 });
+      const price = v.number(b, 'net_price', { min: 0 });
+      v.throwIfErrors();
+      await withTransaction(pool, async (c) => {
+        const po = await assertChangeable(c, req.params.poNumber);
+        let no = itemNo;
+        if (!no) {
+          const { rows } = await c.query(
+            "SELECT LPAD((COALESCE(MAX(item_no::int), 0) + 10)::text, 5, '0') AS next FROM erp.po_items WHERE po_number = $1",
+            [po.po_number]
+          );
+          no = rows[0].next;
+        }
+        await c.query(
+          'INSERT INTO erp.po_items (po_number, item_no, material, short_text, quantity, uom, net_price) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+          [po.po_number, no, material, text, qty, uom, price || 0]
+        );
+        await bumpRevision(c, po.po_number);
+        await recomputeStatus(c, po.po_number);
+      });
+      const { po, body } = await fullPo(pool, req.params.poNumber);
+      res.status(201).set('ETag', etagFor(po)).json({ data: body });
+    })
+  );
+
+  r.patch(
+    '/purchase-orders/:poNumber/items/:itemNo',
+    asyncHandler(async (req, res) => {
+      assertPoNumber(req.params.poNumber);
+      const b = req.body || {};
+      const v = new Validator();
+      const text = v.string(b, 'short_text', { max: 240 });
+      const qty = v.number(b, 'quantity', { exclusiveMin: 0 });
+      const price = v.number(b, 'net_price', { min: 0 });
+      if (text === undefined && qty === undefined && price === undefined) v.add('body', 'provide short_text, quantity and/or net_price');
+      v.throwIfErrors();
+      await withTransaction(pool, async (c) => {
+        const po = await assertChangeable(c, req.params.poNumber);
+        const { rows } = await c.query('SELECT * FROM erp.po_items WHERE po_number = $1 AND item_no = $2', [po.po_number, req.params.itemNo]);
+        const cur = rows[0];
+        if (!cur) throw new ApiError(404, 'ITEM_NOT_FOUND', `Item ${req.params.itemNo} does not exist on PO ${po.po_number}`);
+        if (qty !== undefined && qty < Number(cur.shipped_qty)) {
+          throw new ApiError(422, 'QUANTITY_BELOW_SHIPPED', `Quantity cannot be below shipped quantity ${fixed(cur.shipped_qty, 3)}`, [
+            { field: 'quantity', message: `must be >= ${fixed(cur.shipped_qty, 3)}` },
+          ]);
+        }
+        await c.query(
+          `UPDATE erp.po_items SET short_text = COALESCE($3, short_text), quantity = COALESCE($4, quantity),
+              net_price = COALESCE($5, net_price) WHERE po_number = $1 AND item_no = $2`,
+          [po.po_number, cur.item_no, text ?? null, qty ?? null, price ?? null]
+        );
+        await bumpRevision(c, po.po_number);
+        await recomputeStatus(c, po.po_number);
+      });
+      const { po, body } = await fullPo(pool, req.params.poNumber);
+      res.set('ETag', etagFor(po)).json({ data: body });
+    })
+  );
+
+  r.delete(
+    '/purchase-orders/:poNumber/items/:itemNo',
+    asyncHandler(async (req, res) => {
+      assertPoNumber(req.params.poNumber);
+      await withTransaction(pool, async (c) => {
+        const po = await assertChangeable(c, req.params.poNumber);
+        const items = await loadItems(c, [po.po_number]);
+        const cur = items.find((i) => i.item_no === req.params.itemNo);
+        if (!cur) throw new ApiError(404, 'ITEM_NOT_FOUND', `Item ${req.params.itemNo} does not exist on PO ${po.po_number}`);
+        if (Number(cur.confirmed_qty) > 0 || Number(cur.shipped_qty) > 0) {
+          throw new ApiError(409, 'ITEM_HAS_FOLLOW_ON_DOCUMENTS', `Item ${cur.item_no} is already confirmed or shipped and cannot be deleted`);
+        }
+        if (items.length === 1) {
+          throw new ApiError(422, 'LAST_ITEM', 'A purchase order needs at least one item; delete or cancel the PO instead');
+        }
+        await c.query('DELETE FROM erp.po_items WHERE po_number = $1 AND item_no = $2', [po.po_number, cur.item_no]);
+        await bumpRevision(c, po.po_number);
+        await recomputeStatus(c, po.po_number);
+      });
+      const { po, body } = await fullPo(pool, req.params.poNumber);
+      res.set('ETag', etagFor(po)).json({ data: body });
+    })
+  );
+
+  // ─── Confirmation list (all POs) ─────────────────────────────────────────
+  r.get(
+    '/confirmations',
+    asyncHandler(async (req, res) => {
+      const page = intParam(req.query.page, { def: 1, min: 1, max: 100000, name: 'page' });
+      const limit = intParam(req.query.limit, { def: 25, min: 1, max: 200, name: 'limit' });
+      const conds = [];
+      const params = [];
+      const add = (sql, val) => {
+        params.push(val);
+        conds.push(sql.replace('?', `$${params.length}`));
+      };
+      const pos = csv(req.query.po_number);
+      if (pos.length) add('c.po_number = ANY(?)', pos);
+      const statuses = csv(req.query.status);
+      if (statuses.length) add('c.status = ANY(?)', statuses);
+      const cats = csv(req.query.conf_category);
+      if (cats.length) add('c.conf_category = ANY(?)', cats);
+      const vendors = csv(req.query.vendor_id);
+      if (vendors.length) add('po.vendor_id = ANY(?)', vendors);
+      const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
+      const from = 'FROM erp.confirmations c JOIN erp.purchase_orders po ON po.po_number = c.po_number';
+      const total = (await pool.query(`SELECT COUNT(*)::int AS n ${from} ${where}`, params)).rows[0].n;
+      const { rows } = await pool.query(
+        `SELECT c.*, po.vendor_id ${from} ${where} ORDER BY c.posted_at DESC LIMIT ${limit} OFFSET ${(page - 1) * limit}`,
+        params
+      );
+      res.json({ data: rows.map((x) => ({ ...mapConfirmation(x), vendor_id: x.vendor_id })), pagination: paginationMeta(total, page, limit) });
     })
   );
 

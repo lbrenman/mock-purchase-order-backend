@@ -8,6 +8,7 @@ RUN npm install --omit=dev && npm cache clean --force
 
 COPY src ./src
 COPY openapi ./openapi
+COPY public ./public
 
 EXPOSE 3000 3001 3002 3003
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

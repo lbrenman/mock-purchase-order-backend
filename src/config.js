@@ -34,6 +34,9 @@ function serviceConfig(name, defaults) {
     latencyMs: int(process.env[`${U}_LATENCY_MS`], defaults.latencyMs || 0),
     errorRate: num(process.env[`${U}_ERROR_RATE`], 0),
     rateLimitMax: int(process.env[`${U}_RATE_LIMIT_MAX`], int(process.env.RATE_LIMIT_MAX, 300)),
+    // Public URL of this backend as seen by the dashboard (only needed in separate mode behind tunnels)
+    publicUrl: (process.env[`${U}_PUBLIC_URL`] || '').replace(/\/+$/, ''),
+    demoApiKey: defaults.apiKey,
   };
 }
 
@@ -74,6 +77,9 @@ module.exports = {
   chaosEnabled: bool(process.env.CHAOS_ENABLED, true),
   rateLimitWindowMs: int(process.env.RATE_LIMIT_WINDOW_MS, 60000),
   logFormat: process.env.LOG_FORMAT || 'dev',
+  dashboardEnabled: bool(process.env.DASHBOARD_ENABLED, true),
+  // Let the dashboard pre-fill API keys, but only while they are still the published demo defaults
+  dashboardPrefillDemoKeys: bool(process.env.DASHBOARD_PREFILL_DEMO_KEYS, true),
   services,
   enabledServices: enabled.length ? enabled : Object.keys(services),
 };

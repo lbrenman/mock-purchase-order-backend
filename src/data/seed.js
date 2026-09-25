@@ -61,9 +61,9 @@ async function seedErp(c) {
   }
   for (const dl of d.inbound_deliveries) {
     await c.query(
-      `INSERT INTO erp.inbound_deliveries (delivery_no, vendor_id, asn_reference, items, status, posted_at)
-       VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING`,
-      [dl.delivery_no, dl.vendor_id, dl.asn_reference, JSON.stringify(dl.items), dl.status, dl.posted_at]
+      `INSERT INTO erp.inbound_deliveries (delivery_no, vendor_id, asn_reference, items, status, posted_at, reversed_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING`,
+      [dl.delivery_no, dl.vendor_id, dl.asn_reference, JSON.stringify(dl.items), dl.status, dl.posted_at, dl.reversed_at || null]
     );
   }
 }
@@ -114,11 +114,11 @@ async function seedTms(c) {
   for (const s of d.shipments) {
     const r = await c.query(
       `INSERT INTO tms.shipments (shipment_id, asn_number, supplier_code, carrier_scac, tracking_id, milestone, milestone_since,
-          origin, destination, planned_ship_at, eta, contents, handling_units, created_at, updated_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT DO NOTHING RETURNING shipment_id`,
+          origin, destination, planned_ship_at, eta, contents, handling_units, cancel_reason, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT DO NOTHING RETURNING shipment_id`,
       [s.shipment_id, s.asn_number, s.supplier_code, s.carrier_scac, s.tracking_id, s.milestone, s.milestone_since,
         JSON.stringify(s.origin), JSON.stringify(s.destination), s.planned_ship_at, s.eta, JSON.stringify(s.contents),
-        JSON.stringify(s.handling_units), s.created_at, s.updated_at]
+        JSON.stringify(s.handling_units), s.cancel_reason || null, s.created_at, s.updated_at]
     );
     if (!r.rowCount) continue;
     for (const ev of s.events) {

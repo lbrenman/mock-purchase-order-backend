@@ -1,75 +1,4040 @@
 {
   "carriers": [
-    { "carrier_code": "UPS", "scac": "UPSN", "name": "United Parcel Service", "mode": "PARCEL", "tracking_url_template": "https://www.ups.com/track?tracknum={trackingId}" },
-    { "carrier_code": "FEDEX", "scac": "FDEG", "name": "FedEx Ground", "mode": "PARCEL", "tracking_url_template": "https://www.fedex.com/fedextrack/?trknbr={trackingId}" },
-    { "carrier_code": "DHL", "scac": "DHLE", "name": "DHL Express", "mode": "AIR", "tracking_url_template": "https://www.dhl.com/track?tracking-id={trackingId}" },
-    { "carrier_code": "XPO", "scac": "XPOL", "name": "XPO Logistics Freight", "mode": "LTL", "tracking_url_template": null },
-    { "carrier_code": "ODFL", "scac": "ODFL", "name": "Old Dominion Freight Line", "mode": "LTL", "tracking_url_template": null },
-    { "carrier_code": "MAERSK", "scac": "MAEU", "name": "Maersk Line", "mode": "OCEAN", "tracking_url_template": null }
+    {
+      "carrier_code": "UPS",
+      "scac": "UPSN",
+      "name": "United Parcel Service",
+      "mode": "PARCEL",
+      "tracking_url_template": "https://www.ups.com/track?tracknum={trackingId}"
+    },
+    {
+      "carrier_code": "FEDEX",
+      "scac": "FDEG",
+      "name": "FedEx Ground",
+      "mode": "PARCEL",
+      "tracking_url_template": "https://www.fedex.com/fedextrack/?trknbr={trackingId}"
+    },
+    {
+      "carrier_code": "DHL",
+      "scac": "DHLE",
+      "name": "DHL Express",
+      "mode": "AIR",
+      "tracking_url_template": "https://www.dhl.com/track?tracking-id={trackingId}"
+    },
+    {
+      "carrier_code": "XPO",
+      "scac": "XPOL",
+      "name": "XPO Logistics Freight",
+      "mode": "LTL",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "ODFL",
+      "scac": "ODFL",
+      "name": "Old Dominion Freight Line",
+      "mode": "LTL",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "MAERSK",
+      "scac": "MAEU",
+      "name": "Maersk Line",
+      "mode": "OCEAN",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "SAIA",
+      "scac": "SAIA",
+      "name": "Saia LTL Freight",
+      "mode": "LTL",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "ESTES",
+      "scac": "EXLA",
+      "name": "Estes Express Lines",
+      "mode": "LTL",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "EXPEDITORS",
+      "scac": "EXDO",
+      "name": "Expeditors International",
+      "mode": "AIR",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "KUEHNE",
+      "scac": "KHNN",
+      "name": "Kuehne+Nagel",
+      "mode": "AIR",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "CMACGM",
+      "scac": "CMDU",
+      "name": "CMA CGM",
+      "mode": "OCEAN",
+      "tracking_url_template": null
+    },
+    {
+      "carrier_code": "SCHENKER",
+      "scac": "SHKK",
+      "name": "DB Schenker Road",
+      "mode": "FTL",
+      "tracking_url_template": null
+    }
   ],
   "shipments": [
     {
-      "shipment_id": "SHP-20260828-00088", "asn_number": "ASN-437120", "supplier_code": "SUP-100245", "carrier_scac": "UPSN", "tracking_id": "1Z999AA10123450088",
-      "milestone": "DLV", "milestone_since": "2026-08-29T14:02:00Z",
-      "origin": { "locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "street": "4500 Fulton Industrial Blvd SW", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US" },
-      "destination": { "locationCode": "US-AUBURN-HILLS", "name": "Jabil Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "state": "MI", "zip": "48326", "country": "US" },
-      "planned_ship_at": "2026-08-26T15:00:00Z", "eta": "2026-08-29T17:00:00Z",
-      "contents": [ { "poNumber": "4500123459", "poLine": 10, "quantity": { "value": 150, "uom": "EA" }, "lotNumber": "LOT-87650" } ],
-      "handling_units": [ { "huId": "PALLET-0901", "type": "PLT", "weight": { "value": 180, "unit": "kg" } } ],
-      "created_at": "2026-08-26T18:00:00Z", "updated_at": "2026-08-29T14:02:00Z",
-      "events": [
-        { "event_code": "PU", "description": "Picked up by carrier", "location": "Atlanta, GA, US", "occurred_at": "2026-08-26T16:20:00Z" },
-        { "event_code": "DEP", "description": "Departed origin hub", "location": "Atlanta, GA, US", "occurred_at": "2026-08-26T23:05:00Z" },
-        { "event_code": "ARR", "description": "Arrived at destination hub", "location": "Pontiac, MI, US", "occurred_at": "2026-08-29T06:40:00Z" },
-        { "event_code": "DLV", "description": "Delivered - signed by RECEIVING DOCK 4", "location": "Auburn Hills, MI, US", "occurred_at": "2026-08-29T14:02:00Z" }
-      ]
-    },
-    {
-      "shipment_id": "SHP-20260915-00107", "asn_number": "PRC-ASN-7781", "supplier_code": "SUP-100402", "carrier_scac": "MAEU", "tracking_id": "MAEU2601554817",
-      "milestone": "EXC", "milestone_since": "2026-09-15T08:30:00Z",
-      "origin": { "locationCode": "SUP-HSZ-01", "name": "PRC Hsinchu Fab 2", "street": "No. 18, Science Park Rd", "city": "Hsinchu", "state": "HSZ", "zip": "300", "country": "TW" },
-      "destination": { "locationCode": "SG-SINGAPORE", "name": "Jabil Singapore Operations", "street": "20 Loyang Way", "city": "Singapore", "state": "SG", "zip": "508774", "country": "SG" },
-      "planned_ship_at": "2026-09-01T06:00:00Z", "eta": "2026-09-29T09:00:00Z",
-      "contents": [ { "poNumber": "4500123462", "poLine": 10, "quantity": { "value": 1000, "uom": "EA" }, "lotNumber": "LOT-TW-5521" } ],
-      "handling_units": [
-        { "huId": "CRATE-7781-01", "type": "CRT", "weight": { "value": 310, "unit": "kg" } },
-        { "huId": "CRATE-7781-02", "type": "CRT", "weight": { "value": 295, "unit": "kg" } }
+      "shipment_id": "SHP-20260828-00088",
+      "asn_number": "ASN-437120",
+      "supplier_code": "SUP-100245",
+      "carrier_scac": "UPSN",
+      "tracking_id": "1Z999AA10123450088",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-29T14:02:00Z",
+      "origin": {
+        "locationCode": "SUP-ATL-01",
+        "name": "Supplier Distribution Center",
+        "street": "4500 Fulton Industrial Blvd SW",
+        "city": "Atlanta",
+        "state": "GA",
+        "zip": "30301",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-08-26T15:00:00Z",
+      "eta": "2026-08-29T17:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123459",
+          "poLine": 10,
+          "quantity": {
+            "value": 150,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-87650"
+        }
       ],
-      "created_at": "2026-09-01T04:45:00Z", "updated_at": "2026-09-15T08:30:00Z",
-      "events": [
-        { "event_code": "PU", "description": "Container loaded at shipper", "location": "Hsinchu, TW", "occurred_at": "2026-09-02T03:00:00Z" },
-        { "event_code": "DEP", "description": "Vessel departed port of loading", "location": "Kaohsiung, TW", "occurred_at": "2026-09-04T11:00:00Z" },
-        { "event_code": "ARR", "description": "Vessel arrived port of discharge", "location": "Singapore, SG", "occurred_at": "2026-09-12T22:15:00Z" },
-        { "event_code": "EXC", "description": "Held at customs - commercial invoice query", "location": "Singapore, SG", "occurred_at": "2026-09-15T08:30:00Z" }
-      ]
-    },
-    {
-      "shipment_id": "SHP-20260918-00121", "asn_number": "ASN-439901", "supplier_code": "SUP-100245", "carrier_scac": "UPSN", "tracking_id": "1Z999AA10123450121",
-      "milestone": "ITR", "milestone_since": "2026-09-18T16:10:00Z",
-      "origin": { "locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "street": "4500 Fulton Industrial Blvd SW", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US" },
-      "destination": { "locationCode": "US-ST-PETERSBURG", "name": "Jabil Tampa Bay Operations", "street": "2400 Gateway Centre Blvd", "city": "St. Petersburg", "state": "FL", "zip": "33716", "country": "US" },
-      "planned_ship_at": "2026-09-18T15:00:00Z", "eta": "2026-09-25T17:00:00Z",
-      "contents": [ { "poNumber": "4500123458", "poLine": 10, "quantity": { "value": 300, "uom": "EA" }, "lotNumber": "LOT-88104" } ],
       "handling_units": [
-        { "huId": "PALLET-0981", "type": "PLT", "weight": { "value": 210, "unit": "kg" } },
-        { "huId": "PALLET-0982", "type": "PLT", "weight": { "value": 195, "unit": "kg" } }
+        {
+          "huId": "PALLET-0901",
+          "type": "PLT",
+          "weight": {
+            "value": 180,
+            "unit": "kg"
+          }
+        }
       ],
-      "created_at": "2026-09-18T19:05:10Z", "updated_at": "2026-09-20T06:15:00Z",
+      "created_at": "2026-08-26T18:00:00Z",
+      "updated_at": "2026-08-29T14:02:00Z",
       "events": [
-        { "event_code": "PU", "description": "Picked up by carrier", "location": "Atlanta, GA, US", "occurred_at": "2026-09-18T16:10:00Z" },
-        { "event_code": "DEP", "description": "Departed origin hub", "location": "Atlanta, GA, US", "occurred_at": "2026-09-18T22:40:00Z" },
-        { "event_code": "ARR", "description": "Arrived at regional hub", "location": "Jacksonville, FL, US", "occurred_at": "2026-09-20T06:15:00Z" }
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Atlanta, GA, US",
+          "occurred_at": "2026-08-26T16:20:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin hub",
+          "location": "Atlanta, GA, US",
+          "occurred_at": "2026-08-26T23:05:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at destination hub",
+          "location": "Pontiac, MI, US",
+          "occurred_at": "2026-08-29T06:40:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - signed by RECEIVING DOCK 4",
+          "location": "Auburn Hills, MI, US",
+          "occurred_at": "2026-08-29T14:02:00Z"
+        }
       ]
     },
     {
-      "shipment_id": "SHP-20260922-00188", "asn_number": "NW-ASN-20260922-01", "supplier_code": "SUP-100311", "carrier_scac": "DHLE", "tracking_id": null,
-      "milestone": "PLN", "milestone_since": "2026-09-22T09:00:00Z",
-      "origin": { "locationCode": "SUP-STR-01", "name": "Nordwerk Werk Stuttgart", "street": "Industriestrasse 44", "city": "Stuttgart", "state": "BW", "zip": "70565", "country": "DE" },
-      "destination": { "locationCode": "DE-NUREMBERG", "name": "Jabil Nuremberg Engineering Center", "street": "Industriestrasse 12", "city": "Nuremberg", "state": "BY", "zip": "90411", "country": "DE" },
-      "planned_ship_at": "2026-09-28T07:00:00Z", "eta": "2026-09-30T12:00:00Z",
-      "contents": [ { "poNumber": "4500123461", "poLine": 10, "quantity": { "value": 40, "uom": "EA" }, "lotNumber": "NW-L-26-3301" } ],
-      "handling_units": [ { "huId": "KARTON-5501", "type": "CTN", "weight": { "value": 18.5, "unit": "kg" } } ],
-      "created_at": "2026-09-22T09:00:00Z", "updated_at": "2026-09-22T09:00:00Z",
+      "shipment_id": "SHP-20260915-00107",
+      "asn_number": "PRC-ASN-7781",
+      "supplier_code": "SUP-100402",
+      "carrier_scac": "MAEU",
+      "tracking_id": "MAEU2601554817",
+      "milestone": "EXC",
+      "milestone_since": "2026-09-15T08:30:00Z",
+      "origin": {
+        "locationCode": "SUP-HSZ-01",
+        "name": "PRC Hsinchu Fab 2",
+        "street": "No. 18, Science Park Rd",
+        "city": "Hsinchu",
+        "state": "HSZ",
+        "zip": "300",
+        "country": "TW"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-09-01T06:00:00Z",
+      "eta": "2026-09-29T09:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123462",
+          "poLine": 10,
+          "quantity": {
+            "value": 1000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-TW-5521"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CRATE-7781-01",
+          "type": "CRT",
+          "weight": {
+            "value": 310,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "CRATE-7781-02",
+          "type": "CRT",
+          "weight": {
+            "value": 295,
+            "unit": "kg"
+          }
+        }
+      ],
+      "created_at": "2026-09-01T04:45:00Z",
+      "updated_at": "2026-09-15T08:30:00Z",
+      "events": [
+        {
+          "event_code": "PU",
+          "description": "Container loaded at shipper",
+          "location": "Hsinchu, TW",
+          "occurred_at": "2026-09-02T03:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Vessel departed port of loading",
+          "location": "Kaohsiung, TW",
+          "occurred_at": "2026-09-04T11:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Vessel arrived port of discharge",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-09-12T22:15:00Z"
+        },
+        {
+          "event_code": "EXC",
+          "description": "Held at customs - commercial invoice query",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-09-15T08:30:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260918-00121",
+      "asn_number": "ASN-439901",
+      "supplier_code": "SUP-100245",
+      "carrier_scac": "UPSN",
+      "tracking_id": "1Z999AA10123450121",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-18T16:10:00Z",
+      "origin": {
+        "locationCode": "SUP-ATL-01",
+        "name": "Supplier Distribution Center",
+        "street": "4500 Fulton Industrial Blvd SW",
+        "city": "Atlanta",
+        "state": "GA",
+        "zip": "30301",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-ST-PETERSBURG",
+        "name": "Jabil Tampa Bay Operations",
+        "street": "2400 Gateway Centre Blvd",
+        "city": "St. Petersburg",
+        "state": "FL",
+        "zip": "33716",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-18T15:00:00Z",
+      "eta": "2026-09-25T17:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123458",
+          "poLine": 10,
+          "quantity": {
+            "value": 300,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-88104"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-0981",
+          "type": "PLT",
+          "weight": {
+            "value": 210,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-0982",
+          "type": "PLT",
+          "weight": {
+            "value": 195,
+            "unit": "kg"
+          }
+        }
+      ],
+      "created_at": "2026-09-18T19:05:10Z",
+      "updated_at": "2026-09-20T06:15:00Z",
+      "events": [
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Atlanta, GA, US",
+          "occurred_at": "2026-09-18T16:10:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin hub",
+          "location": "Atlanta, GA, US",
+          "occurred_at": "2026-09-18T22:40:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at regional hub",
+          "location": "Jacksonville, FL, US",
+          "occurred_at": "2026-09-20T06:15:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260922-00188",
+      "asn_number": "NW-ASN-20260922-01",
+      "supplier_code": "SUP-100311",
+      "carrier_scac": "DHLE",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-22T09:00:00Z",
+      "origin": {
+        "locationCode": "SUP-STR-01",
+        "name": "Nordwerk Werk Stuttgart",
+        "street": "Industriestrasse 44",
+        "city": "Stuttgart",
+        "state": "BW",
+        "zip": "70565",
+        "country": "DE"
+      },
+      "destination": {
+        "locationCode": "DE-NUREMBERG",
+        "name": "Jabil Nuremberg Engineering Center",
+        "street": "Industriestrasse 12",
+        "city": "Nuremberg",
+        "state": "BY",
+        "zip": "90411",
+        "country": "DE"
+      },
+      "planned_ship_at": "2026-09-28T07:00:00Z",
+      "eta": "2026-09-30T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123461",
+          "poLine": 10,
+          "quantity": {
+            "value": 40,
+            "uom": "EA"
+          },
+          "lotNumber": "NW-L-26-3301"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "KARTON-5501",
+          "type": "CTN",
+          "weight": {
+            "value": 18.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "created_at": "2026-09-22T09:00:00Z",
+      "updated_at": "2026-09-22T09:00:00Z",
+      "events": []
+    },
+    {
+      "shipment_id": "SHP-20260923-00122",
+      "asn_number": "ASN-440111",
+      "supplier_code": "SUP-100733",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO095705330",
+      "milestone": "TND",
+      "milestone_since": "2026-09-23T22:25:00Z",
+      "origin": {
+        "locationCode": "SUP-BLR-01",
+        "name": "Bharat Passives Electronic City Unit",
+        "street": "Plot 42, Phase II, Electronic City",
+        "city": "Bengaluru",
+        "state": "KA",
+        "zip": "560100",
+        "country": "IN"
+      },
+      "destination": {
+        "locationCode": "VN-HCMC",
+        "name": "Jabil Vietnam Saigon Hi-Tech Park",
+        "street": "Lot I-9, D1 Street",
+        "city": "Ho Chi Minh City",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "planned_ship_at": "2026-09-27T21:00:00Z",
+      "eta": "2026-10-02T21:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123470",
+          "poLine": 10,
+          "quantity": {
+            "value": 10,
+            "uom": "RL"
+          },
+          "lotNumber": "LOT-29557"
+        },
+        {
+          "poNumber": "4500123470",
+          "poLine": 20,
+          "quantity": {
+            "value": 100,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-48498"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40111-01",
+          "type": "CTN",
+          "weight": {
+            "value": 25.7,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T22:25:00Z",
+      "updated_at": "2026-09-23T22:25:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-23T22:25:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260922-00123",
+      "asn_number": "ASN-440139",
+      "supplier_code": "SUP-100884",
+      "carrier_scac": "KHNN",
+      "tracking_id": "KHNN063339209",
+      "milestone": "EXC",
+      "milestone_since": "2026-09-24T02:00:00Z",
+      "origin": {
+        "locationCode": "SUP-ICN-01",
+        "name": "Hanbit Suwon Line 3",
+        "street": "129 Samsung-ro, Yeongtong-gu",
+        "city": "Suwon",
+        "state": "GG",
+        "zip": "16677",
+        "country": "KR"
+      },
+      "destination": {
+        "locationCode": "CN-WUXI",
+        "name": "Jabil Wuxi Campus",
+        "street": "8 Xinhua Road, New District",
+        "city": "Wuxi",
+        "state": "JS",
+        "zip": "214028",
+        "country": "CN"
+      },
+      "planned_ship_at": "2026-09-22T11:00:00Z",
+      "eta": "2026-09-26T11:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123472",
+          "poLine": 10,
+          "quantity": {
+            "value": 600,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-97622"
+        },
+        {
+          "poNumber": "4500123472",
+          "poLine": 20,
+          "quantity": {
+            "value": 1500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-96708"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40139-01",
+          "type": "PLT",
+          "weight": {
+            "value": 162.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40139-02",
+          "type": "PLT",
+          "weight": {
+            "value": 286.6,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40139-03",
+          "type": "PLT",
+          "weight": {
+            "value": 227.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40139-04",
+          "type": "PLT",
+          "weight": {
+            "value": 300.2,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-22T05:00:00Z",
+      "updated_at": "2026-09-24T02:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-22T05:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Suwon, KR",
+          "occurred_at": "2026-09-22T21:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Suwon, KR",
+          "occurred_at": "2026-09-23T17:00:00Z"
+        },
+        {
+          "event_code": "EXC",
+          "description": "Port congestion - vessel delayed",
+          "location": "Incheon, IC, KR",
+          "occurred_at": "2026-09-24T02:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260920-00124",
+      "asn_number": "ASN-440146",
+      "supplier_code": "SUP-100866",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146064720342",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-21T13:00:00Z",
+      "origin": {
+        "locationCode": "SUP-SGN-01",
+        "name": "SPM Thu Duc Factory",
+        "street": "Lot 21, Linh Trung EPZ",
+        "city": "Thu Duc",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "destination": {
+        "locationCode": "VN-HCMC",
+        "name": "Jabil Vietnam Saigon Hi-Tech Park",
+        "street": "Lot I-9, D1 Street",
+        "city": "Ho Chi Minh City",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "planned_ship_at": "2026-09-21T08:00:00Z",
+      "eta": "2026-09-26T08:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123473",
+          "poLine": 10,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-63730"
+        },
+        {
+          "poNumber": "4500123473",
+          "poLine": 20,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-96552"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40146-01",
+          "type": "PLT",
+          "weight": {
+            "value": 129.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40146-02",
+          "type": "PLT",
+          "weight": {
+            "value": 198.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40146-03",
+          "type": "PLT",
+          "weight": {
+            "value": 158.8,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-20T22:00:00Z",
+      "updated_at": "2026-09-24T11:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-20T22:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Thu Duc, VN",
+          "occurred_at": "2026-09-21T13:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Thu Duc, VN",
+          "occurred_at": "2026-09-22T04:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Ho Chi Minh City, HCM, VN",
+          "occurred_at": "2026-09-24T11:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260921-00125",
+      "asn_number": "ASN-440152",
+      "supplier_code": "SUP-100989",
+      "carrier_scac": "UPSN",
+      "tracking_id": "1Z999AA10053606434",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-22T17:00:00Z",
+      "origin": {
+        "locationCode": "SUP-CLT-01",
+        "name": "CPM Charlotte Distribution",
+        "street": "10100 Westlake Dr",
+        "city": "Charlotte",
+        "state": "NC",
+        "zip": "28273",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-22T08:00:00Z",
+      "eta": "2026-09-25T08:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123474",
+          "poLine": 10,
+          "quantity": {
+            "value": 250,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-32070"
+        },
+        {
+          "poNumber": "4500123474",
+          "poLine": 20,
+          "quantity": {
+            "value": 100,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-47941"
+        },
+        {
+          "poNumber": "4500123474",
+          "poLine": 30,
+          "quantity": {
+            "value": 300,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-10268"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40152-01",
+          "type": "PLT",
+          "weight": {
+            "value": 187.3,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40152-02",
+          "type": "PLT",
+          "weight": {
+            "value": 163.9,
+            "unit": "lb"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-21T06:00:00Z",
+      "updated_at": "2026-09-24T09:57:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-21T06:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-09-22T17:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-09-23T07:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-24T09:57:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260921-00126",
+      "asn_number": "ASN-440170",
+      "supplier_code": "SUP-100859",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO096523262",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-22T11:00:00Z",
+      "origin": {
+        "locationCode": "SUP-PEN-01",
+        "name": "PST Bayan Lepas FIZ",
+        "street": "Plot 102, Bayan Lepas FIZ Phase 4",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "destination": {
+        "locationCode": "CN-WUXI",
+        "name": "Jabil Wuxi Campus",
+        "street": "8 Xinhua Road, New District",
+        "city": "Wuxi",
+        "state": "JS",
+        "zip": "214028",
+        "country": "CN"
+      },
+      "planned_ship_at": "2026-09-22T03:00:00Z",
+      "eta": "2026-09-26T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123475",
+          "poLine": 10,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-68887"
+        },
+        {
+          "poNumber": "4500123475",
+          "poLine": 20,
+          "quantity": {
+            "value": 2000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-48722"
+        },
+        {
+          "poNumber": "4500123475",
+          "poLine": 30,
+          "quantity": {
+            "value": 1500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-23891"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40170-01",
+          "type": "PLT",
+          "weight": {
+            "value": 124.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40170-02",
+          "type": "PLT",
+          "weight": {
+            "value": 116.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40170-03",
+          "type": "PLT",
+          "weight": {
+            "value": 250.3,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40170-04",
+          "type": "PLT",
+          "weight": {
+            "value": 215.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40170-05",
+          "type": "PLT",
+          "weight": {
+            "value": 316.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40170-06",
+          "type": "PLT",
+          "weight": {
+            "value": 197.7,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-21T12:00:00Z",
+      "updated_at": "2026-09-22T22:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-21T12:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-22T11:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-22T22:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260908-00127",
+      "asn_number": "ASN-440194",
+      "supplier_code": "SUP-100903",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146076491579",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-13T02:00:00Z",
+      "origin": {
+        "locationCode": "SUP-GDN-01",
+        "name": "Wisla Gdansk Works",
+        "street": "ul. Kartuska 214",
+        "city": "Gdansk",
+        "state": "PM",
+        "zip": "80-122",
+        "country": "PL"
+      },
+      "destination": {
+        "locationCode": "HU-TISZAUJVAROS",
+        "name": "Jabil Tiszaujvaros Plant",
+        "street": "Huszar Andor ut 1",
+        "city": "Tiszaujvaros",
+        "state": "BZ",
+        "zip": "3580",
+        "country": "HU"
+      },
+      "planned_ship_at": "2026-09-09T07:00:00Z",
+      "eta": "2026-09-12T07:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123476",
+          "poLine": 10,
+          "quantity": {
+            "value": 250,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-86429"
+        },
+        {
+          "poNumber": "4500123476",
+          "poLine": 20,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-78908"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40194-01",
+          "type": "PLT",
+          "weight": {
+            "value": 211.3,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40194-02",
+          "type": "PLT",
+          "weight": {
+            "value": 312.9,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-08T18:00:00Z",
+      "updated_at": "2026-09-13T02:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-08T18:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Gdansk, PL",
+          "occurred_at": "2026-09-09T12:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Gdansk, PL",
+          "occurred_at": "2026-09-10T08:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Warsaw, MZ, PL",
+          "occurred_at": "2026-09-11T09:51:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Tiszaujvaros, HU",
+          "occurred_at": "2026-09-12T03:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by HU-TISZAUJVAROS",
+          "location": "Tiszaujvaros, HU",
+          "occurred_at": "2026-09-13T02:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260915-00128",
+      "asn_number": "ASN-440204",
+      "supplier_code": "SUP-100845",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO078496439",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-21T04:00:00Z",
+      "origin": {
+        "locationCode": "SUP-SZX-01",
+        "name": "Brightwave Longhua Factory",
+        "street": "No. 88 Minzhi Ave, Longhua",
+        "city": "Shenzhen",
+        "state": "GD",
+        "zip": "518131",
+        "country": "CN"
+      },
+      "destination": {
+        "locationCode": "VN-HCMC",
+        "name": "Jabil Vietnam Saigon Hi-Tech Park",
+        "street": "Lot I-9, D1 Street",
+        "city": "Ho Chi Minh City",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "planned_ship_at": "2026-09-16T12:00:00Z",
+      "eta": "2026-09-20T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123479",
+          "poLine": 10,
+          "quantity": {
+            "value": 300,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-49528"
+        },
+        {
+          "poNumber": "4500123479",
+          "poLine": 20,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-70863"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40204-01",
+          "type": "PLT",
+          "weight": {
+            "value": 248.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40204-02",
+          "type": "PLT",
+          "weight": {
+            "value": 184.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40204-03",
+          "type": "PLT",
+          "weight": {
+            "value": 113.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40204-04",
+          "type": "PLT",
+          "weight": {
+            "value": 112.3,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40204-05",
+          "type": "PLT",
+          "weight": {
+            "value": 150.3,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-15T16:00:00Z",
+      "updated_at": "2026-09-21T04:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-15T16:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Shenzhen, CN",
+          "occurred_at": "2026-09-16T14:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Shenzhen, CN",
+          "occurred_at": "2026-09-17T09:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Shanghai, SH, CN",
+          "occurred_at": "2026-09-19T02:15:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Ho Chi Minh City, VN",
+          "occurred_at": "2026-09-20T06:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by VN-HCMC",
+          "location": "Ho Chi Minh City, VN",
+          "occurred_at": "2026-09-21T04:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260827-00129",
+      "asn_number": "ASN-440240",
+      "supplier_code": "SUP-100989",
+      "carrier_scac": "FDEG",
+      "tracking_id": "771232684416",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-30T18:00:00Z",
+      "origin": {
+        "locationCode": "SUP-CLT-01",
+        "name": "CPM Charlotte Distribution",
+        "street": "10100 Westlake Dr",
+        "city": "Charlotte",
+        "state": "NC",
+        "zip": "28273",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-MEMPHIS",
+        "name": "Jabil Memphis Repair & Distribution",
+        "street": "4600 Distriplex Farms Dr",
+        "city": "Memphis",
+        "state": "TN",
+        "zip": "38141",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-08-28T09:00:00Z",
+      "eta": "2026-08-30T09:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123481",
+          "poLine": 10,
+          "quantity": {
+            "value": 150,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-20124"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40240-01",
+          "type": "CTN",
+          "weight": {
+            "value": 7.7,
+            "unit": "lb"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-27T23:00:00Z",
+      "updated_at": "2026-08-30T18:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-27T23:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-08-28T19:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-08-29T15:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-08-30T00:54:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Memphis, US",
+          "occurred_at": "2026-08-30T04:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by US-MEMPHIS",
+          "location": "Memphis, US",
+          "occurred_at": "2026-08-30T18:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260821-00130",
+      "asn_number": "ASN-440246",
+      "supplier_code": "SUP-100245",
+      "carrier_scac": "UPSN",
+      "tracking_id": "1Z999AA10023616557",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-27T08:00:00Z",
+      "origin": {
+        "locationCode": "SUP-ATL-01",
+        "name": "Supplier Distribution Center",
+        "street": "4500 Fulton Industrial Blvd SW",
+        "city": "Atlanta",
+        "state": "GA",
+        "zip": "30301",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-08-21T16:00:00Z",
+      "eta": "2026-08-26T16:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123485",
+          "poLine": 10,
+          "quantity": {
+            "value": 300,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-36381"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40246-01",
+          "type": "CTN",
+          "weight": {
+            "value": 11.4,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-21T01:00:00Z",
+      "updated_at": "2026-08-27T08:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-21T01:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Atlanta, US",
+          "occurred_at": "2026-08-21T21:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Atlanta, US",
+          "occurred_at": "2026-08-22T05:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-08-24T15:51:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Auburn Hills, US",
+          "occurred_at": "2026-08-26T10:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by US-AUBURN-HILLS",
+          "location": "Auburn Hills, US",
+          "occurred_at": "2026-08-27T08:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00131",
+      "asn_number": "ASN-440284",
+      "supplier_code": "SUP-100245",
+      "carrier_scac": "XPOL",
+      "tracking_id": "XPOL070452620",
+      "milestone": "CXL",
+      "milestone_since": "2026-09-23T19:58:00Z",
+      "origin": {
+        "locationCode": "SUP-ATL-01",
+        "name": "Supplier Distribution Center",
+        "street": "4500 Fulton Industrial Blvd SW",
+        "city": "Atlanta",
+        "state": "GA",
+        "zip": "30301",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-26T19:00:00Z",
+      "eta": "2026-10-02T19:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123486",
+          "poLine": 10,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-57507"
+        },
+        {
+          "poNumber": "4500123486",
+          "poLine": 20,
+          "quantity": {
+            "value": 3000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-61086"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40284-01",
+          "type": "PLT",
+          "weight": {
+            "value": 107.4,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40284-02",
+          "type": "PLT",
+          "weight": {
+            "value": 224.7,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40284-03",
+          "type": "PLT",
+          "weight": {
+            "value": 217.8,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40284-04",
+          "type": "PLT",
+          "weight": {
+            "value": 288.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40284-05",
+          "type": "PLT",
+          "weight": {
+            "value": 225.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40284-06",
+          "type": "PLT",
+          "weight": {
+            "value": 172.8,
+            "unit": "lb"
+          }
+        }
+      ],
+      "cancel_reason": "Compensation: ERP inbound delivery posting failed (saga rollback)",
+      "created_at": "2026-09-23T19:56:00Z",
+      "updated_at": "2026-09-23T19:58:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-23T19:56:00Z"
+        },
+        {
+          "event_code": "CXL",
+          "description": "Cancelled: Compensation: ERP inbound delivery posting failed (saga rollback)",
+          "location": null,
+          "occurred_at": "2026-09-23T19:58:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260924-00132",
+      "asn_number": "ASN-440296",
+      "supplier_code": "SUP-100871",
+      "carrier_scac": "KHNN",
+      "tracking_id": "KHNN050898977",
+      "milestone": "CXL",
+      "milestone_since": "2026-09-24T03:05:00Z",
+      "origin": {
+        "locationCode": "SUP-KIX-01",
+        "name": "Kansai Ceramics Fushimi Works",
+        "street": "3-12 Takeda Tobadono-cho",
+        "city": "Kyoto",
+        "state": "KY",
+        "zip": "612-8450",
+        "country": "JP"
+      },
+      "destination": {
+        "locationCode": "MY-PENANG",
+        "name": "Jabil Penang Operations",
+        "street": "56 Hilir Sungai Keluang 1",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "planned_ship_at": "2026-09-28T21:00:00Z",
+      "eta": "2026-10-02T21:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123488",
+          "poLine": 10,
+          "quantity": {
+            "value": 2000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-30158"
+        },
+        {
+          "poNumber": "4500123488",
+          "poLine": 20,
+          "quantity": {
+            "value": 20,
+            "uom": "RL"
+          },
+          "lotNumber": "LOT-78807"
+        },
+        {
+          "poNumber": "4500123488",
+          "poLine": 30,
+          "quantity": {
+            "value": 2000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-66528"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40296-01",
+          "type": "PLT",
+          "weight": {
+            "value": 306.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40296-02",
+          "type": "PLT",
+          "weight": {
+            "value": 244.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40296-03",
+          "type": "PLT",
+          "weight": {
+            "value": 206.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40296-04",
+          "type": "PLT",
+          "weight": {
+            "value": 173.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40296-05",
+          "type": "PLT",
+          "weight": {
+            "value": 177.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40296-06",
+          "type": "PLT",
+          "weight": {
+            "value": 199.6,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": "Compensation: ERP inbound delivery posting failed (saga rollback)",
+      "created_at": "2026-09-24T03:03:00Z",
+      "updated_at": "2026-09-24T03:05:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-24T03:03:00Z"
+        },
+        {
+          "event_code": "CXL",
+          "description": "Cancelled: Compensation: ERP inbound delivery posting failed (saga rollback)",
+          "location": null,
+          "occurred_at": "2026-09-24T03:05:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260906-00133",
+      "asn_number": "ASN-440310",
+      "supplier_code": "SUP-100903",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146014498009",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-09T18:00:00Z",
+      "origin": {
+        "locationCode": "SUP-GDN-01",
+        "name": "Wisla Gdansk Works",
+        "street": "ul. Kartuska 214",
+        "city": "Gdansk",
+        "state": "PM",
+        "zip": "80-122",
+        "country": "PL"
+      },
+      "destination": {
+        "locationCode": "HU-TISZAUJVAROS",
+        "name": "Jabil Tiszaujvaros Plant",
+        "street": "Huszar Andor ut 1",
+        "city": "Tiszaujvaros",
+        "state": "BZ",
+        "zip": "3580",
+        "country": "HU"
+      },
+      "planned_ship_at": "2026-09-06T07:00:00Z",
+      "eta": "2026-09-09T07:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123490",
+          "poLine": 10,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-38208"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40310-01",
+          "type": "PLT",
+          "weight": {
+            "value": 220.7,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-06T01:00:00Z",
+      "updated_at": "2026-09-09T18:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-06T01:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Gdansk, PL",
+          "occurred_at": "2026-09-06T12:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Gdansk, PL",
+          "occurred_at": "2026-09-06T16:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Warsaw, MZ, PL",
+          "occurred_at": "2026-09-08T02:39:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Tiszaujvaros, HU",
+          "occurred_at": "2026-09-09T02:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by HU-TISZAUJVAROS",
+          "location": "Tiszaujvaros, HU",
+          "occurred_at": "2026-09-09T18:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260808-00134",
+      "asn_number": "ASN-440340",
+      "supplier_code": "SUP-100866",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO077608797",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-15T02:00:00Z",
+      "origin": {
+        "locationCode": "SUP-SGN-01",
+        "name": "SPM Thu Duc Factory",
+        "street": "Lot 21, Linh Trung EPZ",
+        "city": "Thu Duc",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-08-08T11:00:00Z",
+      "eta": "2026-08-14T11:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123491",
+          "poLine": 10,
+          "quantity": {
+            "value": 500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-69953"
+        },
+        {
+          "poNumber": "4500123491",
+          "poLine": 20,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-63558"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40340-01",
+          "type": "PLT",
+          "weight": {
+            "value": 293.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40340-02",
+          "type": "PLT",
+          "weight": {
+            "value": 92.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40340-03",
+          "type": "PLT",
+          "weight": {
+            "value": 154.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40340-04",
+          "type": "PLT",
+          "weight": {
+            "value": 147.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40340-05",
+          "type": "PLT",
+          "weight": {
+            "value": 183.6,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40340-06",
+          "type": "PLT",
+          "weight": {
+            "value": 92.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-08T02:00:00Z",
+      "updated_at": "2026-08-15T02:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-08T02:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Thu Duc, VN",
+          "occurred_at": "2026-08-08T12:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Thu Duc, VN",
+          "occurred_at": "2026-08-09T01:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Ho Chi Minh City, HCM, VN",
+          "occurred_at": "2026-08-12T00:30:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-08-14T08:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by SG-SINGAPORE",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-08-15T02:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260922-00135",
+      "asn_number": "ASN-440379",
+      "supplier_code": "SUP-100871",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146062433698",
+      "milestone": "TND",
+      "milestone_since": "2026-09-22T23:29:00Z",
+      "origin": {
+        "locationCode": "SUP-KIX-01",
+        "name": "Kansai Ceramics Fushimi Works",
+        "street": "3-12 Takeda Tobadono-cho",
+        "city": "Kyoto",
+        "state": "KY",
+        "zip": "612-8450",
+        "country": "JP"
+      },
+      "destination": {
+        "locationCode": "DE-NUREMBERG",
+        "name": "Jabil Nuremberg Engineering Center",
+        "street": "Industriestrasse 12",
+        "city": "Nuremberg",
+        "state": "BY",
+        "zip": "90411",
+        "country": "DE"
+      },
+      "planned_ship_at": "2026-09-26T19:00:00Z",
+      "eta": "2026-10-07T19:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123492",
+          "poLine": 10,
+          "quantity": {
+            "value": 50,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-53647"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40379-01",
+          "type": "CTN",
+          "weight": {
+            "value": 14.8,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-22T23:29:00Z",
+      "updated_at": "2026-09-22T23:29:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-22T23:29:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260825-00136",
+      "asn_number": "ASN-440396",
+      "supplier_code": "SUP-100871",
+      "carrier_scac": "MAEU",
+      "tracking_id": "MAEU0031033604",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-31T14:00:00Z",
+      "origin": {
+        "locationCode": "SUP-KIX-01",
+        "name": "Kansai Ceramics Fushimi Works",
+        "street": "3-12 Takeda Tobadono-cho",
+        "city": "Kyoto",
+        "state": "KY",
+        "zip": "612-8450",
+        "country": "JP"
+      },
+      "destination": {
+        "locationCode": "DE-NUREMBERG",
+        "name": "Jabil Nuremberg Engineering Center",
+        "street": "Industriestrasse 12",
+        "city": "Nuremberg",
+        "state": "BY",
+        "zip": "90411",
+        "country": "DE"
+      },
+      "planned_ship_at": "2026-08-25T14:00:00Z",
+      "eta": "2026-08-31T14:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123494",
+          "poLine": 10,
+          "quantity": {
+            "value": 1500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-49523"
+        },
+        {
+          "poNumber": "4500123494",
+          "poLine": 20,
+          "quantity": {
+            "value": 40,
+            "uom": "RL"
+          },
+          "lotNumber": "LOT-88256"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40396-01",
+          "type": "PLT",
+          "weight": {
+            "value": 304.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40396-02",
+          "type": "PLT",
+          "weight": {
+            "value": 187.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40396-03",
+          "type": "PLT",
+          "weight": {
+            "value": 114.3,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-25T03:00:00Z",
+      "updated_at": "2026-08-31T14:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-25T03:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Kyoto, JP",
+          "occurred_at": "2026-08-25T16:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Kyoto, JP",
+          "occurred_at": "2026-08-26T11:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Frankfurt, HE, DE",
+          "occurred_at": "2026-08-29T06:39:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Nuremberg, DE",
+          "occurred_at": "2026-08-31T06:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by DE-NUREMBERG",
+          "location": "Nuremberg, DE",
+          "occurred_at": "2026-08-31T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260924-00137",
+      "asn_number": "ASN-440427",
+      "supplier_code": "SUP-100866",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO070729482",
+      "milestone": "TND",
+      "milestone_since": "2026-09-24T05:33:00Z",
+      "origin": {
+        "locationCode": "SUP-SGN-01",
+        "name": "SPM Thu Duc Factory",
+        "street": "Lot 21, Linh Trung EPZ",
+        "city": "Thu Duc",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-09-25T18:00:00Z",
+      "eta": "2026-09-28T18:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123495",
+          "poLine": 10,
+          "quantity": {
+            "value": 250,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-52445"
+        },
+        {
+          "poNumber": "4500123495",
+          "poLine": 20,
+          "quantity": {
+            "value": 250,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-61371"
+        },
+        {
+          "poNumber": "4500123495",
+          "poLine": 30,
+          "quantity": {
+            "value": 5000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-88700"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40427-01",
+          "type": "PLT",
+          "weight": {
+            "value": 257.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40427-02",
+          "type": "PLT",
+          "weight": {
+            "value": 221.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40427-03",
+          "type": "PLT",
+          "weight": {
+            "value": 235.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40427-04",
+          "type": "PLT",
+          "weight": {
+            "value": 185.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40427-05",
+          "type": "PLT",
+          "weight": {
+            "value": 98.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40427-06",
+          "type": "PLT",
+          "weight": {
+            "value": 163.1,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-24T05:33:00Z",
+      "updated_at": "2026-09-24T05:33:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-24T05:33:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00138",
+      "asn_number": "ASN-440457",
+      "supplier_code": "SUP-100845",
+      "carrier_scac": "KHNN",
+      "tracking_id": "KHNN053503524",
+      "milestone": "TND",
+      "milestone_since": "2026-09-23T08:37:00Z",
+      "origin": {
+        "locationCode": "SUP-SZX-01",
+        "name": "Brightwave Longhua Factory",
+        "street": "No. 88 Minzhi Ave, Longhua",
+        "city": "Shenzhen",
+        "state": "GD",
+        "zip": "518131",
+        "country": "CN"
+      },
+      "destination": {
+        "locationCode": "VN-HCMC",
+        "name": "Jabil Vietnam Saigon Hi-Tech Park",
+        "street": "Lot I-9, D1 Street",
+        "city": "Ho Chi Minh City",
+        "state": "HCM",
+        "zip": "700000",
+        "country": "VN"
+      },
+      "planned_ship_at": "2026-09-29T18:00:00Z",
+      "eta": "2026-10-02T18:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123496",
+          "poLine": 10,
+          "quantity": {
+            "value": 250,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-44156"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40457-01",
+          "type": "CTN",
+          "weight": {
+            "value": 5.4,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T08:37:00Z",
+      "updated_at": "2026-09-23T08:37:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-23T08:37:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260831-00139",
+      "asn_number": "ASN-440460",
+      "supplier_code": "SUP-100884",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO038662251",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-04T21:00:00Z",
+      "origin": {
+        "locationCode": "SUP-ICN-01",
+        "name": "Hanbit Suwon Line 3",
+        "street": "129 Samsung-ro, Yeongtong-gu",
+        "city": "Suwon",
+        "state": "GG",
+        "zip": "16677",
+        "country": "KR"
+      },
+      "destination": {
+        "locationCode": "CN-WUXI",
+        "name": "Jabil Wuxi Campus",
+        "street": "8 Xinhua Road, New District",
+        "city": "Wuxi",
+        "state": "JS",
+        "zip": "214028",
+        "country": "CN"
+      },
+      "planned_ship_at": "2026-09-01T14:00:00Z",
+      "eta": "2026-09-04T14:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123497",
+          "poLine": 10,
+          "quantity": {
+            "value": 750,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-41066"
+        },
+        {
+          "poNumber": "4500123497",
+          "poLine": 20,
+          "quantity": {
+            "value": 1000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-34203"
+        },
+        {
+          "poNumber": "4500123497",
+          "poLine": 30,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-33021"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40460-01",
+          "type": "PLT",
+          "weight": {
+            "value": 201.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40460-02",
+          "type": "PLT",
+          "weight": {
+            "value": 188.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40460-03",
+          "type": "PLT",
+          "weight": {
+            "value": 313.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40460-04",
+          "type": "PLT",
+          "weight": {
+            "value": 169.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40460-05",
+          "type": "PLT",
+          "weight": {
+            "value": 119.9,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-31T17:00:00Z",
+      "updated_at": "2026-09-04T21:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-31T17:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Suwon, KR",
+          "occurred_at": "2026-09-01T17:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Suwon, KR",
+          "occurred_at": "2026-09-02T06:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Incheon, IC, KR",
+          "occurred_at": "2026-09-03T12:48:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Wuxi, CN",
+          "occurred_at": "2026-09-04T10:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by CN-WUXI",
+          "location": "Wuxi, CN",
+          "occurred_at": "2026-09-04T21:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00140",
+      "asn_number": "ASN-440484",
+      "supplier_code": "SUP-100938",
+      "carrier_scac": "CMDU",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-23T16:32:00Z",
+      "origin": {
+        "locationCode": "SUP-CPQ-01",
+        "name": "Campinas Eletronica Fabrica 1",
+        "street": "Rod. Dom Pedro I, km 140",
+        "city": "Campinas",
+        "state": "SP",
+        "zip": "13086-902",
+        "country": "BR"
+      },
+      "destination": {
+        "locationCode": "MX-CHIHUAHUA",
+        "name": "Jabil Chihuahua Operations",
+        "street": "Av. de las Industrias 8901",
+        "city": "Chihuahua",
+        "state": "CHH",
+        "zip": "31136",
+        "country": "MX"
+      },
+      "planned_ship_at": "2026-09-25T18:00:00Z",
+      "eta": "2026-10-05T18:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123500",
+          "poLine": 10,
+          "quantity": {
+            "value": 500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-48250"
+        },
+        {
+          "poNumber": "4500123500",
+          "poLine": 20,
+          "quantity": {
+            "value": 5000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-31504"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40484-01",
+          "type": "PLT",
+          "weight": {
+            "value": 121.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40484-02",
+          "type": "PLT",
+          "weight": {
+            "value": 193.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40484-03",
+          "type": "PLT",
+          "weight": {
+            "value": 190.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40484-04",
+          "type": "PLT",
+          "weight": {
+            "value": 238.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40484-05",
+          "type": "PLT",
+          "weight": {
+            "value": 118.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40484-06",
+          "type": "PLT",
+          "weight": {
+            "value": 99.6,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T16:32:00Z",
+      "updated_at": "2026-09-23T16:32:00Z",
+      "events": []
+    },
+    {
+      "shipment_id": "SHP-20260919-00141",
+      "asn_number": "ASN-440523",
+      "supplier_code": "SUP-100944",
+      "carrier_scac": "XPOL",
+      "tracking_id": "XPOL087362853",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-20T08:00:00Z",
+      "origin": {
+        "locationCode": "SUP-YYZ-01",
+        "name": "Maple Ridge Mississauga DC",
+        "street": "6800 Kitimat Rd",
+        "city": "Mississauga",
+        "state": "ON",
+        "zip": "L5N 5M1",
+        "country": "CA"
+      },
+      "destination": {
+        "locationCode": "US-MEMPHIS",
+        "name": "Jabil Memphis Repair & Distribution",
+        "street": "4600 Distriplex Farms Dr",
+        "city": "Memphis",
+        "state": "TN",
+        "zip": "38141",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-20T03:00:00Z",
+      "eta": "2026-09-27T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123501",
+          "poLine": 10,
+          "quantity": {
+            "value": 6,
+            "uom": "BX"
+          },
+          "lotNumber": "LOT-58607"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40523-01",
+          "type": "CTN",
+          "weight": {
+            "value": 17.7,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-19T07:00:00Z",
+      "updated_at": "2026-09-24T11:06:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-19T07:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Mississauga, CA",
+          "occurred_at": "2026-09-20T08:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Mississauga, CA",
+          "occurred_at": "2026-09-20T18:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Toronto, ON, CA",
+          "occurred_at": "2026-09-24T11:06:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00142",
+      "asn_number": "ASN-440543",
+      "supplier_code": "SUP-100903",
+      "carrier_scac": "DHLE",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-23T16:45:00Z",
+      "origin": {
+        "locationCode": "SUP-GDN-01",
+        "name": "Wisla Gdansk Works",
+        "street": "ul. Kartuska 214",
+        "city": "Gdansk",
+        "state": "PM",
+        "zip": "80-122",
+        "country": "PL"
+      },
+      "destination": {
+        "locationCode": "DE-NUREMBERG",
+        "name": "Jabil Nuremberg Engineering Center",
+        "street": "Industriestrasse 12",
+        "city": "Nuremberg",
+        "state": "BY",
+        "zip": "90411",
+        "country": "DE"
+      },
+      "planned_ship_at": "2026-09-26T13:00:00Z",
+      "eta": "2026-09-29T13:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123503",
+          "poLine": 10,
+          "quantity": {
+            "value": 500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-56902"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40543-01",
+          "type": "PLT",
+          "weight": {
+            "value": 143.9,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T16:45:00Z",
+      "updated_at": "2026-09-23T16:45:00Z",
+      "events": []
+    },
+    {
+      "shipment_id": "SHP-20260921-00143",
+      "asn_number": "ASN-440568",
+      "supplier_code": "SUP-100402",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146047618650",
+      "milestone": "EXC",
+      "milestone_since": "2026-09-24T09:00:00Z",
+      "origin": {
+        "locationCode": "SUP-HSZ-01",
+        "name": "PRC Hsinchu Fab 2",
+        "street": "No. 18, Science Park Rd",
+        "city": "Hsinchu",
+        "state": "HSZ",
+        "zip": "300",
+        "country": "TW"
+      },
+      "destination": {
+        "locationCode": "CN-WUXI",
+        "name": "Jabil Wuxi Campus",
+        "street": "8 Xinhua Road, New District",
+        "city": "Wuxi",
+        "state": "JS",
+        "zip": "214028",
+        "country": "CN"
+      },
+      "planned_ship_at": "2026-09-22T10:00:00Z",
+      "eta": "2026-09-25T10:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123504",
+          "poLine": 10,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-83368"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40568-01",
+          "type": "PLT",
+          "weight": {
+            "value": 290.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40568-02",
+          "type": "PLT",
+          "weight": {
+            "value": 257.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40568-03",
+          "type": "PLT",
+          "weight": {
+            "value": 185.4,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-21T09:00:00Z",
+      "updated_at": "2026-09-24T09:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-21T09:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Hsinchu, TW",
+          "occurred_at": "2026-09-22T18:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Hsinchu, TW",
+          "occurred_at": "2026-09-23T13:00:00Z"
+        },
+        {
+          "event_code": "EXC",
+          "description": "Port congestion - vessel delayed",
+          "location": "Taipei, TP, TW",
+          "occurred_at": "2026-09-24T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00144",
+      "asn_number": "ASN-440601",
+      "supplier_code": "SUP-100845",
+      "carrier_scac": "EXDO",
+      "tracking_id": "EXDO039504524",
+      "milestone": "TND",
+      "milestone_since": "2026-09-23T10:45:00Z",
+      "origin": {
+        "locationCode": "SUP-SZX-01",
+        "name": "Brightwave Longhua Factory",
+        "street": "No. 88 Minzhi Ave, Longhua",
+        "city": "Shenzhen",
+        "state": "GD",
+        "zip": "518131",
+        "country": "CN"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-09-26T14:00:00Z",
+      "eta": "2026-09-28T14:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123505",
+          "poLine": 10,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-31713"
+        },
+        {
+          "poNumber": "4500123505",
+          "poLine": 20,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-16502"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40601-01",
+          "type": "PLT",
+          "weight": {
+            "value": 269.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40601-02",
+          "type": "PLT",
+          "weight": {
+            "value": 166.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40601-03",
+          "type": "PLT",
+          "weight": {
+            "value": 260.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40601-04",
+          "type": "PLT",
+          "weight": {
+            "value": 185.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40601-05",
+          "type": "PLT",
+          "weight": {
+            "value": 186.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40601-06",
+          "type": "PLT",
+          "weight": {
+            "value": 292.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T10:45:00Z",
+      "updated_at": "2026-09-23T10:45:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-23T10:45:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00145",
+      "asn_number": "ASN-440635",
+      "supplier_code": "SUP-100975",
+      "carrier_scac": "DHLE",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-23T05:59:00Z",
+      "origin": {
+        "locationCode": "SUP-HMO-01",
+        "name": "Sonora Castings Parque Industrial",
+        "street": "Blvd. Solidaridad 2250",
+        "city": "Hermosillo",
+        "state": "SON",
+        "zip": "83299",
+        "country": "MX"
+      },
+      "destination": {
+        "locationCode": "MX-CHIHUAHUA",
+        "name": "Jabil Chihuahua Operations",
+        "street": "Av. de las Industrias 8901",
+        "city": "Chihuahua",
+        "state": "CHH",
+        "zip": "31136",
+        "country": "MX"
+      },
+      "planned_ship_at": "2026-09-26T15:00:00Z",
+      "eta": "2026-09-28T15:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123508",
+          "poLine": 10,
+          "quantity": {
+            "value": 1000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-23351"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40635-01",
+          "type": "PLT",
+          "weight": {
+            "value": 213.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40635-02",
+          "type": "PLT",
+          "weight": {
+            "value": 96.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T05:59:00Z",
+      "updated_at": "2026-09-23T05:59:00Z",
+      "events": []
+    },
+    {
+      "shipment_id": "SHP-20260915-00146",
+      "asn_number": "ASN-440660",
+      "supplier_code": "SUP-100926",
+      "carrier_scac": "MAEU",
+      "tracking_id": "MAEU0054436006",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-16T14:00:00Z",
+      "origin": {
+        "locationCode": "SUP-SNN-01",
+        "name": "Shannon Free Zone Unit 7",
+        "street": "Shannon Free Zone East",
+        "city": "Shannon",
+        "state": "CE",
+        "zip": "V14 DX24",
+        "country": "IE"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-16T04:00:00Z",
+      "eta": "2026-10-03T04:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123513",
+          "poLine": 10,
+          "quantity": {
+            "value": 1800,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-85750"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40660-01",
+          "type": "PLT",
+          "weight": {
+            "value": 184.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40660-02",
+          "type": "PLT",
+          "weight": {
+            "value": 286.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40660-03",
+          "type": "PLT",
+          "weight": {
+            "value": 218.7,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40660-04",
+          "type": "PLT",
+          "weight": {
+            "value": 96.2,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-15T06:00:00Z",
+      "updated_at": "2026-09-17T09:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-15T06:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Shannon, IE",
+          "occurred_at": "2026-09-16T14:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Shannon, IE",
+          "occurred_at": "2026-09-17T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260919-00147",
+      "asn_number": "ASN-440671",
+      "supplier_code": "SUP-100957",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146087879860",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-20T11:00:00Z",
+      "origin": {
+        "locationCode": "SUP-RYG-01",
+        "name": "CP Harness Rayong Plant",
+        "street": "Eastern Seaboard IE, 64/22 Moo 4",
+        "city": "Rayong",
+        "state": "RY",
+        "zip": "21140",
+        "country": "TH"
+      },
+      "destination": {
+        "locationCode": "MY-PENANG",
+        "name": "Jabil Penang Operations",
+        "street": "56 Hilir Sungai Keluang 1",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "planned_ship_at": "2026-09-20T06:00:00Z",
+      "eta": "2026-09-26T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123514",
+          "poLine": 10,
+          "quantity": {
+            "value": 80,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-31770"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40671-01",
+          "type": "CTN",
+          "weight": {
+            "value": 9.1,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-19T06:00:00Z",
+      "updated_at": "2026-09-23T22:48:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-19T06:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Rayong, TH",
+          "occurred_at": "2026-09-20T11:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Rayong, TH",
+          "occurred_at": "2026-09-20T20:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Laem Chabang, CB, TH",
+          "occurred_at": "2026-09-23T22:48:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260920-00148",
+      "asn_number": "ASN-440684",
+      "supplier_code": "SUP-100859",
+      "carrier_scac": "DHLE",
+      "tracking_id": "JD0146045867810",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-21T10:00:00Z",
+      "origin": {
+        "locationCode": "SUP-PEN-01",
+        "name": "PST Bayan Lepas FIZ",
+        "street": "Plot 102, Bayan Lepas FIZ Phase 4",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-09-21T07:00:00Z",
+      "eta": "2026-09-25T07:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123516",
+          "poLine": 10,
+          "quantity": {
+            "value": 300,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-83652"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40684-01",
+          "type": "CTN",
+          "weight": {
+            "value": 6.4,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-20T10:00:00Z",
+      "updated_at": "2026-09-23T21:15:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-20T10:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-21T10:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-22T04:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Penang, PNG, MY",
+          "occurred_at": "2026-09-23T21:15:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260909-00149",
+      "asn_number": "ASN-440693",
+      "supplier_code": "SUP-100845",
+      "carrier_scac": "MAEU",
+      "tracking_id": "MAEU0096045558",
+      "milestone": "EXC",
+      "milestone_since": "2026-09-21T23:18:00Z",
+      "origin": {
+        "locationCode": "SUP-SZX-01",
+        "name": "Brightwave Longhua Factory",
+        "street": "No. 88 Minzhi Ave, Longhua",
+        "city": "Shenzhen",
+        "state": "GD",
+        "zip": "518131",
+        "country": "CN"
+      },
+      "destination": {
+        "locationCode": "US-SAN-JOSE",
+        "name": "Jabil San Jose Blue Sky Center",
+        "street": "30 Great Oaks Blvd",
+        "city": "San Jose",
+        "state": "CA",
+        "zip": "95119",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-10T11:00:00Z",
+      "eta": "2026-09-30T11:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123517",
+          "poLine": 10,
+          "quantity": {
+            "value": 1500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-33145"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40693-01",
+          "type": "PLT",
+          "weight": {
+            "value": 132.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40693-02",
+          "type": "PLT",
+          "weight": {
+            "value": 221.6,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40693-03",
+          "type": "PLT",
+          "weight": {
+            "value": 215.9,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-09T20:00:00Z",
+      "updated_at": "2026-09-21T23:18:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-09T20:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Shenzhen, CN",
+          "occurred_at": "2026-09-10T13:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Shenzhen, CN",
+          "occurred_at": "2026-09-11T01:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-21T17:18:00Z"
+        },
+        {
+          "event_code": "EXC",
+          "description": "Held at customs - HS code query",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-21T23:18:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260906-00150",
+      "asn_number": "ASN-440727",
+      "supplier_code": "SUP-100989",
+      "carrier_scac": "SAIA",
+      "tracking_id": "SAIA021333153",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-08T21:00:00Z",
+      "origin": {
+        "locationCode": "SUP-CLT-01",
+        "name": "CPM Charlotte Distribution",
+        "street": "10100 Westlake Dr",
+        "city": "Charlotte",
+        "state": "NC",
+        "zip": "28273",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-06T13:00:00Z",
+      "eta": "2026-09-08T13:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123518",
+          "poLine": 10,
+          "quantity": {
+            "value": 3000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-92685"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40727-01",
+          "type": "PLT",
+          "weight": {
+            "value": 162.5,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40727-02",
+          "type": "PLT",
+          "weight": {
+            "value": 118.8,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40727-03",
+          "type": "PLT",
+          "weight": {
+            "value": 210.0,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40727-04",
+          "type": "PLT",
+          "weight": {
+            "value": 209.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40727-05",
+          "type": "PLT",
+          "weight": {
+            "value": 307.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40727-06",
+          "type": "PLT",
+          "weight": {
+            "value": 190.5,
+            "unit": "lb"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-06T04:00:00Z",
+      "updated_at": "2026-09-08T21:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-06T04:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-09-06T21:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Charlotte, US",
+          "occurred_at": "2026-09-07T01:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-07T20:48:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Auburn Hills, US",
+          "occurred_at": "2026-09-08T08:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by US-AUBURN-HILLS",
+          "location": "Auburn Hills, US",
+          "occurred_at": "2026-09-08T21:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260821-00151",
+      "asn_number": "ASN-440764",
+      "supplier_code": "SUP-100402",
+      "carrier_scac": "KHNN",
+      "tracking_id": "KHNN056218592",
+      "milestone": "DLV",
+      "milestone_since": "2026-08-25T21:00:00Z",
+      "origin": {
+        "locationCode": "SUP-HSZ-01",
+        "name": "PRC Hsinchu Fab 2",
+        "street": "No. 18, Science Park Rd",
+        "city": "Hsinchu",
+        "state": "HSZ",
+        "zip": "300",
+        "country": "TW"
+      },
+      "destination": {
+        "locationCode": "MY-PENANG",
+        "name": "Jabil Penang Operations",
+        "street": "56 Hilir Sungai Keluang 1",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "planned_ship_at": "2026-08-22T09:00:00Z",
+      "eta": "2026-08-25T09:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123520",
+          "poLine": 10,
+          "quantity": {
+            "value": 200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-25001"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40764-01",
+          "type": "CTN",
+          "weight": {
+            "value": 25.8,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-08-21T09:00:00Z",
+      "updated_at": "2026-08-25T21:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-08-21T09:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Hsinchu, TW",
+          "occurred_at": "2026-08-22T13:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Hsinchu, TW",
+          "occurred_at": "2026-08-22T20:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Taipei, TP, TW",
+          "occurred_at": "2026-08-24T05:33:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-08-25T06:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by MY-PENANG",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-08-25T21:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00152",
+      "asn_number": "ASN-440800",
+      "supplier_code": "SUP-100884",
+      "carrier_scac": "MAEU",
+      "tracking_id": "MAEU0078032612",
+      "milestone": "CXL",
+      "milestone_since": "2026-09-23T04:28:00Z",
+      "origin": {
+        "locationCode": "SUP-ICN-01",
+        "name": "Hanbit Suwon Line 3",
+        "street": "129 Samsung-ro, Yeongtong-gu",
+        "city": "Suwon",
+        "state": "GG",
+        "zip": "16677",
+        "country": "KR"
+      },
+      "destination": {
+        "locationCode": "US-AUBURN-HILLS",
+        "name": "Jabil Manufacturing Site",
+        "street": "100 Manufacturing Way",
+        "city": "Auburn Hills",
+        "state": "MI",
+        "zip": "48326",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-27T14:00:00Z",
+      "eta": "2026-10-18T14:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123521",
+          "poLine": 10,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-74491"
+        },
+        {
+          "poNumber": "4500123521",
+          "poLine": 20,
+          "quantity": {
+            "value": 2000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-57676"
+        },
+        {
+          "poNumber": "4500123521",
+          "poLine": 30,
+          "quantity": {
+            "value": 2000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-84765"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40800-01",
+          "type": "PLT",
+          "weight": {
+            "value": 228.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40800-02",
+          "type": "PLT",
+          "weight": {
+            "value": 149.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40800-03",
+          "type": "PLT",
+          "weight": {
+            "value": 213.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40800-04",
+          "type": "PLT",
+          "weight": {
+            "value": 95.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40800-05",
+          "type": "PLT",
+          "weight": {
+            "value": 293.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40800-06",
+          "type": "PLT",
+          "weight": {
+            "value": 129.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": "Compensation: ERP inbound delivery posting failed (saga rollback)",
+      "created_at": "2026-09-23T04:26:00Z",
+      "updated_at": "2026-09-23T04:28:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-23T04:26:00Z"
+        },
+        {
+          "event_code": "CXL",
+          "description": "Cancelled: Compensation: ERP inbound delivery posting failed (saga rollback)",
+          "location": null,
+          "occurred_at": "2026-09-23T04:28:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260916-00153",
+      "asn_number": "ASN-440834",
+      "supplier_code": "SUP-100951",
+      "carrier_scac": "EXLA",
+      "tracking_id": "EXLA016485163",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-19T11:00:00Z",
+      "origin": {
+        "locationCode": "SUP-PHX-01",
+        "name": "Tri-Star Tempe Warehouse",
+        "street": "1850 W University Dr",
+        "city": "Tempe",
+        "state": "AZ",
+        "zip": "85281",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-SAN-JOSE",
+        "name": "Jabil San Jose Blue Sky Center",
+        "street": "30 Great Oaks Blvd",
+        "city": "San Jose",
+        "state": "CA",
+        "zip": "95119",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-16T12:00:00Z",
+      "eta": "2026-09-19T12:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123522",
+          "poLine": 10,
+          "quantity": {
+            "value": 400,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-19106"
+        },
+        {
+          "poNumber": "4500123522",
+          "poLine": 20,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-87413"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40834-01",
+          "type": "PLT",
+          "weight": {
+            "value": 103.3,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40834-02",
+          "type": "PLT",
+          "weight": {
+            "value": 312.8,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40834-03",
+          "type": "PLT",
+          "weight": {
+            "value": 213.9,
+            "unit": "lb"
+          }
+        },
+        {
+          "huId": "PALLET-40834-04",
+          "type": "PLT",
+          "weight": {
+            "value": 315.6,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40834-05",
+          "type": "PLT",
+          "weight": {
+            "value": 249.8,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-16T00:00:00Z",
+      "updated_at": "2026-09-19T11:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-16T00:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Tempe, US",
+          "occurred_at": "2026-09-16T21:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Tempe, US",
+          "occurred_at": "2026-09-17T16:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-18T16:12:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "San Jose, US",
+          "occurred_at": "2026-09-19T05:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by US-SAN-JOSE",
+          "location": "San Jose, US",
+          "occurred_at": "2026-09-19T11:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260919-00154",
+      "asn_number": "ASN-440855",
+      "supplier_code": "SUP-100245",
+      "carrier_scac": "EXLA",
+      "tracking_id": "EXLA094831758",
+      "milestone": "ITR",
+      "milestone_since": "2026-09-20T12:00:00Z",
+      "origin": {
+        "locationCode": "SUP-ATL-01",
+        "name": "Supplier Distribution Center",
+        "street": "4500 Fulton Industrial Blvd SW",
+        "city": "Atlanta",
+        "state": "GA",
+        "zip": "30301",
+        "country": "US"
+      },
+      "destination": {
+        "locationCode": "US-MEMPHIS",
+        "name": "Jabil Memphis Repair & Distribution",
+        "street": "4600 Distriplex Farms Dr",
+        "city": "Memphis",
+        "state": "TN",
+        "zip": "38141",
+        "country": "US"
+      },
+      "planned_ship_at": "2026-09-20T10:00:00Z",
+      "eta": "2026-09-26T10:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123525",
+          "poLine": 10,
+          "quantity": {
+            "value": 120,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-56240"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "CTN-40855-01",
+          "type": "CTN",
+          "weight": {
+            "value": 24.5,
+            "unit": "lb"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-19T21:00:00Z",
+      "updated_at": "2026-09-23T20:48:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-19T21:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Atlanta, US",
+          "occurred_at": "2026-09-20T12:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Atlanta, US",
+          "occurred_at": "2026-09-20T18:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Louisville, KY, US",
+          "occurred_at": "2026-09-23T20:48:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00155",
+      "asn_number": "ASN-440887",
+      "supplier_code": "SUP-100962",
+      "carrier_scac": "DHLE",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-23T05:32:00Z",
+      "origin": {
+        "locationCode": "SUP-SIN-01",
+        "name": "LCC Woodlands Hub",
+        "street": "11 Woodlands Close #05-12",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "737853",
+        "country": "SG"
+      },
+      "destination": {
+        "locationCode": "SG-SINGAPORE",
+        "name": "Jabil Singapore Operations",
+        "street": "20 Loyang Way",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "508774",
+        "country": "SG"
+      },
+      "planned_ship_at": "2026-09-25T19:00:00Z",
+      "eta": "2026-09-27T19:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123526",
+          "poLine": 10,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-88001"
+        },
+        {
+          "poNumber": "4500123526",
+          "poLine": 20,
+          "quantity": {
+            "value": 600,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-54163"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40887-01",
+          "type": "PLT",
+          "weight": {
+            "value": 216.1,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40887-02",
+          "type": "PLT",
+          "weight": {
+            "value": 211.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40887-03",
+          "type": "PLT",
+          "weight": {
+            "value": 210.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40887-04",
+          "type": "PLT",
+          "weight": {
+            "value": 231.3,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T05:32:00Z",
+      "updated_at": "2026-09-23T05:32:00Z",
+      "events": []
+    },
+    {
+      "shipment_id": "SHP-20260906-00156",
+      "asn_number": "ASN-440893",
+      "supplier_code": "SUP-100962",
+      "carrier_scac": "KHNN",
+      "tracking_id": "KHNN048698865",
+      "milestone": "DLV",
+      "milestone_since": "2026-09-09T20:00:00Z",
+      "origin": {
+        "locationCode": "SUP-SIN-01",
+        "name": "LCC Woodlands Hub",
+        "street": "11 Woodlands Close #05-12",
+        "city": "Singapore",
+        "state": "SG",
+        "zip": "737853",
+        "country": "SG"
+      },
+      "destination": {
+        "locationCode": "MY-PENANG",
+        "name": "Jabil Penang Operations",
+        "street": "56 Hilir Sungai Keluang 1",
+        "city": "Bayan Lepas",
+        "state": "PNG",
+        "zip": "11900",
+        "country": "MY"
+      },
+      "planned_ship_at": "2026-09-07T15:00:00Z",
+      "eta": "2026-09-09T15:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123527",
+          "poLine": 10,
+          "quantity": {
+            "value": 2500,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-68874"
+        },
+        {
+          "poNumber": "4500123527",
+          "poLine": 20,
+          "quantity": {
+            "value": 3000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-11302"
+        },
+        {
+          "poNumber": "4500123527",
+          "poLine": 30,
+          "quantity": {
+            "value": 3000,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-88856"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40893-01",
+          "type": "PLT",
+          "weight": {
+            "value": 215.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40893-02",
+          "type": "PLT",
+          "weight": {
+            "value": 272.5,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40893-03",
+          "type": "PLT",
+          "weight": {
+            "value": 284.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40893-04",
+          "type": "PLT",
+          "weight": {
+            "value": 173.9,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40893-05",
+          "type": "PLT",
+          "weight": {
+            "value": 259.2,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40893-06",
+          "type": "PLT",
+          "weight": {
+            "value": 90.5,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-06T17:00:00Z",
+      "updated_at": "2026-09-09T20:00:00Z",
+      "events": [
+        {
+          "event_code": "TND",
+          "description": "ASN received and tendered to carrier",
+          "location": null,
+          "occurred_at": "2026-09-06T17:00:00Z"
+        },
+        {
+          "event_code": "PU",
+          "description": "Picked up by carrier",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-09-08T01:00:00Z"
+        },
+        {
+          "event_code": "DEP",
+          "description": "Departed origin facility",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-09-08T10:00:00Z"
+        },
+        {
+          "event_code": "ARR",
+          "description": "Arrived at hub",
+          "location": "Singapore, SG",
+          "occurred_at": "2026-09-09T01:57:00Z"
+        },
+        {
+          "event_code": "OFD",
+          "description": "Out for delivery",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-09T11:00:00Z"
+        },
+        {
+          "event_code": "DLV",
+          "description": "Delivered - received at dock by MY-PENANG",
+          "location": "Bayan Lepas, MY",
+          "occurred_at": "2026-09-09T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260923-00157",
+      "asn_number": "ASN-440897",
+      "supplier_code": "SUP-100311",
+      "carrier_scac": "DHLE",
+      "tracking_id": null,
+      "milestone": "PLN",
+      "milestone_since": "2026-09-23T19:27:00Z",
+      "origin": {
+        "locationCode": "SUP-STR-01",
+        "name": "Nordwerk Werk Stuttgart",
+        "street": "Industriestrasse 44",
+        "city": "Stuttgart",
+        "state": "BW",
+        "zip": "70565",
+        "country": "DE"
+      },
+      "destination": {
+        "locationCode": "DE-NUREMBERG",
+        "name": "Jabil Nuremberg Engineering Center",
+        "street": "Industriestrasse 12",
+        "city": "Nuremberg",
+        "state": "BY",
+        "zip": "90411",
+        "country": "DE"
+      },
+      "planned_ship_at": "2026-09-27T19:00:00Z",
+      "eta": "2026-09-29T19:00:00Z",
+      "contents": [
+        {
+          "poNumber": "4500123529",
+          "poLine": 10,
+          "quantity": {
+            "value": 750,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-54098"
+        },
+        {
+          "poNumber": "4500123529",
+          "poLine": 20,
+          "quantity": {
+            "value": 1200,
+            "uom": "EA"
+          },
+          "lotNumber": "LOT-20027"
+        }
+      ],
+      "handling_units": [
+        {
+          "huId": "PALLET-40897-01",
+          "type": "PLT",
+          "weight": {
+            "value": 103.4,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40897-02",
+          "type": "PLT",
+          "weight": {
+            "value": 92.8,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40897-03",
+          "type": "PLT",
+          "weight": {
+            "value": 92.0,
+            "unit": "kg"
+          }
+        },
+        {
+          "huId": "PALLET-40897-04",
+          "type": "PLT",
+          "weight": {
+            "value": 239.2,
+            "unit": "kg"
+          }
+        }
+      ],
+      "cancel_reason": null,
+      "created_at": "2026-09-23T19:27:00Z",
+      "updated_at": "2026-09-23T19:27:00Z",
       "events": []
     }
   ]

@@ -275,4 +275,24 @@ content type `application/problem+json`. Map any backend 503 to façade 503
 | SHP-20260918-00121 | ITR (ASN-439901) | IN_TRANSIT |
 | SHP-20260922-00188 | PLN (Nordwerk) | DRAFT |
 
+### Additional seed records (expanded data set)
+
+| Record | What it shows |
+|---|---|
+| SUP-100917 Danube Magnetics (ON_HOLD, financial review): POs 4500123482, 4500123489, 4500123519 | Write access denied `SUPPLIER_ON_HOLD` for open orders |
+| SUP-100951 Tri-Star Surplus (BLOCKED): POs 4500123478, 4500123498 (09), 4500123522 (05) | Blocked supplier with only closed/cancelled history; consumer `tristar-portal` inactive |
+| SUP-100938 Campinas Eletronica (CONDITIONAL, HIGH risk) | Active but risky supplier |
+| SUP-100996 RM Sensorik (onboarded 2026-09-01) | Supplier with no ERP orders; consumer `rm-sensorik-onboarding` pending activation |
+| PO 4500123471 (JBCN, CNY) | Supplier rejection (RJ) while the PO is still 01 Open |
+| POs in EUR (JBDE, JBHU), PLN (JBPL), CNY (JBCN) | Currency pass-through in the façade |
+| `asia-pacific-edi-network`, `europe-supplier-hub`, `americas-supplier-portal` | One consumer acting for several suppliers |
+| `jabil-logistics-control-tower`, `jabil-spend-analytics`, `jabil-l2-support-desk` | Internal / operations consumers with `*` read access |
+| Shipments SHP-20260923-00131, SHP-20260924-00132, SHP-20260923-00152 (CXL) with deliveries 180000131, 180000132, 180000149 (REVERSED) | Completed saga compensations |
+| Shipments SHP-20260915-00107, SHP-20260922-00123, SHP-20260921-00143, SHP-20260909-00149 (EXC) | Façade status DELAYED |
+| Planned shipments SHP-20260923-00140, -00142, -00145, -00155, -00157 | Façade status DRAFT (not yet posted to ERP) |
+| Carriers SAIA, ESTES/EXLA, EXPEDITORS/EXDO, KUEHNE/KHNN, CMACGM/CMDU, SCHENKER/SHKK | More code ↔ SCAC translations |
+
+Totals: 23 suppliers, 74 POs, 54 confirmations, 34 inbound deliveries, 40 shipments, 137 tracking events.
+The easiest way to browse them is the dashboard at `/dashboard/`.
+
 Reset everything at any time: `npm run seed:reset`.

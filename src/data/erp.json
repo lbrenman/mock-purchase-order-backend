@@ -1,149 +1,4637 @@
 {
   "purchasing_orgs": [
-    { "code": "JBUS", "name": "Jabil-US", "company_code": "US01" },
-    { "code": "JBMX", "name": "Jabil-MX", "company_code": "MX01" },
-    { "code": "JBDE", "name": "Jabil-DE", "company_code": "DE01" },
-    { "code": "JBSG", "name": "Jabil-SG", "company_code": "SG01" }
+    {
+      "code": "JBUS",
+      "name": "Jabil-US",
+      "company_code": "US01"
+    },
+    {
+      "code": "JBMX",
+      "name": "Jabil-MX",
+      "company_code": "MX01"
+    },
+    {
+      "code": "JBDE",
+      "name": "Jabil-DE",
+      "company_code": "DE01"
+    },
+    {
+      "code": "JBSG",
+      "name": "Jabil-SG",
+      "company_code": "SG01"
+    },
+    {
+      "code": "JBCN",
+      "name": "Jabil-CN",
+      "company_code": "CN01"
+    },
+    {
+      "code": "JBMY",
+      "name": "Jabil-MY",
+      "company_code": "MY01"
+    },
+    {
+      "code": "JBVN",
+      "name": "Jabil-VN",
+      "company_code": "VN01"
+    },
+    {
+      "code": "JBPL",
+      "name": "Jabil-PL",
+      "company_code": "PL01"
+    },
+    {
+      "code": "JBHU",
+      "name": "Jabil-HU",
+      "company_code": "HU01"
+    }
   ],
   "plants": [
-    { "plant_code": "1101", "site_code": "US-AUBURN-HILLS", "name": "Jabil Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "region": "MI", "postal_code": "48326", "country": "US" },
-    { "plant_code": "1102", "site_code": "US-ST-PETERSBURG", "name": "Jabil Tampa Bay Operations", "street": "2400 Gateway Centre Blvd", "city": "St. Petersburg", "region": "FL", "postal_code": "33716", "country": "US" },
-    { "plant_code": "2101", "site_code": "MX-GUADALAJARA", "name": "Jabil Guadalajara Campus", "street": "Av. Industrial 500", "city": "Zapopan", "region": "JAL", "postal_code": "45100", "country": "MX" },
-    { "plant_code": "3101", "site_code": "DE-NUREMBERG", "name": "Jabil Nuremberg Engineering Center", "street": "Industriestrasse 12", "city": "Nuremberg", "region": "BY", "postal_code": "90411", "country": "DE" },
-    { "plant_code": "4101", "site_code": "SG-SINGAPORE", "name": "Jabil Singapore Operations", "street": "20 Loyang Way", "city": "Singapore", "region": "SG", "postal_code": "508774", "country": "SG" }
+    {
+      "plant_code": "1101",
+      "site_code": "US-AUBURN-HILLS",
+      "name": "Jabil Manufacturing Site",
+      "street": "100 Manufacturing Way",
+      "city": "Auburn Hills",
+      "region": "MI",
+      "postal_code": "48326",
+      "country": "US"
+    },
+    {
+      "plant_code": "1102",
+      "site_code": "US-ST-PETERSBURG",
+      "name": "Jabil Tampa Bay Operations",
+      "street": "2400 Gateway Centre Blvd",
+      "city": "St. Petersburg",
+      "region": "FL",
+      "postal_code": "33716",
+      "country": "US"
+    },
+    {
+      "plant_code": "2101",
+      "site_code": "MX-GUADALAJARA",
+      "name": "Jabil Guadalajara Campus",
+      "street": "Av. Industrial 500",
+      "city": "Zapopan",
+      "region": "JAL",
+      "postal_code": "45100",
+      "country": "MX"
+    },
+    {
+      "plant_code": "3101",
+      "site_code": "DE-NUREMBERG",
+      "name": "Jabil Nuremberg Engineering Center",
+      "street": "Industriestrasse 12",
+      "city": "Nuremberg",
+      "region": "BY",
+      "postal_code": "90411",
+      "country": "DE"
+    },
+    {
+      "plant_code": "4101",
+      "site_code": "SG-SINGAPORE",
+      "name": "Jabil Singapore Operations",
+      "street": "20 Loyang Way",
+      "city": "Singapore",
+      "region": "SG",
+      "postal_code": "508774",
+      "country": "SG"
+    },
+    {
+      "plant_code": "1103",
+      "site_code": "US-MEMPHIS",
+      "name": "Jabil Memphis Repair & Distribution",
+      "street": "4600 Distriplex Farms Dr",
+      "city": "Memphis",
+      "region": "TN",
+      "postal_code": "38141",
+      "country": "US"
+    },
+    {
+      "plant_code": "1104",
+      "site_code": "US-SAN-JOSE",
+      "name": "Jabil San Jose Blue Sky Center",
+      "street": "30 Great Oaks Blvd",
+      "city": "San Jose",
+      "region": "CA",
+      "postal_code": "95119",
+      "country": "US"
+    },
+    {
+      "plant_code": "2102",
+      "site_code": "MX-CHIHUAHUA",
+      "name": "Jabil Chihuahua Operations",
+      "street": "Av. de las Industrias 8901",
+      "city": "Chihuahua",
+      "region": "CHH",
+      "postal_code": "31136",
+      "country": "MX"
+    },
+    {
+      "plant_code": "3102",
+      "site_code": "HU-TISZAUJVAROS",
+      "name": "Jabil Tiszaujvaros Plant",
+      "street": "Huszar Andor ut 1",
+      "city": "Tiszaujvaros",
+      "region": "BZ",
+      "postal_code": "3580",
+      "country": "HU"
+    },
+    {
+      "plant_code": "3103",
+      "site_code": "PL-KWIDZYN",
+      "name": "Jabil Kwidzyn Campus",
+      "street": "ul. Mickiewicza 49",
+      "city": "Kwidzyn",
+      "region": "PM",
+      "postal_code": "82-500",
+      "country": "PL"
+    },
+    {
+      "plant_code": "4102",
+      "site_code": "MY-PENANG",
+      "name": "Jabil Penang Operations",
+      "street": "56 Hilir Sungai Keluang 1",
+      "city": "Bayan Lepas",
+      "region": "PNG",
+      "postal_code": "11900",
+      "country": "MY"
+    },
+    {
+      "plant_code": "4103",
+      "site_code": "CN-WUXI",
+      "name": "Jabil Wuxi Campus",
+      "street": "8 Xinhua Road, New District",
+      "city": "Wuxi",
+      "region": "JS",
+      "postal_code": "214028",
+      "country": "CN"
+    },
+    {
+      "plant_code": "4104",
+      "site_code": "VN-HCMC",
+      "name": "Jabil Vietnam Saigon Hi-Tech Park",
+      "street": "Lot I-9, D1 Street",
+      "city": "Ho Chi Minh City",
+      "region": "HCM",
+      "postal_code": "700000",
+      "country": "VN"
+    }
   ],
   "purchase_orders": [
     {
-      "po_number": "4500123456", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-15", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-10-05", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
-      "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-09-15T13:05:00Z", "changed_at": "2026-09-23T14:22:31Z",
+      "po_number": "4500123456",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-15",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-05",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 1,
+      "created_at": "2026-09-15T13:05:00Z",
+      "changed_at": "2026-09-23T14:22:31Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-778210", "short_text": "Industrial controller assembly", "quantity": 250, "uom": "EA", "net_price": 84.50 }
+        {
+          "item_no": "00010",
+          "material": "MAT-778210",
+          "short_text": "Industrial controller assembly",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 84.5
+        }
       ]
     },
     {
-      "po_number": "4500123457", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-10", "currency": "USD",
-      "status_code": "03", "delivery_date": "2026-10-12", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
-      "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-09-10T15:40:00Z", "changed_at": "2026-09-11T09:12:44Z",
+      "po_number": "4500123457",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-10",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-10-12",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 1,
+      "created_at": "2026-09-10T15:40:00Z",
+      "changed_at": "2026-09-11T09:12:44Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-778305", "short_text": "Power distribution board", "quantity": 400, "uom": "EA", "net_price": 42.75, "confirmed_qty": 400, "confirmed_date": "2026-10-12" },
-        { "item_no": "00020", "material": "MAT-778311", "short_text": "Harness, 24-pin, shielded", "quantity": 800, "uom": "EA", "net_price": 6.20, "confirmed_qty": 800, "confirmed_date": "2026-10-12" }
+        {
+          "item_no": "00010",
+          "material": "MAT-778305",
+          "short_text": "Power distribution board",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 42.75,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-10-12"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-778311",
+          "short_text": "Harness, 24-pin, shielded",
+          "quantity": 800,
+          "uom": "EA",
+          "net_price": 6.2,
+          "confirmed_qty": 800,
+          "confirmed_date": "2026-10-12"
+        }
       ]
     },
     {
-      "po_number": "4500123458", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-02", "currency": "USD",
-      "status_code": "04", "delivery_date": "2026-09-26", "plant": "1102", "incoterms": "FCA", "payment_terms": "NET60",
-      "buyer_name": "Daniel Okafor", "revision": 2, "created_at": "2026-09-02T12:00:00Z", "changed_at": "2026-09-18T19:05:10Z",
+      "po_number": "4500123458",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-02",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-09-26",
+      "plant": "1102",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Daniel Okafor",
+      "revision": 2,
+      "created_at": "2026-09-02T12:00:00Z",
+      "changed_at": "2026-09-18T19:05:10Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-778412", "short_text": "Motor driver module", "quantity": 500, "uom": "EA", "net_price": 57.10, "confirmed_qty": 500, "confirmed_date": "2026-09-26", "shipped_qty": 300 },
-        { "item_no": "00020", "material": "MAT-778420", "short_text": "Heat sink, extruded aluminium", "quantity": 500, "uom": "EA", "net_price": 3.85, "confirmed_qty": 500, "confirmed_date": "2026-09-30" }
+        {
+          "item_no": "00010",
+          "material": "MAT-778412",
+          "short_text": "Motor driver module",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 57.1,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-09-26",
+          "shipped_qty": 300
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-778420",
+          "short_text": "Heat sink, extruded aluminium",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 3.85,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-09-30"
+        }
       ]
     },
     {
-      "po_number": "4500123459", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-08-12", "currency": "USD",
-      "status_code": "05", "delivery_date": "2026-08-30", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET60",
-      "buyer_name": "Maria Alvarez", "revision": 1, "created_at": "2026-08-12T14:30:00Z", "changed_at": "2026-08-31T10:00:00Z",
+      "po_number": "4500123459",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-12",
+      "currency": "USD",
+      "status_code": "05",
+      "delivery_date": "2026-08-30",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 1,
+      "created_at": "2026-08-12T14:30:00Z",
+      "changed_at": "2026-08-31T10:00:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-778210", "short_text": "Industrial controller assembly", "quantity": 150, "uom": "EA", "net_price": 84.50, "confirmed_qty": 150, "confirmed_date": "2026-08-29", "shipped_qty": 150 }
+        {
+          "item_no": "00010",
+          "material": "MAT-778210",
+          "short_text": "Industrial controller assembly",
+          "quantity": 150,
+          "uom": "EA",
+          "net_price": 84.5,
+          "confirmed_qty": 150,
+          "confirmed_date": "2026-08-29",
+          "shipped_qty": 150
+        }
       ]
     },
     {
-      "po_number": "4500123460", "vendor_id": "0000710311", "purch_org": "JBDE", "doc_date": "2026-09-18", "currency": "EUR",
-      "status_code": "01", "delivery_date": "2026-10-20", "plant": "3101", "incoterms": "DAP", "payment_terms": "NET45",
-      "buyer_name": "Katrin Vogel", "revision": 1, "created_at": "2026-09-18T08:15:00Z", "changed_at": "2026-09-18T08:15:00Z",
+      "po_number": "4500123460",
+      "vendor_id": "0000710311",
+      "purch_org": "JBDE",
+      "doc_date": "2026-09-18",
+      "currency": "EUR",
+      "status_code": "01",
+      "delivery_date": "2026-10-20",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Katrin Vogel",
+      "revision": 1,
+      "created_at": "2026-09-18T08:15:00Z",
+      "changed_at": "2026-09-18T08:15:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-910020", "short_text": "Precision relay, 24V DC", "quantity": 2000, "uom": "EA", "net_price": 4.15 },
-        { "item_no": "00020", "material": "MAT-910034", "short_text": "Terminal block, 12-way", "quantity": 1500, "uom": "EA", "net_price": 1.92 },
-        { "item_no": "00030", "material": "MAT-910051", "short_text": "DIN rail enclosure", "quantity": 300, "uom": "EA", "net_price": 18.40 }
+        {
+          "item_no": "00010",
+          "material": "MAT-910020",
+          "short_text": "Precision relay, 24V DC",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 4.15
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-910034",
+          "short_text": "Terminal block, 12-way",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 1.92
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-910051",
+          "short_text": "DIN rail enclosure",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 18.4
+        }
       ]
     },
     {
-      "po_number": "4500123461", "vendor_id": "0000710311", "purch_org": "JBDE", "doc_date": "2026-09-05", "currency": "EUR",
-      "status_code": "02", "delivery_date": "2026-10-02", "plant": "3101", "incoterms": "DAP", "payment_terms": "NET45",
-      "buyer_name": "Katrin Vogel", "revision": 1, "created_at": "2026-09-05T07:50:00Z", "changed_at": "2026-09-08T11:31:02Z",
+      "po_number": "4500123461",
+      "vendor_id": "0000710311",
+      "purch_org": "JBDE",
+      "doc_date": "2026-09-05",
+      "currency": "EUR",
+      "status_code": "02",
+      "delivery_date": "2026-10-02",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Katrin Vogel",
+      "revision": 1,
+      "created_at": "2026-09-05T07:50:00Z",
+      "changed_at": "2026-09-08T11:31:02Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-910077", "short_text": "Current sensor module", "quantity": 120, "uom": "EA", "net_price": 22.60, "confirmed_qty": 120, "confirmed_date": "2026-10-02" },
-        { "item_no": "00020", "material": "MAT-910083", "short_text": "Shielded connector kit", "quantity": 240, "uom": "EA", "net_price": 9.75 }
+        {
+          "item_no": "00010",
+          "material": "MAT-910077",
+          "short_text": "Current sensor module",
+          "quantity": 120,
+          "uom": "EA",
+          "net_price": 22.6,
+          "confirmed_qty": 120,
+          "confirmed_date": "2026-10-02"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-910083",
+          "short_text": "Shielded connector kit",
+          "quantity": 240,
+          "uom": "EA",
+          "net_price": 9.75
+        }
       ]
     },
     {
-      "po_number": "4500123462", "vendor_id": "0000710402", "purch_org": "JBSG", "doc_date": "2026-08-25", "currency": "USD",
-      "status_code": "04", "delivery_date": "2026-09-22", "plant": "4101", "incoterms": "FOB", "payment_terms": "NET90",
-      "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-08-25T02:10:00Z", "changed_at": "2026-09-01T04:45:00Z",
+      "po_number": "4500123462",
+      "vendor_id": "0000710402",
+      "purch_org": "JBSG",
+      "doc_date": "2026-08-25",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-09-22",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 1,
+      "created_at": "2026-08-25T02:10:00Z",
+      "changed_at": "2026-09-01T04:45:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-550101", "short_text": "6-layer PCB, FR-4", "quantity": 1000, "uom": "EA", "net_price": 11.30, "confirmed_qty": 1000, "confirmed_date": "2026-09-21", "shipped_qty": 1000 }
+        {
+          "item_no": "00010",
+          "material": "MAT-550101",
+          "short_text": "6-layer PCB, FR-4",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 11.3,
+          "confirmed_qty": 1000,
+          "confirmed_date": "2026-09-21",
+          "shipped_qty": 1000
+        }
       ]
     },
     {
-      "po_number": "4500123463", "vendor_id": "0000710402", "purch_org": "JBSG", "doc_date": "2026-09-20", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-10-25", "plant": "4101", "incoterms": "FOB", "payment_terms": "NET90",
-      "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-09-20T03:00:00Z", "changed_at": "2026-09-20T03:00:00Z",
+      "po_number": "4500123463",
+      "vendor_id": "0000710402",
+      "purch_org": "JBSG",
+      "doc_date": "2026-09-20",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-25",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 1,
+      "created_at": "2026-09-20T03:00:00Z",
+      "changed_at": "2026-09-20T03:00:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-550140", "short_text": "HDI PCB, 10-layer", "quantity": 600, "uom": "EA", "net_price": 27.90 },
-        { "item_no": "00020", "material": "MAT-550155", "short_text": "Flex circuit assembly", "quantity": 900, "uom": "EA", "net_price": 8.45 }
+        {
+          "item_no": "00010",
+          "material": "MAT-550140",
+          "short_text": "HDI PCB, 10-layer",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 27.9
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-550155",
+          "short_text": "Flex circuit assembly",
+          "quantity": 900,
+          "uom": "EA",
+          "net_price": 8.45
+        }
       ]
     },
     {
-      "po_number": "4500123464", "vendor_id": "0000710518", "purch_org": "JBUS", "doc_date": "2026-09-16", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-10-09", "plant": "1101", "incoterms": "FCA", "payment_terms": "NET30",
-      "buyer_name": "Daniel Okafor", "revision": 1, "created_at": "2026-09-16T16:20:00Z", "changed_at": "2026-09-16T16:20:00Z",
+      "po_number": "4500123464",
+      "vendor_id": "0000710518",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-16",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-09",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET30",
+      "buyer_name": "Daniel Okafor",
+      "revision": 1,
+      "created_at": "2026-09-16T16:20:00Z",
+      "changed_at": "2026-09-16T16:20:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-330210", "short_text": "Injection-molded housing, ABS", "quantity": 5000, "uom": "EA", "net_price": 1.35 }
+        {
+          "item_no": "00010",
+          "material": "MAT-330210",
+          "short_text": "Injection-molded housing, ABS",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 1.35
+        }
       ]
     },
     {
-      "po_number": "4500123465", "vendor_id": "0000710627", "purch_org": "JBMX", "doc_date": "2026-08-20", "currency": "USD",
-      "status_code": "09", "delivery_date": "2026-09-15", "plant": "2101", "incoterms": "DAP", "payment_terms": "NET30",
-      "buyer_name": "Luis Hernández", "revision": 2, "created_at": "2026-08-20T17:00:00Z", "changed_at": "2026-09-03T15:30:00Z",
+      "po_number": "4500123465",
+      "vendor_id": "0000710627",
+      "purch_org": "JBMX",
+      "doc_date": "2026-08-20",
+      "currency": "USD",
+      "status_code": "09",
+      "delivery_date": "2026-09-15",
+      "plant": "2101",
+      "incoterms": "DAP",
+      "payment_terms": "NET30",
+      "buyer_name": "Luis Hernández",
+      "revision": 2,
+      "created_at": "2026-08-20T17:00:00Z",
+      "changed_at": "2026-09-03T15:30:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-660410", "short_text": "Stamped steel bracket", "quantity": 10000, "uom": "EA", "net_price": 0.42 }
+        {
+          "item_no": "00010",
+          "material": "MAT-660410",
+          "short_text": "Stamped steel bracket",
+          "quantity": 10000,
+          "uom": "EA",
+          "net_price": 0.42
+        }
       ]
     },
     {
-      "po_number": "4500123466", "vendor_id": "0000710733", "purch_org": "JBSG", "doc_date": "2026-09-19", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-10-30", "plant": "4101", "incoterms": "CIP", "payment_terms": "NET60",
-      "buyer_name": "Wei Ling Tan", "revision": 1, "created_at": "2026-09-19T05:30:00Z", "changed_at": "2026-09-19T05:30:00Z",
+      "po_number": "4500123466",
+      "vendor_id": "0000710733",
+      "purch_org": "JBSG",
+      "doc_date": "2026-09-19",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-30",
+      "plant": "4101",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 1,
+      "created_at": "2026-09-19T05:30:00Z",
+      "changed_at": "2026-09-19T05:30:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-440018", "short_text": "MLCC capacitor reel, 0402", "quantity": 50, "uom": "RL", "net_price": 145.00 },
-        { "item_no": "00020", "material": "MAT-440027", "short_text": "Thick-film resistor reel, 0603", "quantity": 40, "uom": "RL", "net_price": 98.50 }
+        {
+          "item_no": "00010",
+          "material": "MAT-440018",
+          "short_text": "MLCC capacitor reel, 0402",
+          "quantity": 50,
+          "uom": "RL",
+          "net_price": 145.0
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-440027",
+          "short_text": "Thick-film resistor reel, 0603",
+          "quantity": 40,
+          "uom": "RL",
+          "net_price": 98.5
+        }
       ]
     },
     {
-      "po_number": "4500123467", "vendor_id": "0000710245", "purch_org": "JBUS", "doc_date": "2026-09-22", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-10-19", "plant": "1102", "incoterms": "FCA", "payment_terms": "NET60",
-      "buyer_name": "Daniel Okafor", "revision": 1, "created_at": "2026-09-22T18:45:00Z", "changed_at": "2026-09-22T18:45:00Z",
+      "po_number": "4500123467",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-22",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-19",
+      "plant": "1102",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Daniel Okafor",
+      "revision": 1,
+      "created_at": "2026-09-22T18:45:00Z",
+      "changed_at": "2026-09-22T18:45:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-778530", "short_text": "Sensor interface board", "quantity": 300, "uom": "EA", "net_price": 36.25 },
-        { "item_no": "00020", "material": "MAT-778544", "short_text": "Ribbon cable, 40-way", "quantity": 600, "uom": "EA", "net_price": 2.10 }
+        {
+          "item_no": "00010",
+          "material": "MAT-778530",
+          "short_text": "Sensor interface board",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 36.25
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-778544",
+          "short_text": "Ribbon cable, 40-way",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 2.1
+        }
       ]
     },
     {
-      "po_number": "4500123468", "vendor_id": "0000710311", "purch_org": "JBMX", "doc_date": "2026-09-21", "currency": "USD",
-      "status_code": "01", "delivery_date": "2026-11-03", "plant": "2101", "incoterms": "DAP", "payment_terms": "NET45",
-      "buyer_name": "Luis Hernández", "revision": 1, "created_at": "2026-09-21T14:10:00Z", "changed_at": "2026-09-21T14:10:00Z",
+      "po_number": "4500123468",
+      "vendor_id": "0000710311",
+      "purch_org": "JBMX",
+      "doc_date": "2026-09-21",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-11-03",
+      "plant": "2101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 1,
+      "created_at": "2026-09-21T14:10:00Z",
+      "changed_at": "2026-09-21T14:10:00Z",
       "items": [
-        { "item_no": "00010", "material": "MAT-910020", "short_text": "Precision relay, 24V DC", "quantity": 3000, "uom": "EA", "net_price": 4.05 }
+        {
+          "item_no": "00010",
+          "material": "MAT-910020",
+          "short_text": "Precision relay, 24V DC",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 4.05
+        }
+      ]
+    },
+    {
+      "po_number": "4500123469",
+      "vendor_id": "0000710859",
+      "purch_org": "JBCN",
+      "doc_date": "2026-09-07",
+      "currency": "CNY",
+      "status_code": "03",
+      "delivery_date": "2026-09-26",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Zhang Min",
+      "revision": 1,
+      "created_at": "2026-09-07T15:04:30Z",
+      "changed_at": "2026-09-09T22:04:30Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859236",
+          "short_text": "EEPROM, 256 Kbit, SOIC-8",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 2.01,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-09-26"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123470",
+      "vendor_id": "0000710733",
+      "purch_org": "JBVN",
+      "doc_date": "2026-09-16",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-11-07",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 2,
+      "created_at": "2026-09-16T13:27:52Z",
+      "changed_at": "2026-09-23T22:25:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-871418",
+          "short_text": "MLCC, 10 uF 25 V, 0805, reel",
+          "quantity": 10,
+          "uom": "RL",
+          "net_price": 38.1,
+          "confirmed_qty": 10,
+          "confirmed_date": "2026-11-07",
+          "shipped_qty": 10
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-871425",
+          "short_text": "Ceramic resonator, 16 MHz",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 0.12,
+          "confirmed_qty": 100,
+          "confirmed_date": "2026-11-07",
+          "shipped_qty": 100
+        }
+      ]
+    },
+    {
+      "po_number": "4500123471",
+      "vendor_id": "0000710859",
+      "purch_org": "JBCN",
+      "doc_date": "2026-09-20",
+      "currency": "CNY",
+      "status_code": "01",
+      "delivery_date": "2026-11-13",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Li Hua",
+      "revision": 1,
+      "created_at": "2026-09-20T17:10:13Z",
+      "changed_at": "2026-09-22T21:10:13Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859228",
+          "short_text": "DC-DC converter IC, 3 A",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 10.67,
+          "confirmed_qty": 0,
+          "confirmed_date": null,
+          "reject_reason": "PRICE"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123472",
+      "vendor_id": "0000710884",
+      "purch_org": "JBCN",
+      "doc_date": "2026-08-09",
+      "currency": "CNY",
+      "status_code": "04",
+      "delivery_date": "2026-10-02",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Zhang Min",
+      "revision": 2,
+      "created_at": "2026-08-09T11:39:15Z",
+      "changed_at": "2026-09-22T05:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-884501",
+          "short_text": "TFT LCD panel, 10.1 in, 1280x800",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 296.18,
+          "confirmed_qty": 600,
+          "confirmed_date": "2026-10-06",
+          "shipped_qty": 600
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-884517",
+          "short_text": "Capacitive touch sensor, 10.1 in",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 131.96,
+          "confirmed_qty": 1500,
+          "confirmed_date": "2026-10-09",
+          "shipped_qty": 1500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123473",
+      "vendor_id": "0000710866",
+      "purch_org": "JBVN",
+      "doc_date": "2026-09-16",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-13",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 1,
+      "created_at": "2026-09-16T14:10:21Z",
+      "changed_at": "2026-09-20T22:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-866322",
+          "short_text": "Light pipe, clear PC",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 0.21,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-10-16",
+          "shipped_qty": 1200
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-866315",
+          "short_text": "Battery door, PBT, black",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 0.34,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-10-19",
+          "shipped_qty": 400
+        }
+      ]
+    },
+    {
+      "po_number": "4500123474",
+      "vendor_id": "0000710989",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-11",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-09-30",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 2,
+      "created_at": "2026-08-11T13:23:07Z",
+      "changed_at": "2026-09-21T06:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917712",
+          "short_text": "Common-mode choke, 2 x 1 mH",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 0.9,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-10-06",
+          "shipped_qty": 250
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-917701",
+          "short_text": "Power inductor, 10 uH, 5 A",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 0.55,
+          "confirmed_qty": 100,
+          "confirmed_date": "2026-10-05",
+          "shipped_qty": 100
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-917726",
+          "short_text": "Planar transformer, 500 W",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 8.11,
+          "confirmed_qty": 300,
+          "confirmed_date": "2026-10-03",
+          "shipped_qty": 300
+        }
+      ]
+    },
+    {
+      "po_number": "4500123475",
+      "vendor_id": "0000710859",
+      "purch_org": "JBCN",
+      "doc_date": "2026-08-21",
+      "currency": "CNY",
+      "status_code": "04",
+      "delivery_date": "2026-10-09",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Li Hua",
+      "revision": 1,
+      "created_at": "2026-08-21T17:10:30Z",
+      "changed_at": "2026-09-21T12:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859236",
+          "short_text": "EEPROM, 256 Kbit, SOIC-8",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 2.15,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-10-09",
+          "shipped_qty": 400
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-859214",
+          "short_text": "Power MOSFET, 60 V, D2PAK",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 4.3,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-10-09",
+          "shipped_qty": 2000
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-859201",
+          "short_text": "Microcontroller, 32-bit ARM, LQFP-64",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 27.37,
+          "confirmed_qty": 1500,
+          "confirmed_date": "2026-10-09",
+          "shipped_qty": 1500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123476",
+      "vendor_id": "0000710903",
+      "purch_org": "JBHU",
+      "doc_date": "2026-08-12",
+      "currency": "EUR",
+      "status_code": "05",
+      "delivery_date": "2026-09-12",
+      "plant": "3102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Eszter Nagy",
+      "revision": 2,
+      "created_at": "2026-08-12T07:48:50Z",
+      "changed_at": "2026-09-13T07:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903601",
+          "short_text": "Stamped steel chassis, zinc plated",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 3.85,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-09-12",
+          "shipped_qty": 250
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-903614",
+          "short_text": "Aluminum die-cast housing",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 11.93,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-09-12",
+          "shipped_qty": 400
+        }
+      ]
+    },
+    {
+      "po_number": "4500123477",
+      "vendor_id": "0000710859",
+      "purch_org": "JBMY",
+      "doc_date": "2026-07-29",
+      "currency": "USD",
+      "status_code": "09",
+      "delivery_date": "2026-08-25",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Kenneth Lim",
+      "revision": 3,
+      "created_at": "2026-07-29T10:35:22Z",
+      "changed_at": "2026-08-02T10:35:22Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859228",
+          "short_text": "DC-DC converter IC, 3 A",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 1.49
+        }
+      ]
+    },
+    {
+      "po_number": "4500123478",
+      "vendor_id": "0000710951",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-08",
+      "currency": "USD",
+      "status_code": "09",
+      "delivery_date": "2026-11-01",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Daniel Okafor",
+      "revision": 3,
+      "created_at": "2026-09-08T10:45:42Z",
+      "changed_at": "2026-09-11T10:45:42Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859214",
+          "short_text": "Power MOSFET, 60 V, D2PAK",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 0.6
+        }
+      ]
+    },
+    {
+      "po_number": "4500123479",
+      "vendor_id": "0000710845",
+      "purch_org": "JBVN",
+      "doc_date": "2026-09-02",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-15",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 2,
+      "created_at": "2026-09-02T11:22:32Z",
+      "changed_at": "2026-09-15T16:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-845110",
+          "short_text": "LED backlight module, 7 in",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 9.08,
+          "confirmed_qty": 300,
+          "confirmed_date": "2026-10-15",
+          "shipped_qty": 300
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-845133",
+          "short_text": "Fiber transceiver, SFP+ 10G",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 24.88,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-10-15",
+          "shipped_qty": 2500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123480",
+      "vendor_id": "0000710962",
+      "purch_org": "JBMY",
+      "doc_date": "2026-09-12",
+      "currency": "USD",
+      "status_code": "02",
+      "delivery_date": "2026-10-13",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Kenneth Lim",
+      "revision": 1,
+      "created_at": "2026-09-12T13:10:44Z",
+      "changed_at": "2026-09-15T17:10:44Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962131",
+          "short_text": "USB-C receptacle, 24-pin",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 0.39,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-10-15"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-962145",
+          "short_text": "Terminal block, 5.08 mm, 4-way",
+          "quantity": 200,
+          "uom": "EA",
+          "net_price": 0.33,
+          "confirmed_qty": 100,
+          "confirmed_date": "2026-10-22"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123481",
+      "vendor_id": "0000710989",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-02",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-08-30",
+      "plant": "1103",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Heather Lindqvist",
+      "revision": 1,
+      "created_at": "2026-08-02T09:52:10Z",
+      "changed_at": "2026-08-27T23:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917726",
+          "short_text": "Planar transformer, 500 W",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 7.87,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-08-30",
+          "shipped_qty": 150
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-917701",
+          "short_text": "Power inductor, 10 uH, 5 A",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 0.52,
+          "confirmed_qty": 1500,
+          "confirmed_date": "2026-08-30"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123482",
+      "vendor_id": "0000710917",
+      "purch_org": "JBHU",
+      "doc_date": "2026-09-06",
+      "currency": "EUR",
+      "status_code": "02",
+      "delivery_date": "2026-10-30",
+      "plant": "3102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Eszter Nagy",
+      "revision": 1,
+      "created_at": "2026-09-06T13:41:04Z",
+      "changed_at": "2026-09-08T20:41:04Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917726",
+          "short_text": "Planar transformer, 500 W",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 7.3,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-10-30"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-917712",
+          "short_text": "Common-mode choke, 2 x 1 mH",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 0.81,
+          "confirmed_qty": 0,
+          "confirmed_date": null,
+          "reject_reason": "ALLOCATION"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123483",
+      "vendor_id": "0000710926",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-15",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-09-13",
+      "plant": "1102",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 2,
+      "created_at": "2026-08-15T13:20:14Z",
+      "changed_at": "2026-08-15T13:20:14Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-926815",
+          "short_text": "Thermal interface pad, 3 W/mK",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 0.37
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-926822",
+          "short_text": "Axial fan, 80 mm, 12 V",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 3.96
+        }
+      ]
+    },
+    {
+      "po_number": "4500123484",
+      "vendor_id": "0000710975",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-22",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-04",
+      "plant": "1104",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Heather Lindqvist",
+      "revision": 1,
+      "created_at": "2026-08-22T12:20:09Z",
+      "changed_at": "2026-08-22T12:20:09Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903601",
+          "short_text": "Stamped steel chassis, zinc plated",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 4.17
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-903614",
+          "short_text": "Aluminum die-cast housing",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 12.65
+        }
+      ]
+    },
+    {
+      "po_number": "4500123485",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-07-24",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-08-26",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 1,
+      "created_at": "2026-07-24T16:33:11Z",
+      "changed_at": "2026-08-21T01:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 9.05,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-08-31",
+          "shipped_qty": 300
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-938901",
+          "short_text": "PCBA, I/O expansion board",
+          "quantity": 300,
+          "uom": "EA",
+          "net_price": 22.08,
+          "confirmed_qty": 300,
+          "confirmed_date": "2026-09-02"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123486",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-26",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-23",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 1,
+      "created_at": "2026-08-26T08:07:02Z",
+      "changed_at": "2026-09-23T19:56:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938901",
+          "short_text": "PCBA, I/O expansion board",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 23.25,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-09-23"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 8.88,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-09-23"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123487",
+      "vendor_id": "0000710944",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-30",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-01",
+      "plant": "1103",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 2,
+      "created_at": "2026-08-30T10:15:14Z",
+      "changed_at": "2026-08-30T10:15:14Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-944010",
+          "short_text": "Machine screw, M3 x 8, Torx, box/1000",
+          "quantity": 20,
+          "uom": "BX",
+          "net_price": 18.89
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-944037",
+          "short_text": "Standoff, M3 x 12, hex, box/500",
+          "quantity": 25,
+          "uom": "BX",
+          "net_price": 38.38
+        }
+      ]
+    },
+    {
+      "po_number": "4500123488",
+      "vendor_id": "0000710871",
+      "purch_org": "JBMY",
+      "doc_date": "2026-09-14",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-10-14",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Nurul Aisyah",
+      "revision": 1,
+      "created_at": "2026-09-14T09:47:48Z",
+      "changed_at": "2026-09-24T03:03:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-871425",
+          "short_text": "Ceramic resonator, 16 MHz",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 0.12,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-10-14"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-871418",
+          "short_text": "MLCC, 10 uF 25 V, 0805, reel",
+          "quantity": 20,
+          "uom": "RL",
+          "net_price": 36.64,
+          "confirmed_qty": 20,
+          "confirmed_date": "2026-10-14"
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-871401",
+          "short_text": "Ceramic substrate, 96% alumina",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 2.69,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-10-14"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123489",
+      "vendor_id": "0000710917",
+      "purch_org": "JBDE",
+      "doc_date": "2026-09-12",
+      "currency": "EUR",
+      "status_code": "01",
+      "delivery_date": "2026-10-07",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Florian Maier",
+      "revision": 2,
+      "created_at": "2026-09-12T13:10:55Z",
+      "changed_at": "2026-09-12T13:10:55Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917712",
+          "short_text": "Common-mode choke, 2 x 1 mH",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 0.85
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-917701",
+          "short_text": "Power inductor, 10 uH, 5 A",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 0.48
+        }
+      ]
+    },
+    {
+      "po_number": "4500123490",
+      "vendor_id": "0000710903",
+      "purch_org": "JBHU",
+      "doc_date": "2026-07-26",
+      "currency": "EUR",
+      "status_code": "04",
+      "delivery_date": "2026-09-09",
+      "plant": "3102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Eszter Nagy",
+      "revision": 1,
+      "created_at": "2026-07-26T07:37:55Z",
+      "changed_at": "2026-09-06T01:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903628",
+          "short_text": "EMI shield can, nickel silver",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 0.44,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-09-09",
+          "shipped_qty": 400
+        }
+      ]
+    },
+    {
+      "po_number": "4500123491",
+      "vendor_id": "0000710866",
+      "purch_org": "JBSG",
+      "doc_date": "2026-07-22",
+      "currency": "USD",
+      "status_code": "05",
+      "delivery_date": "2026-08-14",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 2,
+      "created_at": "2026-07-22T11:07:09Z",
+      "changed_at": "2026-08-15T11:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-866322",
+          "short_text": "Light pipe, clear PC",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 0.21,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-08-17",
+          "shipped_qty": 500
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-866301",
+          "short_text": "Injection-molded bezel, PC/ABS",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 1.17,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-08-21",
+          "shipped_qty": 2500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123492",
+      "vendor_id": "0000710871",
+      "purch_org": "JBDE",
+      "doc_date": "2026-08-23",
+      "currency": "EUR",
+      "status_code": "04",
+      "delivery_date": "2026-10-08",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Florian Maier",
+      "revision": 2,
+      "created_at": "2026-08-23T07:08:37Z",
+      "changed_at": "2026-09-22T23:29:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-871425",
+          "short_text": "Ceramic resonator, 16 MHz",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 0.11,
+          "confirmed_qty": 100,
+          "confirmed_date": "2026-10-11",
+          "shipped_qty": 50
+        }
+      ]
+    },
+    {
+      "po_number": "4500123493",
+      "vendor_id": "0000710866",
+      "purch_org": "JBVN",
+      "doc_date": "2026-08-20",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-17",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 1,
+      "created_at": "2026-08-20T11:36:10Z",
+      "changed_at": "2026-08-23T15:36:10Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-866301",
+          "short_text": "Injection-molded bezel, PC/ABS",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 1.17,
+          "confirmed_qty": 5000,
+          "confirmed_date": "2026-09-17"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123494",
+      "vendor_id": "0000710871",
+      "purch_org": "JBDE",
+      "doc_date": "2026-08-17",
+      "currency": "EUR",
+      "status_code": "05",
+      "delivery_date": "2026-08-31",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Florian Maier",
+      "revision": 2,
+      "created_at": "2026-08-17T14:41:37Z",
+      "changed_at": "2026-09-01T14:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-871425",
+          "short_text": "Ceramic resonator, 16 MHz",
+          "quantity": 1500,
+          "uom": "EA",
+          "net_price": 0.11,
+          "confirmed_qty": 1500,
+          "confirmed_date": "2026-08-31",
+          "shipped_qty": 1500
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-871418",
+          "short_text": "MLCC, 10 uF 25 V, 0805, reel",
+          "quantity": 40,
+          "uom": "RL",
+          "net_price": 35.55,
+          "confirmed_qty": 40,
+          "confirmed_date": "2026-08-31",
+          "shipped_qty": 40
+        }
+      ]
+    },
+    {
+      "po_number": "4500123495",
+      "vendor_id": "0000710866",
+      "purch_org": "JBSG",
+      "doc_date": "2026-08-15",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-08",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 1,
+      "created_at": "2026-08-15T09:12:58Z",
+      "changed_at": "2026-09-24T05:33:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-866315",
+          "short_text": "Battery door, PBT, black",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 0.34,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-10-08",
+          "shipped_qty": 250
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-866301",
+          "short_text": "Injection-molded bezel, PC/ABS",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 1.12,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-10-08",
+          "shipped_qty": 250
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-866322",
+          "short_text": "Light pipe, clear PC",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 0.2,
+          "confirmed_qty": 5000,
+          "confirmed_date": "2026-10-08",
+          "shipped_qty": 5000
+        }
+      ]
+    },
+    {
+      "po_number": "4500123496",
+      "vendor_id": "0000710845",
+      "purch_org": "JBVN",
+      "doc_date": "2026-09-09",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-05",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 1,
+      "created_at": "2026-09-09T12:04:14Z",
+      "changed_at": "2026-09-23T08:37:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-845133",
+          "short_text": "Fiber transceiver, SFP+ 10G",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 23.78,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-10-11",
+          "shipped_qty": 250
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-845126",
+          "short_text": "Optocoupler, 4-pin SMD",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 0.18,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-10-08"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123497",
+      "vendor_id": "0000710884",
+      "purch_org": "JBCN",
+      "doc_date": "2026-08-21",
+      "currency": "CNY",
+      "status_code": "05",
+      "delivery_date": "2026-09-04",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Zhang Min",
+      "revision": 2,
+      "created_at": "2026-08-21T14:32:25Z",
+      "changed_at": "2026-09-07T14:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-884523",
+          "short_text": "Cover glass, chemically strengthened",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 43.19,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-09-06",
+          "shipped_qty": 750
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-884517",
+          "short_text": "Capacitive touch sensor, 10.1 in",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 131.26,
+          "confirmed_qty": 1000,
+          "confirmed_date": "2026-09-07",
+          "shipped_qty": 1000
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-884501",
+          "short_text": "TFT LCD panel, 10.1 in, 1280x800",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 302.71,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-09-10",
+          "shipped_qty": 1200
+        }
+      ]
+    },
+    {
+      "po_number": "4500123498",
+      "vendor_id": "0000710951",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-17",
+      "currency": "USD",
+      "status_code": "09",
+      "delivery_date": "2026-09-08",
+      "plant": "1104",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 3,
+      "created_at": "2026-08-17T08:36:38Z",
+      "changed_at": "2026-08-18T08:36:38Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859214",
+          "short_text": "Power MOSFET, 60 V, D2PAK",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 0.62
+        }
+      ]
+    },
+    {
+      "po_number": "4500123499",
+      "vendor_id": "0000710962",
+      "purch_org": "JBCN",
+      "doc_date": "2026-09-18",
+      "currency": "CNY",
+      "status_code": "01",
+      "delivery_date": "2026-10-06",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Zhang Min",
+      "revision": 2,
+      "created_at": "2026-09-18T16:36:21Z",
+      "changed_at": "2026-09-18T16:36:21Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962110",
+          "short_text": "Board-to-board connector, 60-pin",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 5.12
+        }
+      ]
+    },
+    {
+      "po_number": "4500123500",
+      "vendor_id": "0000710938",
+      "purch_org": "JBMX",
+      "doc_date": "2026-08-10",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-30",
+      "plant": "2102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 2,
+      "created_at": "2026-08-10T11:08:54Z",
+      "changed_at": "2026-08-11T16:08:54Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 8.69,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-10-06"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-938901",
+          "short_text": "PCBA, I/O expansion board",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 22.58,
+          "confirmed_qty": 5000,
+          "confirmed_date": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123501",
+      "vendor_id": "0000710944",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-21",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-09-27",
+      "plant": "1103",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 2,
+      "created_at": "2026-08-21T13:01:42Z",
+      "changed_at": "2026-09-19T07:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-944010",
+          "short_text": "Machine screw, M3 x 8, Torx, box/1000",
+          "quantity": 10,
+          "uom": "BX",
+          "net_price": 17.83,
+          "confirmed_qty": 10,
+          "confirmed_date": "2026-09-27",
+          "shipped_qty": 6
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-944037",
+          "short_text": "Standoff, M3 x 12, hex, box/500",
+          "quantity": 25,
+          "uom": "BX",
+          "net_price": 36.46,
+          "confirmed_qty": 25,
+          "confirmed_date": "2026-09-27"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123502",
+      "vendor_id": "0000710311",
+      "purch_org": "JBHU",
+      "doc_date": "2026-09-01",
+      "currency": "EUR",
+      "status_code": "03",
+      "delivery_date": "2026-09-17",
+      "plant": "3102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Eszter Nagy",
+      "revision": 1,
+      "created_at": "2026-09-01T12:34:50Z",
+      "changed_at": "2026-09-02T17:34:50Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962110",
+          "short_text": "Board-to-board connector, 60-pin",
+          "quantity": 200,
+          "uom": "EA",
+          "net_price": 0.66,
+          "confirmed_qty": 200,
+          "confirmed_date": "2026-09-17"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-962131",
+          "short_text": "USB-C receptacle, 24-pin",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 0.37,
+          "confirmed_qty": 1000,
+          "confirmed_date": "2026-09-17"
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-962145",
+          "short_text": "Terminal block, 5.08 mm, 4-way",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 0.31,
+          "confirmed_qty": 5000,
+          "confirmed_date": "2026-09-17"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123503",
+      "vendor_id": "0000710903",
+      "purch_org": "JBDE",
+      "doc_date": "2026-08-17",
+      "currency": "EUR",
+      "status_code": "03",
+      "delivery_date": "2026-09-13",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Katrin Vogel",
+      "revision": 1,
+      "created_at": "2026-08-17T14:18:06Z",
+      "changed_at": "2026-08-20T14:18:06Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903614",
+          "short_text": "Aluminum die-cast housing",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 11.51,
+          "confirmed_qty": 500,
+          "confirmed_date": "2026-09-13"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123504",
+      "vendor_id": "0000710402",
+      "purch_org": "JBCN",
+      "doc_date": "2026-09-10",
+      "currency": "CNY",
+      "status_code": "04",
+      "delivery_date": "2026-09-30",
+      "plant": "4103",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Zhang Min",
+      "revision": 1,
+      "created_at": "2026-09-10T07:43:40Z",
+      "changed_at": "2026-09-21T09:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938901",
+          "short_text": "PCBA, I/O expansion board",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 167.53,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-10-03",
+          "shipped_qty": 1200
+        }
+      ]
+    },
+    {
+      "po_number": "4500123505",
+      "vendor_id": "0000710845",
+      "purch_org": "JBSG",
+      "doc_date": "2026-08-25",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-18",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 2,
+      "created_at": "2026-08-25T16:39:59Z",
+      "changed_at": "2026-09-23T10:45:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-845133",
+          "short_text": "Fiber transceiver, SFP+ 10G",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 23.67,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-10-18",
+          "shipped_qty": 2500
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-845110",
+          "short_text": "LED backlight module, 7 in",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 9.68,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-10-18",
+          "shipped_qty": 1200
+        }
+      ]
+    },
+    {
+      "po_number": "4500123506",
+      "vendor_id": "0000710845",
+      "purch_org": "JBVN",
+      "doc_date": "2026-08-18",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-16",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 1,
+      "created_at": "2026-08-18T08:18:01Z",
+      "changed_at": "2026-08-20T08:18:01Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-845126",
+          "short_text": "Optocoupler, 4-pin SMD",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 0.18,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-09-16"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-845110",
+          "short_text": "LED backlight module, 7 in",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 9.53,
+          "confirmed_qty": 600,
+          "confirmed_date": "2026-09-16"
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-845133",
+          "short_text": "Fiber transceiver, SFP+ 10G",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 23.63,
+          "confirmed_qty": 100,
+          "confirmed_date": "2026-09-16"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123507",
+      "vendor_id": "0000710733",
+      "purch_org": "JBVN",
+      "doc_date": "2026-08-23",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-27",
+      "plant": "4104",
+      "incoterms": "CIP",
+      "payment_terms": "NET60",
+      "buyer_name": "Nguyen Thi Mai",
+      "revision": 1,
+      "created_at": "2026-08-23T16:52:02Z",
+      "changed_at": "2026-08-24T22:52:02Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-871425",
+          "short_text": "Ceramic resonator, 16 MHz",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 0.13,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-09-27"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123508",
+      "vendor_id": "0000710975",
+      "purch_org": "JBMX",
+      "doc_date": "2026-09-01",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-10-12",
+      "plant": "2102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 1,
+      "created_at": "2026-09-01T15:07:25Z",
+      "changed_at": "2026-09-03T22:07:25Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903635",
+          "short_text": "Mounting bracket, stainless 304",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 0.83,
+          "confirmed_qty": 1000,
+          "confirmed_date": "2026-10-12"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123509",
+      "vendor_id": "0000710518",
+      "purch_org": "JBUS",
+      "doc_date": "2026-07-24",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-08-09",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Daniel Okafor",
+      "revision": 2,
+      "created_at": "2026-07-24T10:23:13Z",
+      "changed_at": "2026-07-26T13:23:13Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-866322",
+          "short_text": "Light pipe, clear PC",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 0.2,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-08-09"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123510",
+      "vendor_id": "0000710884",
+      "purch_org": "JBMX",
+      "doc_date": "2026-08-14",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-08",
+      "plant": "2102",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 1,
+      "created_at": "2026-08-14T07:50:15Z",
+      "changed_at": "2026-08-14T07:50:15Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-884517",
+          "short_text": "Capacitive touch sensor, 10.1 in",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 19.01
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-884523",
+          "short_text": "Cover glass, chemically strengthened",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 6.06
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-884501",
+          "short_text": "TFT LCD panel, 10.1 in, 1280x800",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 40.16
+        }
+      ]
+    },
+    {
+      "po_number": "4500123511",
+      "vendor_id": "0000710812",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-03",
+      "currency": "USD",
+      "status_code": "01",
+      "delivery_date": "2026-10-11",
+      "plant": "1102",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Heather Lindqvist",
+      "revision": 2,
+      "created_at": "2026-09-03T13:40:21Z",
+      "changed_at": "2026-09-03T13:40:21Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-812024",
+          "short_text": "Coaxial cable assembly, RG-316",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 6.13
+        }
+      ]
+    },
+    {
+      "po_number": "4500123512",
+      "vendor_id": "0000710903",
+      "purch_org": "JBPL",
+      "doc_date": "2026-09-01",
+      "currency": "PLN",
+      "status_code": "01",
+      "delivery_date": "2026-10-26",
+      "plant": "3103",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Tomasz Wiśniewski",
+      "revision": 1,
+      "created_at": "2026-09-01T15:35:58Z",
+      "changed_at": "2026-09-01T15:35:58Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-903628",
+          "short_text": "EMI shield can, nickel silver",
+          "quantity": 200,
+          "uom": "EA",
+          "net_price": 1.85
+        }
+      ]
+    },
+    {
+      "po_number": "4500123513",
+      "vendor_id": "0000710926",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-11",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-17",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 1,
+      "created_at": "2026-09-11T15:39:03Z",
+      "changed_at": "2026-09-15T06:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-926801",
+          "short_text": "Heat pipe assembly, 6 mm",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 5.41,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-10-17",
+          "shipped_qty": 1800
+        }
+      ]
+    },
+    {
+      "po_number": "4500123514",
+      "vendor_id": "0000710957",
+      "purch_org": "JBMY",
+      "doc_date": "2026-08-25",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-16",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Kenneth Lim",
+      "revision": 2,
+      "created_at": "2026-08-25T16:44:16Z",
+      "changed_at": "2026-09-19T06:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-812024",
+          "short_text": "Coaxial cable assembly, RG-316",
+          "quantity": 200,
+          "uom": "EA",
+          "net_price": 6.56,
+          "confirmed_qty": 200,
+          "confirmed_date": "2026-10-16",
+          "shipped_qty": 80
+        }
+      ]
+    },
+    {
+      "po_number": "4500123515",
+      "vendor_id": "0000710884",
+      "purch_org": "JBMY",
+      "doc_date": "2026-08-20",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-28",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Kenneth Lim",
+      "revision": 1,
+      "created_at": "2026-08-20T14:41:46Z",
+      "changed_at": "2026-08-21T15:41:46Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-884517",
+          "short_text": "Capacitive touch sensor, 10.1 in",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 18.8,
+          "confirmed_qty": 250,
+          "confirmed_date": "2026-09-28"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123516",
+      "vendor_id": "0000710859",
+      "purch_org": "JBSG",
+      "doc_date": "2026-08-20",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-12",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Rajesh Pillai",
+      "revision": 1,
+      "created_at": "2026-08-20T08:36:15Z",
+      "changed_at": "2026-09-20T10:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859214",
+          "short_text": "Power MOSFET, 60 V, D2PAK",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 0.61,
+          "confirmed_qty": 600,
+          "confirmed_date": "2026-10-12",
+          "shipped_qty": 300
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-859228",
+          "short_text": "DC-DC converter IC, 3 A",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 1.49,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-10-12"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123517",
+      "vendor_id": "0000710845",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-06",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-04",
+      "plant": "1104",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 2,
+      "created_at": "2026-09-06T11:12:38Z",
+      "changed_at": "2026-09-09T20:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-845110",
+          "short_text": "LED backlight module, 7 in",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 9.44,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-10-04",
+          "shipped_qty": 1500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123518",
+      "vendor_id": "0000710989",
+      "purch_org": "JBUS",
+      "doc_date": "2026-07-23",
+      "currency": "USD",
+      "status_code": "05",
+      "delivery_date": "2026-09-08",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 3,
+      "created_at": "2026-07-23T13:31:44Z",
+      "changed_at": "2026-09-10T13:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917712",
+          "short_text": "Common-mode choke, 2 x 1 mH",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 0.89,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-09-08",
+          "shipped_qty": 3000
+        }
+      ]
+    },
+    {
+      "po_number": "4500123519",
+      "vendor_id": "0000710917",
+      "purch_org": "JBDE",
+      "doc_date": "2026-08-14",
+      "currency": "EUR",
+      "status_code": "02",
+      "delivery_date": "2026-10-04",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Florian Maier",
+      "revision": 2,
+      "created_at": "2026-08-14T17:59:34Z",
+      "changed_at": "2026-08-15T17:59:34Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-917726",
+          "short_text": "Planar transformer, 500 W",
+          "quantity": 250,
+          "uom": "EA",
+          "net_price": 7.36,
+          "confirmed_qty": 150,
+          "confirmed_date": "2026-10-10"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123520",
+      "vendor_id": "0000710402",
+      "purch_org": "JBMY",
+      "doc_date": "2026-08-11",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-08-25",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Nurul Aisyah",
+      "revision": 1,
+      "created_at": "2026-08-11T09:39:33Z",
+      "changed_at": "2026-08-21T09:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 8.69,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-08-25",
+          "shipped_qty": 200
+        }
+      ]
+    },
+    {
+      "po_number": "4500123521",
+      "vendor_id": "0000710884",
+      "purch_org": "JBUS",
+      "doc_date": "2026-08-30",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-09-19",
+      "plant": "1101",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Marcus Webb",
+      "revision": 2,
+      "created_at": "2026-08-30T15:11:05Z",
+      "changed_at": "2026-09-23T04:26:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-884501",
+          "short_text": "TFT LCD panel, 10.1 in, 1280x800",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 43.24,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-09-19"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-884517",
+          "short_text": "Capacitive touch sensor, 10.1 in",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 19.37,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-09-19"
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-884523",
+          "short_text": "Cover glass, chemically strengthened",
+          "quantity": 2000,
+          "uom": "EA",
+          "net_price": 5.72,
+          "confirmed_qty": 2000,
+          "confirmed_date": "2026-09-19"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123522",
+      "vendor_id": "0000710951",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-02",
+      "currency": "USD",
+      "status_code": "05",
+      "delivery_date": "2026-09-28",
+      "plant": "1104",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Maria Alvarez",
+      "revision": 2,
+      "created_at": "2026-09-02T16:37:43Z",
+      "changed_at": "2026-09-22T12:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-859214",
+          "short_text": "Power MOSFET, 60 V, D2PAK",
+          "quantity": 400,
+          "uom": "EA",
+          "net_price": 0.62,
+          "confirmed_qty": 400,
+          "confirmed_date": "2026-09-28",
+          "shipped_qty": 400
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-859201",
+          "short_text": "Microcontroller, 32-bit ARM, LQFP-64",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 3.74,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-09-28",
+          "shipped_qty": 2500
+        }
+      ]
+    },
+    {
+      "po_number": "4500123523",
+      "vendor_id": "0000710938",
+      "purch_org": "JBMX",
+      "doc_date": "2026-08-15",
+      "currency": "USD",
+      "status_code": "09",
+      "delivery_date": "2026-09-01",
+      "plant": "2101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 2,
+      "created_at": "2026-08-15T09:18:07Z",
+      "changed_at": "2026-08-16T09:18:07Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 8.98
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-938901",
+          "short_text": "PCBA, I/O expansion board",
+          "quantity": 500,
+          "uom": "EA",
+          "net_price": 22.04
+        }
+      ]
+    },
+    {
+      "po_number": "4500123524",
+      "vendor_id": "0000710812",
+      "purch_org": "JBMX",
+      "doc_date": "2026-09-01",
+      "currency": "USD",
+      "status_code": "02",
+      "delivery_date": "2026-10-06",
+      "plant": "2101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Luis Hernández",
+      "revision": 1,
+      "created_at": "2026-09-01T14:14:45Z",
+      "changed_at": "2026-09-04T15:14:45Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-812024",
+          "short_text": "Coaxial cable assembly, RG-316",
+          "quantity": 5000,
+          "uom": "EA",
+          "net_price": 6.24,
+          "confirmed_qty": 5000,
+          "confirmed_date": "2026-10-08"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-812047",
+          "short_text": "Flat flex cable, 0.5 mm pitch",
+          "quantity": 100,
+          "uom": "EA",
+          "net_price": 0.97,
+          "confirmed_qty": 0,
+          "confirmed_date": null,
+          "reject_reason": "ALLOCATION"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123525",
+      "vendor_id": "0000710245",
+      "purch_org": "JBUS",
+      "doc_date": "2026-09-12",
+      "currency": "USD",
+      "status_code": "04",
+      "delivery_date": "2026-10-13",
+      "plant": "1103",
+      "incoterms": "FCA",
+      "payment_terms": "NET60",
+      "buyer_name": "Daniel Okafor",
+      "revision": 1,
+      "created_at": "2026-09-12T13:53:53Z",
+      "changed_at": "2026-09-19T21:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-938915",
+          "short_text": "PCBA, LED driver board",
+          "quantity": 200,
+          "uom": "EA",
+          "net_price": 8.73,
+          "confirmed_qty": 200,
+          "confirmed_date": "2026-10-13",
+          "shipped_qty": 120
+        }
+      ]
+    },
+    {
+      "po_number": "4500123526",
+      "vendor_id": "0000710962",
+      "purch_org": "JBSG",
+      "doc_date": "2026-09-07",
+      "currency": "USD",
+      "status_code": "03",
+      "delivery_date": "2026-10-02",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Rajesh Pillai",
+      "revision": 2,
+      "created_at": "2026-09-07T13:54:24Z",
+      "changed_at": "2026-09-09T13:54:24Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962145",
+          "short_text": "Terminal block, 5.08 mm, 4-way",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 0.32,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-10-02"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-962131",
+          "short_text": "USB-C receptacle, 24-pin",
+          "quantity": 600,
+          "uom": "EA",
+          "net_price": 0.42,
+          "confirmed_qty": 600,
+          "confirmed_date": "2026-10-02"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123527",
+      "vendor_id": "0000710962",
+      "purch_org": "JBMY",
+      "doc_date": "2026-08-08",
+      "currency": "USD",
+      "status_code": "05",
+      "delivery_date": "2026-09-09",
+      "plant": "4102",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Kenneth Lim",
+      "revision": 3,
+      "created_at": "2026-08-08T15:39:09Z",
+      "changed_at": "2026-09-10T15:00:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962124",
+          "short_text": "RJ45 jack with magnetics",
+          "quantity": 2500,
+          "uom": "EA",
+          "net_price": 1.33,
+          "confirmed_qty": 2500,
+          "confirmed_date": "2026-09-09",
+          "shipped_qty": 2500
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-962145",
+          "short_text": "Terminal block, 5.08 mm, 4-way",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 0.35,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-09-09",
+          "shipped_qty": 3000
+        },
+        {
+          "item_no": "00030",
+          "material": "MAT-962131",
+          "short_text": "USB-C receptacle, 24-pin",
+          "quantity": 3000,
+          "uom": "EA",
+          "net_price": 0.42,
+          "confirmed_qty": 3000,
+          "confirmed_date": "2026-09-09",
+          "shipped_qty": 3000
+        }
+      ]
+    },
+    {
+      "po_number": "4500123528",
+      "vendor_id": "0000710957",
+      "purch_org": "JBSG",
+      "doc_date": "2026-08-22",
+      "currency": "USD",
+      "status_code": "02",
+      "delivery_date": "2026-09-27",
+      "plant": "4101",
+      "incoterms": "FOB",
+      "payment_terms": "NET90",
+      "buyer_name": "Wei Ling Tan",
+      "revision": 1,
+      "created_at": "2026-08-22T08:22:10Z",
+      "changed_at": "2026-08-24T10:22:10Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-812047",
+          "short_text": "Flat flex cable, 0.5 mm pitch",
+          "quantity": 1000,
+          "uom": "EA",
+          "net_price": 0.98,
+          "confirmed_qty": 600,
+          "confirmed_date": "2026-10-03"
+        }
+      ]
+    },
+    {
+      "po_number": "4500123529",
+      "vendor_id": "0000710311",
+      "purch_org": "JBDE",
+      "doc_date": "2026-08-28",
+      "currency": "EUR",
+      "status_code": "03",
+      "delivery_date": "2026-10-06",
+      "plant": "3101",
+      "incoterms": "DAP",
+      "payment_terms": "NET45",
+      "buyer_name": "Katrin Vogel",
+      "revision": 1,
+      "created_at": "2026-08-28T13:13:05Z",
+      "changed_at": "2026-08-31T19:13:05Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "material": "MAT-962110",
+          "short_text": "Board-to-board connector, 60-pin",
+          "quantity": 750,
+          "uom": "EA",
+          "net_price": 0.67,
+          "confirmed_qty": 750,
+          "confirmed_date": "2026-10-08"
+        },
+        {
+          "item_no": "00020",
+          "material": "MAT-962124",
+          "short_text": "RJ45 jack with magnetics",
+          "quantity": 1200,
+          "uom": "EA",
+          "net_price": 1.19,
+          "confirmed_qty": 1200,
+          "confirmed_date": "2026-10-11"
+        }
       ]
     }
   ],
   "confirmations": [
-    { "confirmation_no": "7100000004", "po_number": "4500123459", "po_revision": 1, "conf_category": "AB", "vendor_reference": "APX-ACK-20813", "note": "Confirmed as ordered.", "status": "POSTED", "posted_at": "2026-08-13T10:02:00Z",
-      "items": [ { "item_no": "00010", "confirmed_qty": "150.000", "confirmed_date": "20260829", "reject_reason": null } ] },
-    { "confirmation_no": "7100000009", "po_number": "4500123462", "po_revision": 1, "conf_category": "AB", "vendor_reference": "PRC-OC-55190", "note": null, "status": "POSTED", "posted_at": "2026-08-26T01:15:00Z",
-      "items": [ { "item_no": "00010", "confirmed_qty": "1000.000", "confirmed_date": "20260921", "reject_reason": null } ] },
-    { "confirmation_no": "7100000011", "po_number": "4500123457", "po_revision": 1, "conf_category": "AB", "vendor_reference": "APX-ACK-21007", "note": "All lines confirmed.", "status": "POSTED", "posted_at": "2026-09-11T09:12:44Z",
-      "items": [ { "item_no": "00010", "confirmed_qty": "400.000", "confirmed_date": "20261012", "reject_reason": null }, { "item_no": "00020", "confirmed_qty": "800.000", "confirmed_date": "20261012", "reject_reason": null } ] },
-    { "confirmation_no": "7100000017", "po_number": "4500123458", "po_revision": 2, "conf_category": "AC", "vendor_reference": "APX-ACK-21102", "note": "Heat sinks confirmed 4 days after requested date.", "status": "POSTED", "posted_at": "2026-09-04T13:20:00Z",
-      "items": [ { "item_no": "00010", "confirmed_qty": "500.000", "confirmed_date": "20260926", "reject_reason": null }, { "item_no": "00020", "confirmed_qty": "500.000", "confirmed_date": "20260930", "reject_reason": null } ] },
-    { "confirmation_no": "7100000019", "po_number": "4500123461", "po_revision": 1, "conf_category": "AC", "vendor_reference": "NW-AB-2026-0913", "note": "Connector kits on allocation - quantity to follow.", "status": "IN_REVIEW", "posted_at": "2026-09-08T11:31:02Z",
-      "items": [ { "item_no": "00010", "confirmed_qty": "120.000", "confirmed_date": "20261002", "reject_reason": null }, { "item_no": "00020", "confirmed_qty": "0.000", "confirmed_date": null, "reject_reason": "ALLOCATION" } ] }
+    {
+      "confirmation_no": "7100000004",
+      "po_number": "4500123459",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "APX-ACK-20813",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-13T10:02:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "150.000",
+          "confirmed_date": "20260829",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000009",
+      "po_number": "4500123462",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "PRC-OC-55190",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-26T01:15:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "1000.000",
+          "confirmed_date": "20260921",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000011",
+      "po_number": "4500123457",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "APX-ACK-21007",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-09-11T09:12:44Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20261012",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "800.000",
+          "confirmed_date": "20261012",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000017",
+      "po_number": "4500123458",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "APX-ACK-21102",
+      "note": "Heat sinks confirmed 4 days after requested date.",
+      "status": "POSTED",
+      "posted_at": "2026-09-04T13:20:00Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20260926",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20260930",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000019",
+      "po_number": "4500123461",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "NW-AB-2026-0913",
+      "note": "Connector kits on allocation - quantity to follow.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-09-08T11:31:02Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "120.000",
+          "confirmed_date": "20261002",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "0.000",
+          "confirmed_date": null,
+          "reject_reason": "ALLOCATION"
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000020",
+      "po_number": "4500123469",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "PST-OC-15347",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-09-09T22:04:30Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260926",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000021",
+      "po_number": "4500123470",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "BHAR-OC-41308",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-09-19T13:27:52Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "10.000",
+          "confirmed_date": "20261107",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "100.000",
+          "confirmed_date": "20261107",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000022",
+      "po_number": "4500123471",
+      "po_revision": 1,
+      "conf_category": "RJ",
+      "vendor_reference": "PST-OC-97101",
+      "note": "Unable to supply - material end of life.",
+      "status": "POSTED",
+      "posted_at": "2026-09-22T21:10:13Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "0.000",
+          "confirmed_date": null,
+          "reject_reason": "PRICE"
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000023",
+      "po_number": "4500123472",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "HANB-OC-10814",
+      "note": "Quantity limited by capacity.",
+      "status": "POSTED",
+      "posted_at": "2026-08-11T18:39:15Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "600.000",
+          "confirmed_date": "20261006",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1500.000",
+          "confirmed_date": "20261009",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000024",
+      "po_number": "4500123473",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "SAIG-OC-97357",
+      "note": "Partial allocation - balance to follow.",
+      "status": "POSTED",
+      "posted_at": "2026-09-19T16:10:21Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20261016",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20261019",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000025",
+      "po_number": "4500123474",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "CPM-OC-58558",
+      "note": "Quantity limited by capacity.",
+      "status": "POSTED",
+      "posted_at": "2026-08-14T15:23:07Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20261006",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "100.000",
+          "confirmed_date": "20261005",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "300.000",
+          "confirmed_date": "20261003",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000026",
+      "po_number": "4500123475",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "PST-OC-70958",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-24T20:10:30Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20261009",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20261009",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "1500.000",
+          "confirmed_date": "20261009",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000027",
+      "po_number": "4500123476",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "WISL-OC-12173",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-13T09:48:50Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20260912",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260912",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000028",
+      "po_number": "4500123479",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "BRIG-OC-92131",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-09-04T14:22:32Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "300.000",
+          "confirmed_date": "20261015",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20261015",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000029",
+      "po_number": "4500123480",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "LC-OC-52578",
+      "note": "Revised dates due to component lead time.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-09-15T17:10:44Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20261015",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "100.000",
+          "confirmed_date": "20261022",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000030",
+      "po_number": "4500123481",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "CPM-OC-69502",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-04T09:52:10Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20260830",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1500.000",
+          "confirmed_date": "20260830",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000031",
+      "po_number": "4500123482",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "DANU-OC-60309",
+      "note": "Revised dates due to component lead time.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-09-08T20:41:04Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20261030",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "0.000",
+          "confirmed_date": null,
+          "reject_reason": "ALLOCATION"
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000032",
+      "po_number": "4500123485",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "APEX-OC-69258",
+      "note": "Quantity limited by capacity.",
+      "status": "POSTED",
+      "posted_at": "2026-07-25T16:33:11Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20260831",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "300.000",
+          "confirmed_date": "20260902",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000033",
+      "po_number": "4500123486",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "APEX-OC-32227",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-29T14:07:02Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260923",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20260923",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000034",
+      "po_number": "4500123488",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "KANS-OC-73603",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-09-17T10:47:48Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20261014",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "20.000",
+          "confirmed_date": "20261014",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20261014",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000035",
+      "po_number": "4500123490",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "WISL-OC-26979",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-07-27T11:37:55Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260909",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000036",
+      "po_number": "4500123491",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "SAIG-OC-22884",
+      "note": "Quantity limited by capacity.",
+      "status": "POSTED",
+      "posted_at": "2026-07-23T19:07:09Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20260817",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20260821",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000037",
+      "po_number": "4500123492",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "KANS-OC-96776",
+      "note": "Revised dates due to component lead time.",
+      "status": "POSTED",
+      "posted_at": "2026-08-24T07:08:37Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "100.000",
+          "confirmed_date": "20261011",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000038",
+      "po_number": "4500123493",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "SAIG-OC-12559",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-08-23T15:36:10Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "5000.000",
+          "confirmed_date": "20260917",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000039",
+      "po_number": "4500123494",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "KANS-OC-18813",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-20T16:41:37Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "1500.000",
+          "confirmed_date": "20260831",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "40.000",
+          "confirmed_date": "20260831",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000040",
+      "po_number": "4500123495",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "SAIG-OC-21163",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-18T17:12:58Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "5000.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000041",
+      "po_number": "4500123496",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "BRIG-OC-95090",
+      "note": "Quantity limited by capacity.",
+      "status": "POSTED",
+      "posted_at": "2026-09-11T19:04:14Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20261011",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000042",
+      "po_number": "4500123497",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "HANB-OC-79901",
+      "note": "Revised dates due to component lead time.",
+      "status": "POSTED",
+      "posted_at": "2026-08-22T21:32:25Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20260906",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1000.000",
+          "confirmed_date": "20260907",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20260910",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000043",
+      "po_number": "4500123500",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "CAMP-OC-32539",
+      "note": "Partial allocation - balance to follow.",
+      "status": "POSTED",
+      "posted_at": "2026-08-11T16:08:54Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20261006",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "5000.000",
+          "confirmed_date": "20261003",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000044",
+      "po_number": "4500123501",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "MAPL-OC-54110",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-22T15:01:42Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "10.000",
+          "confirmed_date": "20260927",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "25.000",
+          "confirmed_date": "20260927",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000045",
+      "po_number": "4500123502",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "NORD-OC-99133",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-09-02T17:34:50Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "200.000",
+          "confirmed_date": "20260917",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1000.000",
+          "confirmed_date": "20260917",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "5000.000",
+          "confirmed_date": "20260917",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000046",
+      "po_number": "4500123503",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "WISL-OC-22608",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-20T14:18:06Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "500.000",
+          "confirmed_date": "20260913",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000047",
+      "po_number": "4500123504",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "PRC-OC-29814",
+      "note": "Partial allocation - balance to follow.",
+      "status": "POSTED",
+      "posted_at": "2026-09-12T12:43:40Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20261003",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000048",
+      "po_number": "4500123505",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "BRIG-OC-51880",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-26T17:39:59Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20261018",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20261018",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000049",
+      "po_number": "4500123506",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "BRIG-OC-60522",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-20T08:18:01Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20260916",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "600.000",
+          "confirmed_date": "20260916",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "100.000",
+          "confirmed_date": "20260916",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000050",
+      "po_number": "4500123507",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "BHAR-OC-37756",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-24T22:52:02Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20260927",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000051",
+      "po_number": "4500123508",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "SONO-OC-46341",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-09-03T22:07:25Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "1000.000",
+          "confirmed_date": "20261012",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000052",
+      "po_number": "4500123509",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "GREA-OC-93543",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-07-26T13:23:13Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20260809",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000053",
+      "po_number": "4500123513",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "SHAN-OC-42250",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-09-13T23:39:03Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20261017",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000054",
+      "po_number": "4500123514",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "CP-OC-76409",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-27T22:44:16Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "200.000",
+          "confirmed_date": "20261016",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000055",
+      "po_number": "4500123515",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "HANB-OC-79274",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-21T15:41:46Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "250.000",
+          "confirmed_date": "20260928",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000056",
+      "po_number": "4500123516",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "PST-OC-48859",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-08-22T16:36:15Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "600.000",
+          "confirmed_date": "20261012",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20261012",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000057",
+      "po_number": "4500123517",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "BRIG-OC-84728",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-09-07T14:12:38Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20261004",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000058",
+      "po_number": "4500123518",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "CPM-OC-33273",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-07-25T19:31:44Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20260908",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000059",
+      "po_number": "4500123519",
+      "po_revision": 2,
+      "conf_category": "AC",
+      "vendor_reference": "DANU-OC-86321",
+      "note": "Partial allocation - balance to follow.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-08-15T17:59:34Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "150.000",
+          "confirmed_date": "20261010",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000060",
+      "po_number": "4500123520",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "PRC-OC-79543",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-08-13T12:39:33Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260825",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000061",
+      "po_number": "4500123521",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "HANB-OC-82044",
+      "note": null,
+      "status": "POSTED",
+      "posted_at": "2026-08-31T18:11:05Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20260919",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20260919",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "2000.000",
+          "confirmed_date": "20260919",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000062",
+      "po_number": "4500123522",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "TRI--OC-97198",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-09-04T23:37:43Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "400.000",
+          "confirmed_date": "20260928",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20260928",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000063",
+      "po_number": "4500123524",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "KEYS-OC-93954",
+      "note": "Quantity limited by capacity.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-09-04T15:14:45Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "5000.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "0.000",
+          "confirmed_date": null,
+          "reject_reason": "ALLOCATION"
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000064",
+      "po_number": "4500123525",
+      "po_revision": 1,
+      "conf_category": "AB",
+      "vendor_reference": "APEX-OC-50751",
+      "note": "Confirmed as ordered.",
+      "status": "POSTED",
+      "posted_at": "2026-09-15T14:53:53Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "200.000",
+          "confirmed_date": "20261013",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000065",
+      "po_number": "4500123526",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "LC-OC-24633",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-09-09T13:54:24Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20261002",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "600.000",
+          "confirmed_date": "20261002",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000066",
+      "po_number": "4500123527",
+      "po_revision": 2,
+      "conf_category": "AB",
+      "vendor_reference": "LC-OC-60547",
+      "note": "All lines confirmed.",
+      "status": "POSTED",
+      "posted_at": "2026-08-09T19:39:09Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "2500.000",
+          "confirmed_date": "20260909",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20260909",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00030",
+          "confirmed_qty": "3000.000",
+          "confirmed_date": "20260909",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000067",
+      "po_number": "4500123528",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "CP-OC-32790",
+      "note": "Partial allocation - balance to follow.",
+      "status": "IN_REVIEW",
+      "posted_at": "2026-08-24T10:22:10Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "600.000",
+          "confirmed_date": "20261003",
+          "reject_reason": null
+        }
+      ]
+    },
+    {
+      "confirmation_no": "7100000068",
+      "po_number": "4500123529",
+      "po_revision": 1,
+      "conf_category": "AC",
+      "vendor_reference": "NORD-OC-93163",
+      "note": "Partial allocation - balance to follow.",
+      "status": "POSTED",
+      "posted_at": "2026-08-31T19:13:05Z",
+      "items": [
+        {
+          "item_no": "00010",
+          "confirmed_qty": "750.000",
+          "confirmed_date": "20261008",
+          "reject_reason": null
+        },
+        {
+          "item_no": "00020",
+          "confirmed_qty": "1200.000",
+          "confirmed_date": "20261011",
+          "reject_reason": null
+        }
+      ]
+    }
   ],
   "inbound_deliveries": [
-    { "delivery_no": "180000088", "vendor_id": "0000710245", "asn_reference": "ASN-437120", "status": "POSTED", "posted_at": "2026-08-26T18:00:00Z",
-      "items": [ { "po_number": "4500123459", "item_no": "00010", "quantity": "150.000" } ] },
-    { "delivery_no": "180000107", "vendor_id": "0000710402", "asn_reference": "PRC-ASN-7781", "status": "POSTED", "posted_at": "2026-09-01T04:45:00Z",
-      "items": [ { "po_number": "4500123462", "item_no": "00010", "quantity": "1000.000" } ] },
-    { "delivery_no": "180000121", "vendor_id": "0000710245", "asn_reference": "ASN-439901", "status": "POSTED", "posted_at": "2026-09-18T19:05:10Z",
-      "items": [ { "po_number": "4500123458", "item_no": "00010", "quantity": "300.000" } ] }
+    {
+      "delivery_no": "180000088",
+      "vendor_id": "0000710245",
+      "asn_reference": "ASN-437120",
+      "status": "POSTED",
+      "posted_at": "2026-08-26T18:00:00Z",
+      "items": [
+        {
+          "po_number": "4500123459",
+          "item_no": "00010",
+          "quantity": "150.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000107",
+      "vendor_id": "0000710402",
+      "asn_reference": "PRC-ASN-7781",
+      "status": "POSTED",
+      "posted_at": "2026-09-01T04:45:00Z",
+      "items": [
+        {
+          "po_number": "4500123462",
+          "item_no": "00010",
+          "quantity": "1000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000121",
+      "vendor_id": "0000710245",
+      "asn_reference": "ASN-439901",
+      "status": "POSTED",
+      "posted_at": "2026-09-18T19:05:10Z",
+      "items": [
+        {
+          "po_number": "4500123458",
+          "item_no": "00010",
+          "quantity": "300.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000122",
+      "vendor_id": "0000710733",
+      "asn_reference": "ASN-440111",
+      "status": "POSTED",
+      "posted_at": "2026-09-23T22:26:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123470",
+          "item_no": "00010",
+          "quantity": "10.000"
+        },
+        {
+          "po_number": "4500123470",
+          "item_no": "00020",
+          "quantity": "100.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000123",
+      "vendor_id": "0000710884",
+      "asn_reference": "ASN-440139",
+      "status": "POSTED",
+      "posted_at": "2026-09-22T05:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123472",
+          "item_no": "00010",
+          "quantity": "600.000"
+        },
+        {
+          "po_number": "4500123472",
+          "item_no": "00020",
+          "quantity": "1500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000124",
+      "vendor_id": "0000710866",
+      "asn_reference": "ASN-440146",
+      "status": "POSTED",
+      "posted_at": "2026-09-20T22:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123473",
+          "item_no": "00010",
+          "quantity": "1200.000"
+        },
+        {
+          "po_number": "4500123473",
+          "item_no": "00020",
+          "quantity": "400.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000125",
+      "vendor_id": "0000710989",
+      "asn_reference": "ASN-440152",
+      "status": "POSTED",
+      "posted_at": "2026-09-21T06:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123474",
+          "item_no": "00010",
+          "quantity": "250.000"
+        },
+        {
+          "po_number": "4500123474",
+          "item_no": "00020",
+          "quantity": "100.000"
+        },
+        {
+          "po_number": "4500123474",
+          "item_no": "00030",
+          "quantity": "300.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000126",
+      "vendor_id": "0000710859",
+      "asn_reference": "ASN-440170",
+      "status": "POSTED",
+      "posted_at": "2026-09-21T12:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123475",
+          "item_no": "00010",
+          "quantity": "400.000"
+        },
+        {
+          "po_number": "4500123475",
+          "item_no": "00020",
+          "quantity": "2000.000"
+        },
+        {
+          "po_number": "4500123475",
+          "item_no": "00030",
+          "quantity": "1500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000127",
+      "vendor_id": "0000710903",
+      "asn_reference": "ASN-440194",
+      "status": "POSTED",
+      "posted_at": "2026-09-08T18:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123476",
+          "item_no": "00010",
+          "quantity": "250.000"
+        },
+        {
+          "po_number": "4500123476",
+          "item_no": "00020",
+          "quantity": "400.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000128",
+      "vendor_id": "0000710845",
+      "asn_reference": "ASN-440204",
+      "status": "POSTED",
+      "posted_at": "2026-09-15T16:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123479",
+          "item_no": "00010",
+          "quantity": "300.000"
+        },
+        {
+          "po_number": "4500123479",
+          "item_no": "00020",
+          "quantity": "2500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000129",
+      "vendor_id": "0000710989",
+      "asn_reference": "ASN-440240",
+      "status": "POSTED",
+      "posted_at": "2026-08-27T23:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123481",
+          "item_no": "00010",
+          "quantity": "150.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000130",
+      "vendor_id": "0000710245",
+      "asn_reference": "ASN-440246",
+      "status": "POSTED",
+      "posted_at": "2026-08-21T01:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123485",
+          "item_no": "00010",
+          "quantity": "300.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000131",
+      "vendor_id": "0000710245",
+      "asn_reference": "ASN-440284",
+      "status": "REVERSED",
+      "posted_at": "2026-09-23T19:57:00Z",
+      "reversed_at": "2026-09-23T19:59:00Z",
+      "items": [
+        {
+          "po_number": "4500123486",
+          "item_no": "00010",
+          "quantity": "400.000"
+        },
+        {
+          "po_number": "4500123486",
+          "item_no": "00020",
+          "quantity": "3000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000132",
+      "vendor_id": "0000710871",
+      "asn_reference": "ASN-440296",
+      "status": "REVERSED",
+      "posted_at": "2026-09-24T03:04:00Z",
+      "reversed_at": "2026-09-24T03:06:00Z",
+      "items": [
+        {
+          "po_number": "4500123488",
+          "item_no": "00010",
+          "quantity": "2000.000"
+        },
+        {
+          "po_number": "4500123488",
+          "item_no": "00020",
+          "quantity": "20.000"
+        },
+        {
+          "po_number": "4500123488",
+          "item_no": "00030",
+          "quantity": "2000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000133",
+      "vendor_id": "0000710903",
+      "asn_reference": "ASN-440310",
+      "status": "POSTED",
+      "posted_at": "2026-09-06T01:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123490",
+          "item_no": "00010",
+          "quantity": "400.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000134",
+      "vendor_id": "0000710866",
+      "asn_reference": "ASN-440340",
+      "status": "POSTED",
+      "posted_at": "2026-08-08T02:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123491",
+          "item_no": "00010",
+          "quantity": "500.000"
+        },
+        {
+          "po_number": "4500123491",
+          "item_no": "00020",
+          "quantity": "2500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000135",
+      "vendor_id": "0000710871",
+      "asn_reference": "ASN-440379",
+      "status": "POSTED",
+      "posted_at": "2026-09-22T23:30:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123492",
+          "item_no": "00010",
+          "quantity": "50.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000136",
+      "vendor_id": "0000710871",
+      "asn_reference": "ASN-440396",
+      "status": "POSTED",
+      "posted_at": "2026-08-25T03:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123494",
+          "item_no": "00010",
+          "quantity": "1500.000"
+        },
+        {
+          "po_number": "4500123494",
+          "item_no": "00020",
+          "quantity": "40.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000137",
+      "vendor_id": "0000710866",
+      "asn_reference": "ASN-440427",
+      "status": "POSTED",
+      "posted_at": "2026-09-24T05:34:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123495",
+          "item_no": "00010",
+          "quantity": "250.000"
+        },
+        {
+          "po_number": "4500123495",
+          "item_no": "00020",
+          "quantity": "250.000"
+        },
+        {
+          "po_number": "4500123495",
+          "item_no": "00030",
+          "quantity": "5000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000138",
+      "vendor_id": "0000710845",
+      "asn_reference": "ASN-440457",
+      "status": "POSTED",
+      "posted_at": "2026-09-23T08:38:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123496",
+          "item_no": "00010",
+          "quantity": "250.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000139",
+      "vendor_id": "0000710884",
+      "asn_reference": "ASN-440460",
+      "status": "POSTED",
+      "posted_at": "2026-08-31T17:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123497",
+          "item_no": "00010",
+          "quantity": "750.000"
+        },
+        {
+          "po_number": "4500123497",
+          "item_no": "00020",
+          "quantity": "1000.000"
+        },
+        {
+          "po_number": "4500123497",
+          "item_no": "00030",
+          "quantity": "1200.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000140",
+      "vendor_id": "0000710944",
+      "asn_reference": "ASN-440523",
+      "status": "POSTED",
+      "posted_at": "2026-09-19T07:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123501",
+          "item_no": "00010",
+          "quantity": "6.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000141",
+      "vendor_id": "0000710402",
+      "asn_reference": "ASN-440568",
+      "status": "POSTED",
+      "posted_at": "2026-09-21T09:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123504",
+          "item_no": "00010",
+          "quantity": "1200.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000142",
+      "vendor_id": "0000710845",
+      "asn_reference": "ASN-440601",
+      "status": "POSTED",
+      "posted_at": "2026-09-23T10:46:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123505",
+          "item_no": "00010",
+          "quantity": "2500.000"
+        },
+        {
+          "po_number": "4500123505",
+          "item_no": "00020",
+          "quantity": "1200.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000143",
+      "vendor_id": "0000710926",
+      "asn_reference": "ASN-440660",
+      "status": "POSTED",
+      "posted_at": "2026-09-15T06:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123513",
+          "item_no": "00010",
+          "quantity": "1800.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000144",
+      "vendor_id": "0000710957",
+      "asn_reference": "ASN-440671",
+      "status": "POSTED",
+      "posted_at": "2026-09-19T06:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123514",
+          "item_no": "00010",
+          "quantity": "80.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000145",
+      "vendor_id": "0000710859",
+      "asn_reference": "ASN-440684",
+      "status": "POSTED",
+      "posted_at": "2026-09-20T10:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123516",
+          "item_no": "00010",
+          "quantity": "300.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000146",
+      "vendor_id": "0000710845",
+      "asn_reference": "ASN-440693",
+      "status": "POSTED",
+      "posted_at": "2026-09-09T20:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123517",
+          "item_no": "00010",
+          "quantity": "1500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000147",
+      "vendor_id": "0000710989",
+      "asn_reference": "ASN-440727",
+      "status": "POSTED",
+      "posted_at": "2026-09-06T04:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123518",
+          "item_no": "00010",
+          "quantity": "3000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000148",
+      "vendor_id": "0000710402",
+      "asn_reference": "ASN-440764",
+      "status": "POSTED",
+      "posted_at": "2026-08-21T09:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123520",
+          "item_no": "00010",
+          "quantity": "200.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000149",
+      "vendor_id": "0000710884",
+      "asn_reference": "ASN-440800",
+      "status": "REVERSED",
+      "posted_at": "2026-09-23T04:27:00Z",
+      "reversed_at": "2026-09-23T04:29:00Z",
+      "items": [
+        {
+          "po_number": "4500123521",
+          "item_no": "00010",
+          "quantity": "2500.000"
+        },
+        {
+          "po_number": "4500123521",
+          "item_no": "00020",
+          "quantity": "2000.000"
+        },
+        {
+          "po_number": "4500123521",
+          "item_no": "00030",
+          "quantity": "2000.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000150",
+      "vendor_id": "0000710951",
+      "asn_reference": "ASN-440834",
+      "status": "POSTED",
+      "posted_at": "2026-09-16T00:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123522",
+          "item_no": "00010",
+          "quantity": "400.000"
+        },
+        {
+          "po_number": "4500123522",
+          "item_no": "00020",
+          "quantity": "2500.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000151",
+      "vendor_id": "0000710245",
+      "asn_reference": "ASN-440855",
+      "status": "POSTED",
+      "posted_at": "2026-09-19T21:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123525",
+          "item_no": "00010",
+          "quantity": "120.000"
+        }
+      ]
+    },
+    {
+      "delivery_no": "180000152",
+      "vendor_id": "0000710962",
+      "asn_reference": "ASN-440893",
+      "status": "POSTED",
+      "posted_at": "2026-09-06T17:01:00Z",
+      "reversed_at": null,
+      "items": [
+        {
+          "po_number": "4500123527",
+          "item_no": "00010",
+          "quantity": "2500.000"
+        },
+        {
+          "po_number": "4500123527",
+          "item_no": "00020",
+          "quantity": "3000.000"
+        },
+        {
+          "po_number": "4500123527",
+          "item_no": "00030",
+          "quantity": "3000.000"
+        }
+      ]
+    }
   ]
 }

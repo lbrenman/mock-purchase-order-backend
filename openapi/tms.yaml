@@ -79,6 +79,84 @@ paths:
                     mode: PARCEL
                     trackingUrlTemplate: 'https://www.ups.com/track?tracknum={trackingId}'
         '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Reference Data]
+      summary: Create a carrier
+      operationId: createCarrier
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Carrier'}
+            example: {carrierCode: RLC, scac: RLCA, name: R+L Carriers, mode: LTL, trackingUrlTemplate: null}
+      responses:
+        '201':
+          description: Created carrier
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Carrier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /v1/carriers/{carrierCode}:
+    parameters:
+      - {name: carrierCode, in: path, required: true, description: Carrier code or SCAC, schema: {type: string, example: UPS}}
+    get:
+      tags: [Reference Data]
+      summary: Get a carrier with shipment counts per milestone
+      operationId: getCarrier
+      responses:
+        '200':
+          description: Carrier
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Carrier'
+                  - type: object
+                    properties:
+                      shipmentsByMilestone:
+                        type: object
+                        additionalProperties: {type: integer}
+                        example: {DLV: 4, ITR: 2}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Reference Data]
+      summary: Change name, mode or tracking URL template
+      description: "Send `trackingUrlTemplate: null` to remove the template."
+      operationId: updateCarrier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+                mode: {type: string, enum: [PARCEL, LTL, FTL, AIR, OCEAN]}
+                trackingUrlTemplate: {type: string, nullable: true}
+            example: {name: UPS Supply Chain Solutions}
+      responses:
+        '200':
+          description: Updated carrier
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Carrier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Reference Data]
+      summary: Delete a carrier (409 CARRIER_IN_USE while shipments use its SCAC)
+      operationId: deleteCarrier
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/milestones:
     get:
       tags: [Reference Data]
@@ -132,6 +210,7 @@ paths:
         - {name: status, in: query, description: 'Milestone codes, comma separated (PLN,TND,ITR,DLV,EXC,CXL)', schema: {type: string, example: 'TND,ITR'}}
         - {name: poNumber, in: query, description: 10-digit ERP PO number contained in the shipment, schema: {type: string, pattern: '^[0-9]{10}$', example: '4500123458'}}
         - {name: asnNumber, in: query, schema: {type: string, example: ASN-439901}}
+        - {name: carrier, in: query, description: 'SCAC or carrier code, comma separated', schema: {type: string, example: UPSN}}
         - {name: updatedSince, in: query, schema: {type: string, format: date-time}}
         - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 200, default: 25}}
         - {name: cursor, in: query, description: nextCursor from the previous page, schema: {type: string}}
@@ -227,6 +306,46 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Shipments]
+      summary: Change a shipment
+      description: |
+        Field locks follow the milestone:
+        * any open shipment: `carrier.trackingId`, `schedule.estimatedArrival`
+        * PLN or TND only: `carrier.scac`, `route`, `schedule.plannedShipDate`, `handlingUnits`
+        * PLN only: `contents`, `asnNumber`
+
+        Locked fields return 409 `FIELD_LOCKED`; DLV and CXL return 409 `SHIPMENT_CLOSED`.
+      operationId: updateShipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdateShipment'}
+            example:
+              carrier: {trackingId: 1Z999AA10123456799}
+              schedule: {estimatedArrival: '2026-10-08T15:00:00Z'}
+      responses:
+        '200':
+          description: Updated shipment
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Shipment'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+    delete:
+      tags: [Shipments]
+      summary: Delete a planned (PLN) shipment
+      description: Anything already tendered returns 409 `SHIPMENT_NOT_DRAFT`; use POST /cancel instead.
+      operationId: deleteShipment
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/shipments/{shipmentId}/events:
     parameters:
       - $ref: '#/components/parameters/ShipmentId'
@@ -426,6 +545,31 @@ components:
           type: array
           items: {$ref: '#/components/schemas/HandlingUnit'}
         tender: {type: boolean, default: true, description: false creates the shipment as PLN}
+    UpdateShipment:
+      type: object
+      properties:
+        asnNumber: {type: string}
+        carrier:
+          type: object
+          properties:
+            scac: {type: string}
+            trackingId: {type: string}
+        route:
+          type: object
+          properties:
+            origin: {$ref: '#/components/schemas/Location'}
+            destination: {$ref: '#/components/schemas/Location'}
+        schedule:
+          type: object
+          properties:
+            plannedShipDate: {type: string, format: date-time}
+            estimatedArrival: {type: string, format: date-time}
+        contents:
+          type: array
+          items: {$ref: '#/components/schemas/Content'}
+        handlingUnits:
+          type: array
+          items: {$ref: '#/components/schemas/HandlingUnit'}
     TrackingEvent:
       type: object
       properties:
@@ -527,6 +671,13 @@ components:
       content:
         application/json:
           schema: {$ref: '#/components/schemas/TmsFault'}
+    UnprocessableEntity:
+      description: Business rule violation (unknown SCAC, invalid schedule)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/TmsFault'}
+          example:
+            fault: {faultCode: tms.INVALID_SCHEDULE, faultString: estimatedArrival must not be before plannedShipDate, httpStatus: 422, detail: [{path: schedule.estimatedArrival, issue: must be >= schedule.plannedShipDate}]}
     TooManyRequests:
       description: Rate limited
       content:

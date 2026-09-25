@@ -36,6 +36,7 @@ tags:
   - name: Inbound Deliveries
     description: ERP side of an ASN. Reserves open quantity; reversible for compensation.
   - name: Reference Data
+    description: Plants and purchasing organisations, with maintenance operations (create, change, delete) for the dashboard.
   - name: Health
 paths:
   /health:
@@ -110,6 +111,86 @@ paths:
                     type: array
                     items: {$ref: '#/components/schemas/PurchasingOrg'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Reference Data]
+      summary: Create a purchasing organisation
+      operationId: createPurchasingOrg
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PurchasingOrg'}
+            example: {code: JBBR, name: Jabil-BR, company_code: BR01}
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchasingOrg'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /v1/reference/purchasing-orgs/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: {type: string, example: JBUS}
+    get:
+      tags: [Reference Data]
+      summary: Get a purchasing organisation
+      operationId: getPurchasingOrg
+      responses:
+        '200':
+          description: Purchasing org
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchasingOrg'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Reference Data]
+      summary: Change name or company code
+      operationId: changePurchasingOrg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: {type: string}
+                company_code: {type: string}
+            example: {name: Jabil-US Procurement}
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchasingOrg'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Reference Data]
+      summary: Delete a purchasing organisation (409 PURCH_ORG_IN_USE while POs reference it)
+      operationId: deletePurchasingOrg
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/plants:
     get:
       tags: [Reference Data]
@@ -131,6 +212,38 @@ paths:
                     type: array
                     items: {$ref: '#/components/schemas/Plant'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Reference Data]
+      summary: Create a plant
+      operationId: createPlant
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlantCreate'}
+            example:
+              plant_code: '1105'
+              site_code: US-AUSTIN
+              name: Jabil Austin Test Site
+              street: 1 Demo Way
+              city: Austin
+              region: TX
+              postal_code: '78701'
+              country: US
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/Plant'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/plants/{plantCode}:
     get:
       tags: [Reference Data]
@@ -152,6 +265,48 @@ paths:
                   data: {$ref: '#/components/schemas/Plant'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Reference Data]
+      summary: Change plant master data
+      operationId: changePlant
+      parameters:
+        - name: plantCode
+          in: path
+          required: true
+          schema: {type: string, example: '1101'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PlantChange'}
+            example: {name: Jabil Auburn Hills Campus}
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/Plant'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [Reference Data]
+      summary: Delete a plant (409 PLANT_IN_USE while POs reference it)
+      operationId: deletePlant
+      parameters:
+        - name: plantCode
+          in: path
+          required: true
+          schema: {type: string, example: '1105'}
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/purchase-orders:
     get:
       tags: [Purchase Orders]
@@ -342,6 +497,16 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/UnprocessableEntity'}
+    delete:
+      tags: [Purchase Orders]
+      summary: Delete a purchase order
+      description: Only POs without confirmations or inbound deliveries can be deleted; otherwise 409 `PO_HAS_FOLLOW_ON_DOCUMENTS` (cancel with PATCH `status_code` `09` instead).
+      operationId: deletePurchaseOrder
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/purchase-orders/{poNumber}/items:
     parameters:
       - $ref: '#/components/parameters/PoNumber'
@@ -362,6 +527,87 @@ paths:
                     items: {$ref: '#/components/schemas/PurchaseOrderItem'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Purchase Orders]
+      summary: Add an item (creates a new revision)
+      description: "`item_no` is optional; the next multiple of 10 is used. 409 `PO_LOCKED` for closed or cancelled POs."
+      operationId: addPurchaseOrderItem
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/PurchaseOrderItemCreate'}
+            example: {material: MAT-778999, short_text: Spare fuse kit, quantity: 50, uom: EA, net_price: 1.25}
+      responses:
+        '201':
+          description: Purchase order with the new item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /v1/purchase-orders/{poNumber}/items/{itemNo}:
+    parameters:
+      - $ref: '#/components/parameters/PoNumber'
+      - name: itemNo
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[0-9]{5}$', example: '00010'}
+    patch:
+      tags: [Purchase Orders]
+      summary: Change an item (creates a new revision)
+      description: Quantity cannot go below the shipped quantity (422 `QUANTITY_BELOW_SHIPPED`).
+      operationId: changePurchaseOrderItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                short_text: {type: string}
+                quantity: {type: number}
+                net_price: {type: number}
+            example: {quantity: 275}
+      responses:
+        '200':
+          description: Updated purchase order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
+    delete:
+      tags: [Purchase Orders]
+      summary: Delete an item (creates a new revision)
+      description: Refused with 409 `ITEM_HAS_FOLLOW_ON_DOCUMENTS` when confirmed or shipped, and 422 `LAST_ITEM` for the only item.
+      operationId: deletePurchaseOrderItem
+      responses:
+        '200':
+          description: Purchase order without the item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {$ref: '#/components/schemas/PurchaseOrder'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '422': {$ref: '#/components/responses/UnprocessableEntity'}
   /v1/purchase-orders/{poNumber}/confirmations:
     parameters:
       - $ref: '#/components/parameters/PoNumber'
@@ -463,6 +709,36 @@ paths:
         '422': {$ref: '#/components/responses/UnprocessableEntity'}
         '429': {$ref: '#/components/responses/TooManyRequests'}
         '503': {$ref: '#/components/responses/ServiceUnavailable'}
+  /v1/confirmations:
+    get:
+      tags: [Confirmations]
+      summary: List confirmations across all purchase orders
+      operationId: listAllConfirmations
+      parameters:
+        - {name: po_number, in: query, description: Comma separated, schema: {type: string, example: '4500123461'}}
+        - {name: status, in: query, schema: {type: string, enum: [POSTED, IN_REVIEW]}}
+        - {name: conf_category, in: query, schema: {type: string, enum: [AB, AC, RJ]}}
+        - {name: vendor_id, in: query, description: ERP vendor of the PO, schema: {type: string, example: '0000710311'}}
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Confirmations, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Confirmation'
+                        - type: object
+                          properties:
+                            vendor_id: {type: string, example: '0000710311'}
+                  pagination: {$ref: '#/components/schemas/Pagination'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /v1/confirmations/{confirmationNo}:
     get:
       tags: [Confirmations]
@@ -718,6 +994,8 @@ components:
         delivery_date: {type: string}
         status_code: {type: string, enum: ['05', '09']}
         buyer_name: {type: string}
+        incoterms: {type: string, example: DAP}
+        payment_terms: {type: string, example: NET45}
         items:
           type: array
           items:
@@ -727,6 +1005,38 @@ components:
               item_no: {type: string, pattern: '^[0-9]{5}$'}
               quantity: {type: number}
               net_price: {type: number}
+    PurchaseOrderItemCreate:
+      type: object
+      required: [material, short_text, quantity, uom]
+      properties:
+        item_no: {type: string, pattern: '^[0-9]{5}$', description: Optional; next multiple of 10 when omitted}
+        material: {type: string}
+        short_text: {type: string}
+        quantity: {type: number}
+        uom: {type: string, example: EA}
+        net_price: {type: number}
+    PlantCreate:
+      type: object
+      required: [plant_code, site_code, name, country]
+      properties:
+        plant_code: {type: string, pattern: '^[0-9]{4}$'}
+        site_code: {type: string, pattern: '^[A-Z0-9-]+$'}
+        name: {type: string}
+        street: {type: string}
+        city: {type: string}
+        region: {type: string}
+        postal_code: {type: string}
+        country: {type: string, pattern: '^[A-Z]{2}$'}
+    PlantChange:
+      type: object
+      properties:
+        site_code: {type: string}
+        name: {type: string}
+        street: {type: string}
+        city: {type: string}
+        region: {type: string}
+        postal_code: {type: string}
+        country: {type: string}
     ConfirmationRequest:
       type: object
       required: [conf_category, items]

@@ -175,6 +175,8 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
         add('s.contents @> ?::jsonb', JSON.stringify([{ poNumber: String(req.query.poNumber) }]));
       }
       if (req.query.asnNumber) add('s.asn_number = ?', String(req.query.asnNumber));
+      const scacs = csv(req.query.carrier).map((x) => x.toUpperCase());
+      if (scacs.length) add('(s.carrier_scac = ANY(?) OR c.carrier_code = ANY($' + (params.length + 1) + '))', scacs);
       if (req.query.updatedSince) {
         const ts = parseTimestampLoose(String(req.query.updatedSince));
         if (!ts) throw new ApiError(400, 'INVALID_FILTER', 'updatedSince must be ISO-8601', [{ field: 'updatedSince', message: 'invalid date-time' }]);
@@ -389,6 +391,194 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
       });
       const s = await loadShipment(pool, req.params.shipmentId);
       res.json(mapShipment(s));
+    })
+  );
+
+
+  // ═══ Maintenance (CRUD) endpoints used by the dashboard and Postman ═══════
+
+  // ─── Carriers ────────────────────────────────────────────────────────────
+  const MODES = ['PARCEL', 'LTL', 'FTL', 'AIR', 'OCEAN'];
+  const mapCarrier = (c) => ({ carrierCode: c.carrier_code, scac: c.scac, name: c.name, mode: c.mode, trackingUrlTemplate: c.tracking_url_template });
+  async function loadCarrier(code) {
+    const { rows } = await pool.query('SELECT * FROM tms.carriers WHERE carrier_code = $1 OR scac = $1', [String(code).toUpperCase()]);
+    if (!rows[0]) throw new ApiError(404, 'CARRIER_NOT_FOUND', `Carrier ${code} is not configured`);
+    return rows[0];
+  }
+
+  r.get(
+    '/carriers/:carrierCode',
+    asyncHandler(async (req, res) => {
+      const c = await loadCarrier(req.params.carrierCode);
+      const { rows } = await pool.query(
+        'SELECT milestone, COUNT(*)::int AS n FROM tms.shipments WHERE carrier_scac = $1 GROUP BY milestone',
+        [c.scac]
+      );
+      res.json({ ...mapCarrier(c), shipmentsByMilestone: Object.fromEntries(rows.map((x) => [x.milestone, x.n])) });
+    })
+  );
+
+  r.post(
+    '/carriers',
+    idem,
+    asyncHandler(async (req, res) => {
+      const b = req.body || {};
+      const v = new Validator();
+      const code = v.string(b, 'carrierCode', { required: true, max: 20, pattern: /^[A-Z0-9]+$/ });
+      const scac = v.string(b, 'scac', { required: true, pattern: /^[A-Z]{2,4}$/ });
+      const name = v.string(b, 'name', { required: true, max: 120 });
+      const mode = v.string(b, 'mode', { required: true, oneOf: MODES });
+      const tpl = v.string(b, 'trackingUrlTemplate', { max: 300 });
+      v.throwIfErrors();
+      await pool.query(
+        'INSERT INTO tms.carriers (carrier_code, scac, name, mode, tracking_url_template) VALUES ($1,$2,$3,$4,$5)',
+        [code, scac, name, mode, tpl || null]
+      );
+      res.status(201).set('Location', `/tms/v1/carriers/${code}`).json(mapCarrier(await loadCarrier(code)));
+    })
+  );
+
+  r.patch(
+    '/carriers/:carrierCode',
+    asyncHandler(async (req, res) => {
+      const b = req.body || {};
+      const v = new Validator();
+      const name = v.string(b, 'name', { max: 120 });
+      const mode = v.string(b, 'mode', { oneOf: MODES });
+      const tpl = v.string(b, 'trackingUrlTemplate', { max: 300 });
+      if (!name && !mode && tpl === undefined && b.trackingUrlTemplate !== null) v.add('body', 'provide name, mode and/or trackingUrlTemplate');
+      v.throwIfErrors();
+      const c = await loadCarrier(req.params.carrierCode);
+      await pool.query(
+        `UPDATE tms.carriers SET name = COALESCE($2, name), mode = COALESCE($3, mode),
+            tracking_url_template = CASE WHEN $4::boolean THEN NULL ELSE COALESCE($5, tracking_url_template) END
+          WHERE carrier_code = $1`,
+        [c.carrier_code, name || null, mode || null, b.trackingUrlTemplate === null, tpl || null]
+      );
+      res.json(mapCarrier(await loadCarrier(c.carrier_code)));
+    })
+  );
+
+  r.delete(
+    '/carriers/:carrierCode',
+    asyncHandler(async (req, res) => {
+      const c = await loadCarrier(req.params.carrierCode);
+      const used = await pool.query('SELECT COUNT(*)::int AS n FROM tms.shipments WHERE carrier_scac = $1', [c.scac]);
+      if (used.rows[0].n) {
+        throw new ApiError(409, 'CARRIER_IN_USE', `Carrier ${c.carrier_code} (${c.scac}) is used by ${used.rows[0].n} shipment(s)`);
+      }
+      await pool.query('DELETE FROM tms.carriers WHERE carrier_code = $1', [c.carrier_code]);
+      res.status(204).end();
+    })
+  );
+
+  // ─── Shipment update / delete ────────────────────────────────────────────
+  /**
+   * PATCH rules (mirrors a real TMS):
+   *  - any open shipment (not DLV/CXL): trackingId, schedule.estimatedArrival
+   *  - PLN or TND only: carrier.scac, route, schedule.plannedShipDate, handlingUnits
+   *  - PLN only: contents, asnNumber
+   */
+  r.patch(
+    '/shipments/:shipmentId',
+    asyncHandler(async (req, res) => {
+      const b = req.body || {};
+      const v = new Validator();
+      const carrier = v.object(b, 'carrier') || {};
+      const scac = v.string(carrier, 'scac', { max: 4, path: 'carrier.scac' });
+      const trackingId = v.string(carrier, 'trackingId', { max: 100, path: 'carrier.trackingId' });
+      const schedule = v.object(b, 'schedule') || {};
+      const planned = v.timestamp(schedule, 'plannedShipDate', { path: 'schedule.plannedShipDate' });
+      const eta = v.timestamp(schedule, 'estimatedArrival', { path: 'schedule.estimatedArrival' });
+      const asnNumber = v.string(b, 'asnNumber', { max: 80 });
+      const route = v.object(b, 'route');
+      const origin = route && route.origin ? validateLocation(v, route.origin, 'route.origin') : null;
+      const destination = route && route.destination ? validateLocation(v, route.destination, 'route.destination') : null;
+      const contentsIn = v.array(b, 'contents', { minItems: 1 });
+      const contents = contentsIn
+        ? contentsIn.map((c, i) => {
+            const p = `contents[${i}]`;
+            const qty = v.object(c, 'quantity', { required: true, path: `${p}.quantity` }) || {};
+            return {
+              poNumber: v.string(c, 'poNumber', { required: true, pattern: PO_RE, path: `${p}.poNumber` }),
+              poLine: v.number(c, 'poLine', { required: true, min: 1, integer: true, path: `${p}.poLine` }),
+              quantity: {
+                value: v.number(qty, 'value', { required: true, exclusiveMin: 0, path: `${p}.quantity.value` }),
+                uom: v.string(qty, 'uom', { required: true, max: 12, path: `${p}.quantity.uom` }),
+              },
+              lotNumber: v.string(c, 'lotNumber', { max: 80, path: `${p}.lotNumber` }) || null,
+            };
+          })
+        : null;
+      const husIn = v.array(b, 'handlingUnits');
+      const hus = husIn
+        ? husIn.map((h, i) => {
+            const p = `handlingUnits[${i}]`;
+            const w = v.object(h, 'weight', { path: `${p}.weight` });
+            return {
+              huId: v.string(h, 'huId', { required: true, max: 80, path: `${p}.huId` }),
+              type: v.string(h, 'type', { required: true, oneOf: HU_TYPES, path: `${p}.type` }),
+              weight: w
+                ? {
+                    value: v.number(w, 'value', { required: true, min: 0, path: `${p}.weight.value` }),
+                    unit: v.string(w, 'unit', { required: true, oneOf: ['kg', 'lb'], path: `${p}.weight.unit` }),
+                  }
+                : null,
+            };
+          })
+        : null;
+      const changes = [scac, trackingId, planned, eta, asnNumber, origin, destination, contents, hus].filter((x) => x !== undefined && x !== null);
+      if (!changes.length) v.add('body', 'provide at least one updatable field');
+      v.throwIfErrors();
+
+      await withTransaction(pool, async (c) => {
+        const s = await loadShipment(c, req.params.shipmentId, { lock: true });
+        if (CLOSED.includes(s.milestone)) throw new ApiError(409, 'SHIPMENT_CLOSED', `Shipment is ${MILESTONES[s.milestone].toLowerCase()} and cannot be changed`);
+        const early = ['PLN', 'TND'].includes(s.milestone);
+        const locked = [];
+        if (!early && (scac || origin || destination || planned || hus)) locked.push('carrier.scac, route, schedule.plannedShipDate, handlingUnits');
+        if (s.milestone !== 'PLN' && (contents || asnNumber)) locked.push('contents, asnNumber');
+        if (locked.length) {
+          throw new ApiError(409, 'FIELD_LOCKED', `Shipment is ${MILESTONES[s.milestone].toLowerCase()}; these fields can no longer change: ${locked.join('; ')}`);
+        }
+        if (scac) {
+          const car = await c.query('SELECT scac FROM tms.carriers WHERE scac = $1', [scac.toUpperCase()]);
+          if (!car.rows[0]) throw new ApiError(422, 'UNKNOWN_CARRIER', `Carrier SCAC ${scac} is not configured in TMS`, [{ field: 'carrier.scac', message: 'unknown SCAC' }]);
+        }
+        const newPlanned = planned || s.planned_ship_at;
+        const newEta = eta || s.eta;
+        if (new Date(newEta) < new Date(newPlanned)) {
+          throw new ApiError(422, 'INVALID_SCHEDULE', 'estimatedArrival must not be before plannedShipDate', [
+            { field: 'schedule.estimatedArrival', message: 'must be >= schedule.plannedShipDate' },
+          ]);
+        }
+        await c.query(
+          `UPDATE tms.shipments SET carrier_scac = COALESCE($2, carrier_scac), tracking_id = COALESCE($3, tracking_id),
+              planned_ship_at = $4, eta = $5, asn_number = COALESCE($6, asn_number),
+              origin = COALESCE($7::jsonb, origin), destination = COALESCE($8::jsonb, destination),
+              contents = COALESCE($9::jsonb, contents), handling_units = COALESCE($10::jsonb, handling_units), updated_at = NOW()
+            WHERE shipment_id = $1`,
+          [s.shipment_id, scac ? scac.toUpperCase() : null, trackingId || null, newPlanned, newEta, asnNumber || null,
+            origin ? JSON.stringify(origin) : null, destination ? JSON.stringify(destination) : null,
+            contents ? JSON.stringify(contents) : null, hus ? JSON.stringify(hus) : null]
+        );
+      });
+      const s = await loadShipment(pool, req.params.shipmentId);
+      res.json(mapShipment(s));
+    })
+  );
+
+  r.delete(
+    '/shipments/:shipmentId',
+    asyncHandler(async (req, res) => {
+      await withTransaction(pool, async (c) => {
+        const s = await loadShipment(c, req.params.shipmentId, { lock: true });
+        if (s.milestone !== 'PLN') {
+          throw new ApiError(409, 'SHIPMENT_NOT_DRAFT', `Only planned (PLN) shipments can be deleted; this one is ${s.milestone}. Use POST /cancel instead.`);
+        }
+        await c.query('DELETE FROM tms.shipments WHERE shipment_id = $1', [s.shipment_id]);
+      });
+      res.status(204).end();
     })
   );
 

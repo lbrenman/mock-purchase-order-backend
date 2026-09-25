@@ -1,41 +1,1429 @@
 {
   "suppliers": [
-    { "supplier_code": "SUP-100245", "erp_vendor_number": "0000710245", "legal_name": "Apex Precision Components, Inc.", "trading_name": "Apex Precision", "status": "ACTIVE", "status_reason": null, "tier": "STRATEGIC", "risk_rating": "LOW", "country": "US", "duns": "081466849", "portal_enabled": true, "asn_enabled": true, "onboarded_on": "2019-04-01" },
-    { "supplier_code": "SUP-100311", "erp_vendor_number": "0000710311", "legal_name": "Nordwerk Elektronik GmbH", "trading_name": "Nordwerk", "status": "ACTIVE", "status_reason": null, "tier": "PREFERRED", "risk_rating": "LOW", "country": "DE", "duns": "315873920", "portal_enabled": true, "asn_enabled": true, "onboarded_on": "2020-11-16" },
-    { "supplier_code": "SUP-100402", "erp_vendor_number": "0000710402", "legal_name": "Pacific Rim Circuits Co., Ltd.", "trading_name": "PRC Circuits", "status": "ACTIVE", "status_reason": null, "tier": "STRATEGIC", "risk_rating": "MEDIUM", "country": "TW", "duns": "656120483", "portal_enabled": false, "asn_enabled": true, "onboarded_on": "2018-02-12" },
-    { "supplier_code": "SUP-100518", "erp_vendor_number": "0000710518", "legal_name": "Great Lakes Plastics LLC", "trading_name": "Great Lakes Plastics", "status": "ON_HOLD", "status_reason": "Quality hold pending corrective action CAR-2026-114", "tier": "APPROVED", "risk_rating": "HIGH", "country": "US", "duns": "792044135", "portal_enabled": true, "asn_enabled": false, "onboarded_on": "2022-06-30" },
-    { "supplier_code": "SUP-100627", "erp_vendor_number": "0000710627", "legal_name": "Monterrey Metal Works S.A. de C.V.", "trading_name": "MMW", "status": "BLOCKED", "status_reason": "Contract terminated 2026-09-01", "tier": "CONDITIONAL", "risk_rating": "HIGH", "country": "MX", "duns": "812334097", "portal_enabled": false, "asn_enabled": false, "onboarded_on": "2021-03-08" },
-    { "supplier_code": "SUP-100733", "erp_vendor_number": "0000710733", "legal_name": "Bharat Passive Devices Pvt. Ltd.", "trading_name": "Bharat Passives", "status": "ACTIVE", "status_reason": null, "tier": "APPROVED", "risk_rating": "MEDIUM", "country": "IN", "duns": "860217755", "portal_enabled": true, "asn_enabled": true, "onboarded_on": "2024-01-22" }
+    {
+      "supplier_code": "SUP-100245",
+      "erp_vendor_number": "0000710245",
+      "legal_name": "Apex Precision Components, Inc.",
+      "trading_name": "Apex Precision",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "STRATEGIC",
+      "risk_rating": "LOW",
+      "country": "US",
+      "duns": "081466849",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2019-04-01"
+    },
+    {
+      "supplier_code": "SUP-100311",
+      "erp_vendor_number": "0000710311",
+      "legal_name": "Nordwerk Elektronik GmbH",
+      "trading_name": "Nordwerk",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "DE",
+      "duns": "315873920",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2020-11-16"
+    },
+    {
+      "supplier_code": "SUP-100402",
+      "erp_vendor_number": "0000710402",
+      "legal_name": "Pacific Rim Circuits Co., Ltd.",
+      "trading_name": "PRC Circuits",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "STRATEGIC",
+      "risk_rating": "MEDIUM",
+      "country": "TW",
+      "duns": "656120483",
+      "portal_enabled": false,
+      "asn_enabled": true,
+      "onboarded_on": "2018-02-12"
+    },
+    {
+      "supplier_code": "SUP-100518",
+      "erp_vendor_number": "0000710518",
+      "legal_name": "Great Lakes Plastics LLC",
+      "trading_name": "Great Lakes Plastics",
+      "status": "ON_HOLD",
+      "status_reason": "Quality hold pending corrective action CAR-2026-114",
+      "tier": "APPROVED",
+      "risk_rating": "HIGH",
+      "country": "US",
+      "duns": "792044135",
+      "portal_enabled": true,
+      "asn_enabled": false,
+      "onboarded_on": "2022-06-30"
+    },
+    {
+      "supplier_code": "SUP-100627",
+      "erp_vendor_number": "0000710627",
+      "legal_name": "Monterrey Metal Works S.A. de C.V.",
+      "trading_name": "MMW",
+      "status": "BLOCKED",
+      "status_reason": "Contract terminated 2026-09-01",
+      "tier": "CONDITIONAL",
+      "risk_rating": "HIGH",
+      "country": "MX",
+      "duns": "812334097",
+      "portal_enabled": false,
+      "asn_enabled": false,
+      "onboarded_on": "2021-03-08"
+    },
+    {
+      "supplier_code": "SUP-100733",
+      "erp_vendor_number": "0000710733",
+      "legal_name": "Bharat Passive Devices Pvt. Ltd.",
+      "trading_name": "Bharat Passives",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "IN",
+      "duns": "860217755",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2024-01-22"
+    },
+    {
+      "supplier_code": "SUP-100812",
+      "erp_vendor_number": "0000710812",
+      "legal_name": "Keystone Cable Assemblies Corp.",
+      "trading_name": "Keystone Cable",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "US",
+      "duns": "012049474",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2017-05-15"
+    },
+    {
+      "supplier_code": "SUP-100845",
+      "erp_vendor_number": "0000710845",
+      "legal_name": "Shenzhen Brightwave Optoelectronics Co., Ltd.",
+      "trading_name": "Brightwave Opto",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "STRATEGIC",
+      "risk_rating": "MEDIUM",
+      "country": "CN",
+      "duns": "042778753",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2016-10-03"
+    },
+    {
+      "supplier_code": "SUP-100859",
+      "erp_vendor_number": "0000710859",
+      "legal_name": "Penang Semicon Test Sdn. Bhd.",
+      "trading_name": "PST",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "STRATEGIC",
+      "risk_rating": "LOW",
+      "country": "MY",
+      "duns": "059601426",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2015-03-20"
+    },
+    {
+      "supplier_code": "SUP-100866",
+      "erp_vendor_number": "0000710866",
+      "legal_name": "Saigon Precision Molding JSC",
+      "trading_name": "Saigon Molding",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "VN",
+      "duns": "084922292",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2023-02-14"
+    },
+    {
+      "supplier_code": "SUP-100871",
+      "erp_vendor_number": "0000710871",
+      "legal_name": "Kansai Fine Ceramics K.K.",
+      "trading_name": "Kansai Ceramics",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "JP",
+      "duns": "078125095",
+      "portal_enabled": false,
+      "asn_enabled": true,
+      "onboarded_on": "2019-08-01"
+    },
+    {
+      "supplier_code": "SUP-100884",
+      "erp_vendor_number": "0000710884",
+      "legal_name": "Hanbit Display Components Co., Ltd.",
+      "trading_name": "Hanbit Display",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "STRATEGIC",
+      "risk_rating": "LOW",
+      "country": "KR",
+      "duns": "013269883",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2018-06-11"
+    },
+    {
+      "supplier_code": "SUP-100903",
+      "erp_vendor_number": "0000710903",
+      "legal_name": "Wisla Metal Stamping Sp. z o.o.",
+      "trading_name": "Wisla Stamping",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "PL",
+      "duns": "092085240",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2021-09-27"
+    },
+    {
+      "supplier_code": "SUP-100917",
+      "erp_vendor_number": "0000710917",
+      "legal_name": "Danube Magnetics Kft.",
+      "trading_name": "Danube Magnetics",
+      "status": "ON_HOLD",
+      "status_reason": "Financial review - credit limit exceeded",
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "HU",
+      "duns": "087118784",
+      "portal_enabled": true,
+      "asn_enabled": false,
+      "onboarded_on": "2022-04-19"
+    },
+    {
+      "supplier_code": "SUP-100926",
+      "erp_vendor_number": "0000710926",
+      "legal_name": "Shannon Thermal Solutions Ltd.",
+      "trading_name": "Shannon Thermal",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "IE",
+      "duns": "063627820",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2020-01-13"
+    },
+    {
+      "supplier_code": "SUP-100938",
+      "erp_vendor_number": "0000710938",
+      "legal_name": "Campinas Eletronica Ltda.",
+      "trading_name": "Campinas Eletronica",
+      "status": "ACTIVE",
+      "status_reason": "Conditional approval - quarterly audit",
+      "tier": "CONDITIONAL",
+      "risk_rating": "HIGH",
+      "country": "BR",
+      "duns": "024873075",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2025-11-05"
+    },
+    {
+      "supplier_code": "SUP-100944",
+      "erp_vendor_number": "0000710944",
+      "legal_name": "Maple Ridge Fasteners Inc.",
+      "trading_name": "Maple Ridge",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "LOW",
+      "country": "CA",
+      "duns": "039138702",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2018-03-02"
+    },
+    {
+      "supplier_code": "SUP-100951",
+      "erp_vendor_number": "0000710951",
+      "legal_name": "Tri-Star Surplus Electronics LLC",
+      "trading_name": "Tri-Star Surplus",
+      "status": "BLOCKED",
+      "status_reason": "Failed counterfeit-risk audit AUD-2026-031",
+      "tier": "CONDITIONAL",
+      "risk_rating": "HIGH",
+      "country": "US",
+      "duns": "060983761",
+      "portal_enabled": false,
+      "asn_enabled": false,
+      "onboarded_on": "2024-07-08"
+    },
+    {
+      "supplier_code": "SUP-100957",
+      "erp_vendor_number": "0000710957",
+      "legal_name": "Chao Phraya Wire & Harness Co., Ltd.",
+      "trading_name": "CP Harness",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "TH",
+      "duns": "094158416",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2022-10-17"
+    },
+    {
+      "supplier_code": "SUP-100962",
+      "erp_vendor_number": "0000710962",
+      "legal_name": "Lion City Connectors Pte. Ltd.",
+      "trading_name": "LC Connectors",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "SG",
+      "duns": "075704600",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2017-12-04"
+    },
+    {
+      "supplier_code": "SUP-100975",
+      "erp_vendor_number": "0000710975",
+      "legal_name": "Sonora Aluminum Castings S. de R.L.",
+      "trading_name": "Sonora Castings",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "APPROVED",
+      "risk_rating": "MEDIUM",
+      "country": "MX",
+      "duns": "052504435",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2021-05-24"
+    },
+    {
+      "supplier_code": "SUP-100989",
+      "erp_vendor_number": "0000710989",
+      "legal_name": "Carolina Power Magnetics LLC",
+      "trading_name": "CPM",
+      "status": "ACTIVE",
+      "status_reason": null,
+      "tier": "PREFERRED",
+      "risk_rating": "LOW",
+      "country": "US",
+      "duns": "052946668",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2016-02-29"
+    },
+    {
+      "supplier_code": "SUP-100996",
+      "erp_vendor_number": "0000710996",
+      "legal_name": "Rhein-Main Sensorik AG",
+      "trading_name": "RM Sensorik",
+      "status": "ACTIVE",
+      "status_reason": "Newly onboarded - no orders yet",
+      "tier": "STRATEGIC",
+      "risk_rating": "LOW",
+      "country": "DE",
+      "duns": "042146227",
+      "portal_enabled": true,
+      "asn_enabled": true,
+      "onboarded_on": "2026-09-01"
+    }
   ],
   "contacts": [
-    { "contact_id": "CNT-0001", "supplier_code": "SUP-100245", "role": "PRIMARY", "full_name": "Rachel Kim", "email": "rachel.kim@apex-precision.example.com", "phone": "+1-404-555-0142" },
-    { "contact_id": "CNT-0002", "supplier_code": "SUP-100245", "role": "LOGISTICS", "full_name": "Marcus Bell", "email": "shipping@apex-precision.example.com", "phone": "+1-404-555-0177" },
-    { "contact_id": "CNT-0003", "supplier_code": "SUP-100311", "role": "PRIMARY", "full_name": "Jonas Richter", "email": "j.richter@nordwerk.example.de", "phone": "+49-711-555-2210" },
-    { "contact_id": "CNT-0004", "supplier_code": "SUP-100311", "role": "LOGISTICS", "full_name": "Leonie Braun", "email": "versand@nordwerk.example.de", "phone": "+49-711-555-2290" },
-    { "contact_id": "CNT-0005", "supplier_code": "SUP-100402", "role": "PRIMARY", "full_name": "Chen Yi-Ting", "email": "yiting.chen@prc-circuits.example.tw", "phone": "+886-3-555-8812" },
-    { "contact_id": "CNT-0006", "supplier_code": "SUP-100402", "role": "QUALITY", "full_name": "Lin Po-Han", "email": "quality@prc-circuits.example.tw", "phone": "+886-3-555-8830" },
-    { "contact_id": "CNT-0007", "supplier_code": "SUP-100518", "role": "PRIMARY", "full_name": "Tom Kowalski", "email": "tkowalski@greatlakesplastics.example.com", "phone": "+1-616-555-0199" },
-    { "contact_id": "CNT-0008", "supplier_code": "SUP-100627", "role": "FINANCE", "full_name": "Ana Garza", "email": "cxc@mmw.example.mx", "phone": "+52-81-5555-4410" },
-    { "contact_id": "CNT-0009", "supplier_code": "SUP-100733", "role": "PRIMARY", "full_name": "Priya Raman", "email": "priya.raman@bharatpassives.example.in", "phone": "+91-80-5555-7021" },
-    { "contact_id": "CNT-0010", "supplier_code": "SUP-100733", "role": "LOGISTICS", "full_name": "Arjun Mehta", "email": "dispatch@bharatpassives.example.in", "phone": "+91-80-5555-7040" }
+    {
+      "contact_id": "CNT-0001",
+      "supplier_code": "SUP-100245",
+      "role": "PRIMARY",
+      "full_name": "Rachel Kim",
+      "email": "rachel.kim@apex-precision.example.com",
+      "phone": "+1-404-555-0142"
+    },
+    {
+      "contact_id": "CNT-0002",
+      "supplier_code": "SUP-100245",
+      "role": "LOGISTICS",
+      "full_name": "Marcus Bell",
+      "email": "shipping@apex-precision.example.com",
+      "phone": "+1-404-555-0177"
+    },
+    {
+      "contact_id": "CNT-0003",
+      "supplier_code": "SUP-100311",
+      "role": "PRIMARY",
+      "full_name": "Jonas Richter",
+      "email": "j.richter@nordwerk.example.de",
+      "phone": "+49-711-555-2210"
+    },
+    {
+      "contact_id": "CNT-0004",
+      "supplier_code": "SUP-100311",
+      "role": "LOGISTICS",
+      "full_name": "Leonie Braun",
+      "email": "versand@nordwerk.example.de",
+      "phone": "+49-711-555-2290"
+    },
+    {
+      "contact_id": "CNT-0005",
+      "supplier_code": "SUP-100402",
+      "role": "PRIMARY",
+      "full_name": "Chen Yi-Ting",
+      "email": "yiting.chen@prc-circuits.example.tw",
+      "phone": "+886-3-555-8812"
+    },
+    {
+      "contact_id": "CNT-0006",
+      "supplier_code": "SUP-100402",
+      "role": "QUALITY",
+      "full_name": "Lin Po-Han",
+      "email": "quality@prc-circuits.example.tw",
+      "phone": "+886-3-555-8830"
+    },
+    {
+      "contact_id": "CNT-0007",
+      "supplier_code": "SUP-100518",
+      "role": "PRIMARY",
+      "full_name": "Tom Kowalski",
+      "email": "tkowalski@greatlakesplastics.example.com",
+      "phone": "+1-616-555-0199"
+    },
+    {
+      "contact_id": "CNT-0008",
+      "supplier_code": "SUP-100627",
+      "role": "FINANCE",
+      "full_name": "Ana Garza",
+      "email": "cxc@mmw.example.mx",
+      "phone": "+52-81-5555-4410"
+    },
+    {
+      "contact_id": "CNT-0009",
+      "supplier_code": "SUP-100733",
+      "role": "PRIMARY",
+      "full_name": "Priya Raman",
+      "email": "priya.raman@bharatpassives.example.in",
+      "phone": "+91-80-5555-7021"
+    },
+    {
+      "contact_id": "CNT-0010",
+      "supplier_code": "SUP-100733",
+      "role": "LOGISTICS",
+      "full_name": "Arjun Mehta",
+      "email": "dispatch@bharatpassives.example.in",
+      "phone": "+91-80-5555-7040"
+    },
+    {
+      "contact_id": "CNT-0011",
+      "supplier_code": "SUP-100812",
+      "role": "PRIMARY",
+      "full_name": "Henrik Hoffmann",
+      "email": "henrik.hoffmann@keystonecable.example.com",
+      "phone": "+1-555-0157"
+    },
+    {
+      "contact_id": "CNT-0012",
+      "supplier_code": "SUP-100812",
+      "role": "LOGISTICS",
+      "full_name": "Anya Kowalczyk",
+      "email": "logistics@keystonecable.example.com",
+      "phone": "+1-555-0152"
+    },
+    {
+      "contact_id": "CNT-0013",
+      "supplier_code": "SUP-100812",
+      "role": "QUALITY",
+      "full_name": "Nadia Moreau",
+      "email": "quality@keystonecable.example.com",
+      "phone": "+1-555-0179"
+    },
+    {
+      "contact_id": "CNT-0014",
+      "supplier_code": "SUP-100845",
+      "role": "PRIMARY",
+      "full_name": "Elena Park",
+      "email": "elena.park@brightwave-opto.example.cn",
+      "phone": "+86-755-5550-0282"
+    },
+    {
+      "contact_id": "CNT-0015",
+      "supplier_code": "SUP-100845",
+      "role": "LOGISTICS",
+      "full_name": "Hana Okoye",
+      "email": "logistics@brightwave-opto.example.cn",
+      "phone": "+86-755-5550-0617"
+    },
+    {
+      "contact_id": "CNT-0016",
+      "supplier_code": "SUP-100859",
+      "role": "PRIMARY",
+      "full_name": "Elena Moreau",
+      "email": "elena.moreau@pst-semicon.example.my",
+      "phone": "+60-4-555-0235"
+    },
+    {
+      "contact_id": "CNT-0017",
+      "supplier_code": "SUP-100859",
+      "role": "LOGISTICS",
+      "full_name": "Imani Chandra",
+      "email": "logistics@pst-semicon.example.my",
+      "phone": "+60-4-555-0515"
+    },
+    {
+      "contact_id": "CNT-0018",
+      "supplier_code": "SUP-100859",
+      "role": "FINANCE",
+      "full_name": "Bruno Moreau",
+      "email": "ar@pst-semicon.example.my",
+      "phone": "+60-4-555-0453"
+    },
+    {
+      "contact_id": "CNT-0019",
+      "supplier_code": "SUP-100859",
+      "role": "QUALITY",
+      "full_name": "Anya Hoffmann",
+      "email": "quality@pst-semicon.example.my",
+      "phone": "+60-4-555-0049"
+    },
+    {
+      "contact_id": "CNT-0020",
+      "supplier_code": "SUP-100866",
+      "role": "PRIMARY",
+      "full_name": "Paula Brennan",
+      "email": "paula.brennan@saigonmolding.example.vn",
+      "phone": "+84-28-5555-0525"
+    },
+    {
+      "contact_id": "CNT-0021",
+      "supplier_code": "SUP-100866",
+      "role": "LOGISTICS",
+      "full_name": "Samuel Lindgren",
+      "email": "logistics@saigonmolding.example.vn",
+      "phone": "+84-28-5555-0476"
+    },
+    {
+      "contact_id": "CNT-0022",
+      "supplier_code": "SUP-100866",
+      "role": "FINANCE",
+      "full_name": "Felix Fischer",
+      "email": "ar@saigonmolding.example.vn",
+      "phone": "+84-28-5555-0440"
+    },
+    {
+      "contact_id": "CNT-0023",
+      "supplier_code": "SUP-100871",
+      "role": "PRIMARY",
+      "full_name": "Ethan Silva",
+      "email": "ethan.silva@kansai-ceramics.example.jp",
+      "phone": "+81-75-555-0238"
+    },
+    {
+      "contact_id": "CNT-0024",
+      "supplier_code": "SUP-100871",
+      "role": "LOGISTICS",
+      "full_name": "Yuki Tanaka",
+      "email": "logistics@kansai-ceramics.example.jp",
+      "phone": "+81-75-555-0118"
+    },
+    {
+      "contact_id": "CNT-0025",
+      "supplier_code": "SUP-100871",
+      "role": "QUALITY",
+      "full_name": "Freya Moreau",
+      "email": "quality@kansai-ceramics.example.jp",
+      "phone": "+81-75-555-0151"
+    },
+    {
+      "contact_id": "CNT-0026",
+      "supplier_code": "SUP-100884",
+      "role": "PRIMARY",
+      "full_name": "Ahmed Tanaka",
+      "email": "ahmed.tanaka@hanbit-display.example.kr",
+      "phone": "+82-31-555-0204"
+    },
+    {
+      "contact_id": "CNT-0027",
+      "supplier_code": "SUP-100884",
+      "role": "LOGISTICS",
+      "full_name": "Clara Kowalczyk",
+      "email": "logistics@hanbit-display.example.kr",
+      "phone": "+82-31-555-0657"
+    },
+    {
+      "contact_id": "CNT-0028",
+      "supplier_code": "SUP-100903",
+      "role": "PRIMARY",
+      "full_name": "Ravi Silva",
+      "email": "ravi.silva@wisla-stamping.example.pl",
+      "phone": "+48-58-555-0833"
+    },
+    {
+      "contact_id": "CNT-0029",
+      "supplier_code": "SUP-100903",
+      "role": "LOGISTICS",
+      "full_name": "Chloe Nguyen",
+      "email": "logistics@wisla-stamping.example.pl",
+      "phone": "+48-58-555-0071"
+    },
+    {
+      "contact_id": "CNT-0030",
+      "supplier_code": "SUP-100903",
+      "role": "FINANCE",
+      "full_name": "Felix Rahman",
+      "email": "ar@wisla-stamping.example.pl",
+      "phone": "+48-58-555-0395"
+    },
+    {
+      "contact_id": "CNT-0031",
+      "supplier_code": "SUP-100917",
+      "role": "PRIMARY",
+      "full_name": "Aiko Chandra",
+      "email": "aiko.chandra@danube-magnetics.example.hu",
+      "phone": "+36-1-555-0737"
+    },
+    {
+      "contact_id": "CNT-0032",
+      "supplier_code": "SUP-100917",
+      "role": "LOGISTICS",
+      "full_name": "Kofi Silva",
+      "email": "logistics@danube-magnetics.example.hu",
+      "phone": "+36-1-555-0332"
+    },
+    {
+      "contact_id": "CNT-0033",
+      "supplier_code": "SUP-100926",
+      "role": "PRIMARY",
+      "full_name": "Omar Rahman",
+      "email": "omar.rahman@shannonthermal.example.ie",
+      "phone": "+353-61-555-032"
+    },
+    {
+      "contact_id": "CNT-0034",
+      "supplier_code": "SUP-100926",
+      "role": "LOGISTICS",
+      "full_name": "Aiko Byrne",
+      "email": "logistics@shannonthermal.example.ie",
+      "phone": "+353-61-555-308"
+    },
+    {
+      "contact_id": "CNT-0035",
+      "supplier_code": "SUP-100926",
+      "role": "QUALITY",
+      "full_name": "Ravi Ortiz",
+      "email": "quality@shannonthermal.example.ie",
+      "phone": "+353-61-555-737"
+    },
+    {
+      "contact_id": "CNT-0036",
+      "supplier_code": "SUP-100938",
+      "role": "PRIMARY",
+      "full_name": "Ethan Rahman",
+      "email": "ethan.rahman@campinas-eletronica.example.br",
+      "phone": "+55-19-5555-0689"
+    },
+    {
+      "contact_id": "CNT-0037",
+      "supplier_code": "SUP-100938",
+      "role": "LOGISTICS",
+      "full_name": "Nadia Okoye",
+      "email": "logistics@campinas-eletronica.example.br",
+      "phone": "+55-19-5555-0699"
+    },
+    {
+      "contact_id": "CNT-0038",
+      "supplier_code": "SUP-100938",
+      "role": "QUALITY",
+      "full_name": "Hana Iyer",
+      "email": "quality@campinas-eletronica.example.br",
+      "phone": "+55-19-5555-0101"
+    },
+    {
+      "contact_id": "CNT-0039",
+      "supplier_code": "SUP-100944",
+      "role": "PRIMARY",
+      "full_name": "Aiko Okoye",
+      "email": "aiko.okoye@mapleridgefasteners.example.ca",
+      "phone": "+1-905-555-0177"
+    },
+    {
+      "contact_id": "CNT-0040",
+      "supplier_code": "SUP-100944",
+      "role": "LOGISTICS",
+      "full_name": "Mateo Iyer",
+      "email": "logistics@mapleridgefasteners.example.ca",
+      "phone": "+1-905-555-0147"
+    },
+    {
+      "contact_id": "CNT-0041",
+      "supplier_code": "SUP-100944",
+      "role": "QUALITY",
+      "full_name": "Olivia Nguyen",
+      "email": "quality@mapleridgefasteners.example.ca",
+      "phone": "+1-905-555-0172"
+    },
+    {
+      "contact_id": "CNT-0042",
+      "supplier_code": "SUP-100951",
+      "role": "PRIMARY",
+      "full_name": "Anya Petrov",
+      "email": "anya.petrov@tristar-surplus.example.com",
+      "phone": "+1-555-0165"
+    },
+    {
+      "contact_id": "CNT-0043",
+      "supplier_code": "SUP-100951",
+      "role": "LOGISTICS",
+      "full_name": "Henrik Walsh",
+      "email": "logistics@tristar-surplus.example.com",
+      "phone": "+1-555-0156"
+    },
+    {
+      "contact_id": "CNT-0044",
+      "supplier_code": "SUP-100957",
+      "role": "PRIMARY",
+      "full_name": "Mateo Walsh",
+      "email": "mateo.walsh@cpharness.example.th",
+      "phone": "+66-38-555-340"
+    },
+    {
+      "contact_id": "CNT-0045",
+      "supplier_code": "SUP-100957",
+      "role": "LOGISTICS",
+      "full_name": "Kofi Hoffmann",
+      "email": "logistics@cpharness.example.th",
+      "phone": "+66-38-555-357"
+    },
+    {
+      "contact_id": "CNT-0046",
+      "supplier_code": "SUP-100957",
+      "role": "QUALITY",
+      "full_name": "Diego Ortiz",
+      "email": "quality@cpharness.example.th",
+      "phone": "+66-38-555-480"
+    },
+    {
+      "contact_id": "CNT-0047",
+      "supplier_code": "SUP-100957",
+      "role": "FINANCE",
+      "full_name": "Omar Okoye",
+      "email": "ar@cpharness.example.th",
+      "phone": "+66-38-555-170"
+    },
+    {
+      "contact_id": "CNT-0048",
+      "supplier_code": "SUP-100962",
+      "role": "PRIMARY",
+      "full_name": "Elena Tanaka",
+      "email": "elena.tanaka@lcconnectors.example.sg",
+      "phone": "+65-6555-0589"
+    },
+    {
+      "contact_id": "CNT-0049",
+      "supplier_code": "SUP-100962",
+      "role": "LOGISTICS",
+      "full_name": "Yuki Rahman",
+      "email": "logistics@lcconnectors.example.sg",
+      "phone": "+65-6555-0428"
+    },
+    {
+      "contact_id": "CNT-0050",
+      "supplier_code": "SUP-100975",
+      "role": "PRIMARY",
+      "full_name": "Ethan Fischer",
+      "email": "ethan.fischer@sonoracastings.example.mx",
+      "phone": "+52-662-555-0874"
+    },
+    {
+      "contact_id": "CNT-0051",
+      "supplier_code": "SUP-100975",
+      "role": "LOGISTICS",
+      "full_name": "Olivia Castillo",
+      "email": "logistics@sonoracastings.example.mx",
+      "phone": "+52-662-555-0659"
+    },
+    {
+      "contact_id": "CNT-0052",
+      "supplier_code": "SUP-100975",
+      "role": "QUALITY",
+      "full_name": "Ingrid Brennan",
+      "email": "quality@sonoracastings.example.mx",
+      "phone": "+52-662-555-0607"
+    },
+    {
+      "contact_id": "CNT-0053",
+      "supplier_code": "SUP-100989",
+      "role": "PRIMARY",
+      "full_name": "Henrik Sato",
+      "email": "henrik.sato@carolinapowermag.example.com",
+      "phone": "+1-555-0131"
+    },
+    {
+      "contact_id": "CNT-0054",
+      "supplier_code": "SUP-100989",
+      "role": "LOGISTICS",
+      "full_name": "Ingrid Duarte",
+      "email": "logistics@carolinapowermag.example.com",
+      "phone": "+1-555-0156"
+    },
+    {
+      "contact_id": "CNT-0055",
+      "supplier_code": "SUP-100989",
+      "role": "FINANCE",
+      "full_name": "Ingrid Silva",
+      "email": "ar@carolinapowermag.example.com",
+      "phone": "+1-555-0163"
+    },
+    {
+      "contact_id": "CNT-0056",
+      "supplier_code": "SUP-100989",
+      "role": "QUALITY",
+      "full_name": "Chloe Okoye",
+      "email": "quality@carolinapowermag.example.com",
+      "phone": "+1-555-0165"
+    },
+    {
+      "contact_id": "CNT-0057",
+      "supplier_code": "SUP-100996",
+      "role": "PRIMARY",
+      "full_name": "Sara Wong",
+      "email": "sara.wong@rm-sensorik.example.de",
+      "phone": "+49-69-555-0349"
+    },
+    {
+      "contact_id": "CNT-0058",
+      "supplier_code": "SUP-100996",
+      "role": "LOGISTICS",
+      "full_name": "Chloe Wong",
+      "email": "logistics@rm-sensorik.example.de",
+      "phone": "+49-69-555-0918"
+    }
   ],
   "sites": [
-    { "site_code": "SUP-ATL-01", "supplier_code": "SUP-100245", "site_type": "SHIP_FROM", "name": "Supplier Distribution Center", "address_line1": "4500 Fulton Industrial Blvd SW", "city": "Atlanta", "region": "GA", "postal_code": "30301", "country": "US", "active": true },
-    { "site_code": "SUP-DAL-01", "supplier_code": "SUP-100245", "site_type": "SHIP_FROM", "name": "Apex Dallas Fulfillment", "address_line1": "1200 Commerce Pkwy", "city": "Dallas", "region": "TX", "postal_code": "75247", "country": "US", "active": true },
-    { "site_code": "SUP-ATL-HQ", "supplier_code": "SUP-100245", "site_type": "REMIT_TO", "name": "Apex Precision Accounts Receivable", "address_line1": "PO Box 93114", "city": "Atlanta", "region": "GA", "postal_code": "30377", "country": "US", "active": true },
-    { "site_code": "SUP-STR-01", "supplier_code": "SUP-100311", "site_type": "SHIP_FROM", "name": "Nordwerk Werk Stuttgart", "address_line1": "Industriestrasse 44", "city": "Stuttgart", "region": "BW", "postal_code": "70565", "country": "DE", "active": true },
-    { "site_code": "SUP-HSZ-01", "supplier_code": "SUP-100402", "site_type": "SHIP_FROM", "name": "PRC Hsinchu Fab 2", "address_line1": "No. 18, Science Park Rd", "city": "Hsinchu", "region": "HSZ", "postal_code": "300", "country": "TW", "active": true },
-    { "site_code": "SUP-GRR-01", "supplier_code": "SUP-100518", "site_type": "MANUFACTURING", "name": "Great Lakes Molding Plant", "address_line1": "3300 Roger B Chaffee Blvd SE", "city": "Grand Rapids", "region": "MI", "postal_code": "49548", "country": "US", "active": true },
-    { "site_code": "SUP-MTY-01", "supplier_code": "SUP-100627", "site_type": "SHIP_FROM", "name": "MMW Planta Apodaca", "address_line1": "Carretera Miguel Aleman km 22", "city": "Apodaca", "region": "NL", "postal_code": "66600", "country": "MX", "active": false },
-    { "site_code": "SUP-BLR-01", "supplier_code": "SUP-100733", "site_type": "SHIP_FROM", "name": "Bharat Passives Electronic City Unit", "address_line1": "Plot 42, Phase II, Electronic City", "city": "Bengaluru", "region": "KA", "postal_code": "560100", "country": "IN", "active": true }
+    {
+      "site_code": "SUP-ATL-01",
+      "supplier_code": "SUP-100245",
+      "site_type": "SHIP_FROM",
+      "name": "Supplier Distribution Center",
+      "address_line1": "4500 Fulton Industrial Blvd SW",
+      "city": "Atlanta",
+      "region": "GA",
+      "postal_code": "30301",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-DAL-01",
+      "supplier_code": "SUP-100245",
+      "site_type": "SHIP_FROM",
+      "name": "Apex Dallas Fulfillment",
+      "address_line1": "1200 Commerce Pkwy",
+      "city": "Dallas",
+      "region": "TX",
+      "postal_code": "75247",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-ATL-HQ",
+      "supplier_code": "SUP-100245",
+      "site_type": "REMIT_TO",
+      "name": "Apex Precision Accounts Receivable",
+      "address_line1": "PO Box 93114",
+      "city": "Atlanta",
+      "region": "GA",
+      "postal_code": "30377",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-STR-01",
+      "supplier_code": "SUP-100311",
+      "site_type": "SHIP_FROM",
+      "name": "Nordwerk Werk Stuttgart",
+      "address_line1": "Industriestrasse 44",
+      "city": "Stuttgart",
+      "region": "BW",
+      "postal_code": "70565",
+      "country": "DE",
+      "active": true
+    },
+    {
+      "site_code": "SUP-HSZ-01",
+      "supplier_code": "SUP-100402",
+      "site_type": "SHIP_FROM",
+      "name": "PRC Hsinchu Fab 2",
+      "address_line1": "No. 18, Science Park Rd",
+      "city": "Hsinchu",
+      "region": "HSZ",
+      "postal_code": "300",
+      "country": "TW",
+      "active": true
+    },
+    {
+      "site_code": "SUP-GRR-01",
+      "supplier_code": "SUP-100518",
+      "site_type": "MANUFACTURING",
+      "name": "Great Lakes Molding Plant",
+      "address_line1": "3300 Roger B Chaffee Blvd SE",
+      "city": "Grand Rapids",
+      "region": "MI",
+      "postal_code": "49548",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-MTY-01",
+      "supplier_code": "SUP-100627",
+      "site_type": "SHIP_FROM",
+      "name": "MMW Planta Apodaca",
+      "address_line1": "Carretera Miguel Aleman km 22",
+      "city": "Apodaca",
+      "region": "NL",
+      "postal_code": "66600",
+      "country": "MX",
+      "active": false
+    },
+    {
+      "site_code": "SUP-BLR-01",
+      "supplier_code": "SUP-100733",
+      "site_type": "SHIP_FROM",
+      "name": "Bharat Passives Electronic City Unit",
+      "address_line1": "Plot 42, Phase II, Electronic City",
+      "city": "Bengaluru",
+      "region": "KA",
+      "postal_code": "560100",
+      "country": "IN",
+      "active": true
+    },
+    {
+      "site_code": "SUP-PIT-01",
+      "supplier_code": "SUP-100812",
+      "site_type": "SHIP_FROM",
+      "name": "Keystone Cable Pittsburgh Plant",
+      "address_line1": "2200 Liberty Ave",
+      "city": "Pittsburgh",
+      "region": "PA",
+      "postal_code": "15222",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-PIT-AR",
+      "supplier_code": "SUP-100812",
+      "site_type": "REMIT_TO",
+      "name": "Keystone Cable Receivables",
+      "address_line1": "PO Box 64410",
+      "city": "Pittsburgh",
+      "region": "PA",
+      "postal_code": "15264",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-SZX-01",
+      "supplier_code": "SUP-100845",
+      "site_type": "SHIP_FROM",
+      "name": "Brightwave Longhua Factory",
+      "address_line1": "No. 88 Minzhi Ave, Longhua",
+      "city": "Shenzhen",
+      "region": "GD",
+      "postal_code": "518131",
+      "country": "CN",
+      "active": true
+    },
+    {
+      "site_code": "SUP-PEN-01",
+      "supplier_code": "SUP-100859",
+      "site_type": "SHIP_FROM",
+      "name": "PST Bayan Lepas FIZ",
+      "address_line1": "Plot 102, Bayan Lepas FIZ Phase 4",
+      "city": "Bayan Lepas",
+      "region": "PNG",
+      "postal_code": "11900",
+      "country": "MY",
+      "active": true
+    },
+    {
+      "site_code": "SUP-SGN-01",
+      "supplier_code": "SUP-100866",
+      "site_type": "SHIP_FROM",
+      "name": "SPM Thu Duc Factory",
+      "address_line1": "Lot 21, Linh Trung EPZ",
+      "city": "Thu Duc",
+      "region": "HCM",
+      "postal_code": "700000",
+      "country": "VN",
+      "active": true
+    },
+    {
+      "site_code": "SUP-KIX-01",
+      "supplier_code": "SUP-100871",
+      "site_type": "SHIP_FROM",
+      "name": "Kansai Ceramics Fushimi Works",
+      "address_line1": "3-12 Takeda Tobadono-cho",
+      "city": "Kyoto",
+      "region": "KY",
+      "postal_code": "612-8450",
+      "country": "JP",
+      "active": true
+    },
+    {
+      "site_code": "SUP-ICN-01",
+      "supplier_code": "SUP-100884",
+      "site_type": "SHIP_FROM",
+      "name": "Hanbit Suwon Line 3",
+      "address_line1": "129 Samsung-ro, Yeongtong-gu",
+      "city": "Suwon",
+      "region": "GG",
+      "postal_code": "16677",
+      "country": "KR",
+      "active": true
+    },
+    {
+      "site_code": "SUP-GDN-01",
+      "supplier_code": "SUP-100903",
+      "site_type": "SHIP_FROM",
+      "name": "Wisla Gdansk Works",
+      "address_line1": "ul. Kartuska 214",
+      "city": "Gdansk",
+      "region": "PM",
+      "postal_code": "80-122",
+      "country": "PL",
+      "active": true
+    },
+    {
+      "site_code": "SUP-BUD-01",
+      "supplier_code": "SUP-100917",
+      "site_type": "SHIP_FROM",
+      "name": "Danube Magnetics Csepel Plant",
+      "address_line1": "Varosmajor utca 30",
+      "city": "Budapest",
+      "region": "BU",
+      "postal_code": "1211",
+      "country": "HU",
+      "active": true
+    },
+    {
+      "site_code": "SUP-SNN-01",
+      "supplier_code": "SUP-100926",
+      "site_type": "SHIP_FROM",
+      "name": "Shannon Free Zone Unit 7",
+      "address_line1": "Shannon Free Zone East",
+      "city": "Shannon",
+      "region": "CE",
+      "postal_code": "V14 DX24",
+      "country": "IE",
+      "active": true
+    },
+    {
+      "site_code": "SUP-CPQ-01",
+      "supplier_code": "SUP-100938",
+      "site_type": "SHIP_FROM",
+      "name": "Campinas Eletronica Fabrica 1",
+      "address_line1": "Rod. Dom Pedro I, km 140",
+      "city": "Campinas",
+      "region": "SP",
+      "postal_code": "13086-902",
+      "country": "BR",
+      "active": true
+    },
+    {
+      "site_code": "SUP-YYZ-01",
+      "supplier_code": "SUP-100944",
+      "site_type": "SHIP_FROM",
+      "name": "Maple Ridge Mississauga DC",
+      "address_line1": "6800 Kitimat Rd",
+      "city": "Mississauga",
+      "region": "ON",
+      "postal_code": "L5N 5M1",
+      "country": "CA",
+      "active": true
+    },
+    {
+      "site_code": "SUP-PHX-01",
+      "supplier_code": "SUP-100951",
+      "site_type": "SHIP_FROM",
+      "name": "Tri-Star Tempe Warehouse",
+      "address_line1": "1850 W University Dr",
+      "city": "Tempe",
+      "region": "AZ",
+      "postal_code": "85281",
+      "country": "US",
+      "active": false
+    },
+    {
+      "site_code": "SUP-RYG-01",
+      "supplier_code": "SUP-100957",
+      "site_type": "SHIP_FROM",
+      "name": "CP Harness Rayong Plant",
+      "address_line1": "Eastern Seaboard IE, 64/22 Moo 4",
+      "city": "Rayong",
+      "region": "RY",
+      "postal_code": "21140",
+      "country": "TH",
+      "active": true
+    },
+    {
+      "site_code": "SUP-SIN-01",
+      "supplier_code": "SUP-100962",
+      "site_type": "SHIP_FROM",
+      "name": "LCC Woodlands Hub",
+      "address_line1": "11 Woodlands Close #05-12",
+      "city": "Singapore",
+      "region": "SG",
+      "postal_code": "737853",
+      "country": "SG",
+      "active": true
+    },
+    {
+      "site_code": "SUP-HMO-01",
+      "supplier_code": "SUP-100975",
+      "site_type": "SHIP_FROM",
+      "name": "Sonora Castings Parque Industrial",
+      "address_line1": "Blvd. Solidaridad 2250",
+      "city": "Hermosillo",
+      "region": "SON",
+      "postal_code": "83299",
+      "country": "MX",
+      "active": true
+    },
+    {
+      "site_code": "SUP-CLT-01",
+      "supplier_code": "SUP-100989",
+      "site_type": "SHIP_FROM",
+      "name": "CPM Charlotte Distribution",
+      "address_line1": "10100 Westlake Dr",
+      "city": "Charlotte",
+      "region": "NC",
+      "postal_code": "28273",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-CLT-MF",
+      "supplier_code": "SUP-100989",
+      "site_type": "MANUFACTURING",
+      "name": "CPM Winding Plant",
+      "address_line1": "455 Industrial Dr",
+      "city": "Gastonia",
+      "region": "NC",
+      "postal_code": "28052",
+      "country": "US",
+      "active": true
+    },
+    {
+      "site_code": "SUP-FRA-01",
+      "supplier_code": "SUP-100996",
+      "site_type": "SHIP_FROM",
+      "name": "RM Sensorik Offenbach",
+      "address_line1": "Sprendlinger Landstrasse 115",
+      "city": "Offenbach am Main",
+      "region": "HE",
+      "postal_code": "63069",
+      "country": "DE",
+      "active": true
+    }
   ],
   "entitlements": [
-    { "consumer_id": "apex-supplier-portal", "display_name": "Apex Precision - Supplier Portal", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100245"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": true, "cost_center": "EXT-SUP-100245", "contact_email": "it@apex-precision.example.com" },
-    { "consumer_id": "nordwerk-b2b-gateway", "display_name": "Nordwerk B2B Gateway", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100311"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": true, "cost_center": "EXT-SUP-100311", "contact_email": "edi@nordwerk.example.de" },
-    { "consumer_id": "prc-edi-bridge", "display_name": "Pacific Rim Circuits EDI Bridge (read only)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100402"], "scopes": ["supplier-orders.read"], "active": true, "cost_center": "EXT-SUP-100402", "contact_email": "edi@prc-circuits.example.tw" },
-    { "consumer_id": "greatlakes-portal", "display_name": "Great Lakes Plastics Portal", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100518"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": true, "cost_center": "EXT-SUP-100518", "contact_email": "it@greatlakesplastics.example.com" },
-    { "consumer_id": "mmw-legacy-portal", "display_name": "MMW Legacy Portal (revoked)", "consumer_type": "supplier-partner", "supplier_codes": ["SUP-100627"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": false, "cost_center": "EXT-SUP-100627", "contact_email": "it@mmw.example.mx" },
-    { "consumer_id": "jabil-procurement-workbench", "display_name": "Jabil Procurement Workbench", "consumer_type": "internal-application", "supplier_codes": ["*"], "scopes": ["supplier-orders.read"], "active": true, "cost_center": "CC-4410-PROC", "contact_email": "procurement-apps@jabil.example.com" },
-    { "consumer_id": "jabil-ops-console", "display_name": "Jabil Supplier Ops Console", "consumer_type": "operations-support", "supplier_codes": ["*"], "scopes": ["supplier-orders.read", "supplier-orders.write"], "active": true, "cost_center": "CC-4420-SCO", "contact_email": "supplier-ops@jabil.example.com" }
+    {
+      "consumer_id": "apex-supplier-portal",
+      "display_name": "Apex Precision - Supplier Portal",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100245"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100245",
+      "contact_email": "it@apex-precision.example.com"
+    },
+    {
+      "consumer_id": "nordwerk-b2b-gateway",
+      "display_name": "Nordwerk B2B Gateway",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100311"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100311",
+      "contact_email": "edi@nordwerk.example.de"
+    },
+    {
+      "consumer_id": "prc-edi-bridge",
+      "display_name": "Pacific Rim Circuits EDI Bridge (read only)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100402"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100402",
+      "contact_email": "edi@prc-circuits.example.tw"
+    },
+    {
+      "consumer_id": "greatlakes-portal",
+      "display_name": "Great Lakes Plastics Portal",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100518"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100518",
+      "contact_email": "it@greatlakesplastics.example.com"
+    },
+    {
+      "consumer_id": "mmw-legacy-portal",
+      "display_name": "MMW Legacy Portal (revoked)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100627"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": false,
+      "cost_center": "EXT-SUP-100627",
+      "contact_email": "it@mmw.example.mx"
+    },
+    {
+      "consumer_id": "jabil-procurement-workbench",
+      "display_name": "Jabil Procurement Workbench",
+      "consumer_type": "internal-application",
+      "supplier_codes": [
+        "*"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "CC-4410-PROC",
+      "contact_email": "procurement-apps@jabil.example.com"
+    },
+    {
+      "consumer_id": "jabil-ops-console",
+      "display_name": "Jabil Supplier Ops Console",
+      "consumer_type": "operations-support",
+      "supplier_codes": [
+        "*"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "CC-4420-SCO",
+      "contact_email": "supplier-ops@jabil.example.com"
+    },
+    {
+      "consumer_id": "keystone-edi-gateway",
+      "display_name": "Keystone Cable - AS2 EDI Gateway",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100812"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100812",
+      "contact_email": "edi@keystonecable.example.com"
+    },
+    {
+      "consumer_id": "brightwave-portal",
+      "display_name": "Brightwave Opto - Supplier Portal",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100845"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100845",
+      "contact_email": "it@brightwave-opto.example.cn"
+    },
+    {
+      "consumer_id": "pst-b2b-api",
+      "display_name": "Penang Semicon Test - B2B API",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100859"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100859",
+      "contact_email": "b2b@pst-semicon.example.my"
+    },
+    {
+      "consumer_id": "hanbit-portal",
+      "display_name": "Hanbit Display - Portal (read only)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100884"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "EXT-SUP-100884",
+      "contact_email": "scm@hanbit-display.example.kr"
+    },
+    {
+      "consumer_id": "asia-pacific-edi-network",
+      "display_name": "APAC Supplier EDI Network (multi-supplier VAN)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100866",
+        "SUP-100957",
+        "SUP-100962",
+        "SUP-100871"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-VAN-APAC",
+      "contact_email": "onboarding@apac-edi-network.example.com"
+    },
+    {
+      "consumer_id": "europe-supplier-hub",
+      "display_name": "Europe Supplier Hub (multi-supplier)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100903",
+        "SUP-100917",
+        "SUP-100926"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-HUB-EU",
+      "contact_email": "support@eu-supplier-hub.example.com"
+    },
+    {
+      "consumer_id": "americas-supplier-portal",
+      "display_name": "Americas Supplier Portal",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100944",
+        "SUP-100975",
+        "SUP-100989",
+        "SUP-100938"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": true,
+      "cost_center": "EXT-PORTAL-AMER",
+      "contact_email": "portal-support@jabil.example.com"
+    },
+    {
+      "consumer_id": "tristar-portal",
+      "display_name": "Tri-Star Surplus Portal (revoked)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100951"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": false,
+      "cost_center": "EXT-SUP-100951",
+      "contact_email": "it@tristar-surplus.example.com"
+    },
+    {
+      "consumer_id": "rm-sensorik-onboarding",
+      "display_name": "RM Sensorik - Integration (pending activation)",
+      "consumer_type": "supplier-partner",
+      "supplier_codes": [
+        "SUP-100996"
+      ],
+      "scopes": [
+        "supplier-orders.read",
+        "supplier-orders.write"
+      ],
+      "active": false,
+      "cost_center": "EXT-SUP-100996",
+      "contact_email": "it@rm-sensorik.example.de"
+    },
+    {
+      "consumer_id": "jabil-logistics-control-tower",
+      "display_name": "Jabil Logistics Control Tower",
+      "consumer_type": "internal-application",
+      "supplier_codes": [
+        "*"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "CC-4460-LOG",
+      "contact_email": "control-tower@jabil.example.com"
+    },
+    {
+      "consumer_id": "jabil-spend-analytics",
+      "display_name": "Jabil Spend Analytics",
+      "consumer_type": "internal-application",
+      "supplier_codes": [
+        "*"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "CC-4480-FIN",
+      "contact_email": "spend-analytics@jabil.example.com"
+    },
+    {
+      "consumer_id": "jabil-l2-support-desk",
+      "display_name": "Supplier Platform L2 Support Desk",
+      "consumer_type": "operations-support",
+      "supplier_codes": [
+        "*"
+      ],
+      "scopes": [
+        "supplier-orders.read"
+      ],
+      "active": true,
+      "cost_center": "CC-4420-SCO",
+      "contact_email": "supplier-platform-l2@jabil.example.com"
+    }
   ]
 }

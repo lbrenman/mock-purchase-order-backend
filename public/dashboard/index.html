@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supplier Order Backends — Data Console</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='4' width='8' height='24' fill='%2334508F'/%3E%3Crect x='12' y='4' width='8' height='24' fill='%2318785A'/%3E%3Crect x='22' y='4' width='8' height='24' fill='%23B15E12'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail" aria-label="Systems">
+      <a class="brand" href="#/overview">
+        <span class="brand-mark" aria-hidden="true"><i class="erp"></i><i class="srm"></i><i class="tms"></i></span>
+        <span class="brand-text">Supplier order<br>backends</span>
+      </a>
+      <nav id="nav"></nav>
+      <div class="rail-foot">
+        <button type="button" class="link" id="open-settings">Connection settings</button>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <button type="button" class="menu-btn" id="menu-btn" aria-label="Show navigation">☰</button>
+      <h1 id="page-title">Overview</h1>
+      <div class="health" id="health" aria-live="polite"></div>
+    </header>
+
+    <main id="main" tabindex="-1"></main>
+
+    <section class="wirelog" id="wirelog" aria-label="Wire log">
+      <button type="button" class="wirelog-toggle" id="wirelog-toggle" aria-expanded="false">
+        <span>Wire log</span><span class="wirelog-count" id="wirelog-count">0 calls</span><span class="wirelog-last" id="wirelog-last"></span>
+      </button>
+      <div class="wirelog-body" id="wirelog-body" hidden></div>
+    </section>
+  </div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true" tabindex="-1"></aside>
+  <div class="scrim" id="scrim" hidden></div>
+  <dialog class="modal" id="modal"></dialog>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

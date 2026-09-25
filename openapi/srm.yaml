@@ -22,6 +22,7 @@ security:
 tags:
   - name: Suppliers
   - name: Sites
+  - name: Contacts
   - name: Cross Reference
   - name: Entitlements
   - name: Health
@@ -74,6 +75,33 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '429': {$ref: '#/components/responses/TooManyRequests'}
         '503': {$ref: '#/components/responses/ServiceUnavailable'}
+    post:
+      tags: [Suppliers]
+      summary: Create a supplier
+      description: "`supplierCode` is optional (next free SUP- number). `erpVendorNumber` must be unique: it is the join key to ERP purchase orders."
+      operationId: createSupplier
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SupplierWrite'}
+            example:
+              erpVendorNumber: '0000710999'
+              name: {legal: Demo Components LLC, trading: Demo Components}
+              countryCode: US
+              classification: {tier: APPROVED, riskRating: MEDIUM}
+              capabilities: {portal: true, asn: true}
+      responses:
+        '201':
+          description: Created supplier (with empty sites and contacts)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Supplier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/suppliers/{supplierCode}:
     parameters:
       - $ref: '#/components/parameters/SupplierCode'
@@ -115,27 +143,14 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
     patch:
       tags: [Suppliers]
-      summary: Update supplier status / capabilities (demo control)
+      summary: Update supplier master data, status or capabilities
+      description: Partial update. Setting `status` to `ACTIVE` without `statusReason` clears the reason. Putting a supplier ON_HOLD or BLOCKED is the demo control for governance failures.
       operationId: updateSupplier
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                status: {type: string, enum: [ACTIVE, ON_HOLD, BLOCKED]}
-                statusReason: {type: string}
-                capabilities:
-                  type: object
-                  properties:
-                    portal: {type: boolean}
-                    asn: {type: boolean}
-                classification:
-                  type: object
-                  properties:
-                    tier: {type: string, enum: [STRATEGIC, PREFERRED, APPROVED, CONDITIONAL]}
-                    riskRating: {type: string, enum: [LOW, MEDIUM, HIGH]}
+            schema: {$ref: '#/components/schemas/SupplierWrite'}
             example:
               status: ON_HOLD
               statusReason: Quality escalation QE-2026-77
@@ -148,6 +163,16 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Suppliers]
+      summary: Delete a supplier with its sites and contacts
+      description: Refused with 409 `SUPPLIER_HAS_ENTITLEMENTS` while an entitlement lists it. ERP purchase orders for its vendor number stop resolving (VENDOR_NOT_MAPPED).
+      operationId: deleteSupplier
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/suppliers/{supplierCode}/sites:
     parameters:
       - $ref: '#/components/parameters/SupplierCode'
@@ -172,6 +197,33 @@ paths:
                     items: {$ref: '#/components/schemas/Site'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Sites]
+      summary: Add a site to a supplier
+      operationId: createSite
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SiteWrite'}
+            example:
+              siteCode: SUP-ATL-02
+              type: SHIP_FROM
+              name: Apex Savannah Crossdock
+              address: {line1: 1 Port Way, city: Savannah, region: GA, postalCode: '31401', countryCode: US}
+              active: true
+      responses:
+        '201':
+          description: Created site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Site'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/suppliers/{supplierCode}/contacts:
     parameters:
       - $ref: '#/components/parameters/SupplierCode'
@@ -195,6 +247,54 @@ paths:
                     items: {$ref: '#/components/schemas/Contact'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Contacts]
+      summary: Add a contact to a supplier (contactId assigned as CNT-nnnn)
+      operationId: createContact
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ContactWrite'}
+            example: {role: QUALITY, name: Dana Whitfield, email: quality@apex-precision.example.com, phone: +1-404-555-0190}
+      responses:
+        '201':
+          description: Created contact
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ContactWithSupplier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/sites:
+    get:
+      tags: [Sites]
+      summary: List sites across all suppliers
+      operationId: listSites
+      parameters:
+        - {name: supplierCode, in: query, description: Comma separated, schema: {type: string}}
+        - {name: type, in: query, schema: {type: string, enum: [SHIP_FROM, REMIT_TO, MANUFACTURING]}}
+        - {name: country, in: query, schema: {type: string}}
+        - {name: active, in: query, schema: {type: boolean}}
+        - {name: offset, in: query, schema: {type: integer, default: 0}}
+        - {name: limit, in: query, schema: {type: integer, default: 50, maximum: 200}}
+      responses:
+        '200':
+          description: Sites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  offset: {type: integer}
+                  limit: {type: integer}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/Site'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
   /v1/sites/{siteCode}:
     get:
       tags: [Sites]
@@ -208,6 +308,105 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Site'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Sites]
+      summary: Change a site
+      operationId: updateSite
+      parameters:
+        - {name: siteCode, in: path, required: true, schema: {type: string, example: SUP-ATL-01}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SiteWrite'}
+            example: {active: false}
+      responses:
+        '200':
+          description: Updated site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Site'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Sites]
+      summary: Delete a site
+      operationId: deleteSite
+      parameters:
+        - {name: siteCode, in: path, required: true, schema: {type: string, example: SUP-ATL-02}}
+      responses:
+        '204': {description: Deleted}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /v1/contacts:
+    get:
+      tags: [Contacts]
+      summary: List contacts across all suppliers
+      operationId: listContacts
+      parameters:
+        - {name: supplierCode, in: query, description: Comma separated, schema: {type: string}}
+        - {name: role, in: query, schema: {type: string, enum: [PRIMARY, LOGISTICS, QUALITY, FINANCE]}}
+        - {name: q, in: query, description: Name or email contains, schema: {type: string}}
+        - {name: offset, in: query, schema: {type: integer, default: 0}}
+        - {name: limit, in: query, schema: {type: integer, default: 50, maximum: 200}}
+      responses:
+        '200':
+          description: Contacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  offset: {type: integer}
+                  limit: {type: integer}
+                  items:
+                    type: array
+                    items: {$ref: '#/components/schemas/ContactWithSupplier'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+  /v1/contacts/{contactId}:
+    parameters:
+      - {name: contactId, in: path, required: true, schema: {type: string, example: CNT-0001}}
+    get:
+      tags: [Contacts]
+      summary: Get a contact
+      operationId: getContact
+      responses:
+        '200':
+          description: Contact
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ContactWithSupplier'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Contacts]
+      summary: Change a contact
+      operationId: updateContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ContactWrite'}
+            example: {phone: +1-404-555-0100}
+      responses:
+        '200':
+          description: Updated contact
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ContactWithSupplier'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contacts]
+      summary: Delete a contact
+      operationId: deleteContact
+      responses:
+        '204': {description: Deleted}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
   /v1/vendor-xref:
@@ -270,6 +469,36 @@ paths:
                     type: array
                     items: {$ref: '#/components/schemas/Entitlement'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Entitlements]
+      summary: Register an API consumer and its entitlements
+      description: "Use `allSuppliers: true` for a wildcard grant, otherwise list supplier codes in `suppliers`."
+      operationId: createEntitlement
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EntitlementWrite'}
+            example:
+              consumerId: demo-supplier-portal
+              displayName: Demo Supplier Portal
+              consumerType: supplier-partner
+              suppliers: [SUP-100245, SUP-100311]
+              scopes: [supplier-orders.read, supplier-orders.write]
+              active: true
+              costCenter: EXT-DEMO
+              contactEmail: it@demo.example.com
+      responses:
+        '201':
+          description: Created entitlement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Entitlement'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
   /v1/entitlements/{consumerId}:
     get:
       tags: [Entitlements]
@@ -283,6 +512,38 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/Entitlement'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Entitlements]
+      summary: Change scopes, suppliers or activation
+      description: Deactivating a consumer makes every check return allowed=false with reason CONSUMER_INACTIVE.
+      operationId: updateEntitlement
+      parameters:
+        - $ref: '#/components/parameters/ConsumerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EntitlementWrite'}
+            example: {active: false}
+      responses:
+        '200':
+          description: Updated entitlement
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Entitlement'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Entitlements]
+      summary: Remove an API consumer
+      operationId: deleteEntitlement
+      parameters:
+        - $ref: '#/components/parameters/ConsumerId'
+      responses:
+        '204': {description: Deleted}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
   /v1/entitlements/{consumerId}/check:
@@ -361,6 +622,12 @@ components:
       in: path
       required: true
       schema: {type: string, example: apex-supplier-portal}
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Optional. Same key + same body replays the original response.
+      schema: {type: string, minLength: 8, maxLength: 128}
   schemas:
     Address:
       type: object
@@ -419,6 +686,72 @@ components:
         sites:
           type: array
           items: {$ref: '#/components/schemas/Site'}
+    SupplierWrite:
+      type: object
+      description: Create requires erpVendorNumber, name.legal and countryCode; every field is optional on PATCH.
+      properties:
+        supplierCode: {type: string, pattern: '^SUP-[0-9]{6}$', description: Create only}
+        erpVendorNumber: {type: string, pattern: '^[0-9]{10}$'}
+        name:
+          type: object
+          properties:
+            legal: {type: string}
+            trading: {type: string}
+        status: {type: string, enum: [ACTIVE, ON_HOLD, BLOCKED]}
+        statusReason: {type: string}
+        classification:
+          type: object
+          properties:
+            tier: {type: string, enum: [STRATEGIC, PREFERRED, APPROVED, CONDITIONAL]}
+            riskRating: {type: string, enum: [LOW, MEDIUM, HIGH]}
+        capabilities:
+          type: object
+          properties:
+            portal: {type: boolean}
+            asn: {type: boolean}
+        countryCode: {type: string, pattern: '^[A-Z]{2}$'}
+        duns: {type: string, pattern: '^[0-9]{9}$'}
+        onboardedOn: {type: string, format: date}
+    SiteWrite:
+      type: object
+      description: Create requires siteCode, type, name and address.countryCode.
+      properties:
+        siteCode: {type: string, description: Create only}
+        type: {type: string, enum: [SHIP_FROM, REMIT_TO, MANUFACTURING]}
+        name: {type: string}
+        address: {$ref: '#/components/schemas/Address'}
+        active: {type: boolean}
+    ContactWrite:
+      type: object
+      description: Create requires role, name and email.
+      properties:
+        role: {type: string, enum: [PRIMARY, LOGISTICS, QUALITY, FINANCE]}
+        name: {type: string}
+        email: {type: string, format: email}
+        phone: {type: string}
+    ContactWithSupplier:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            supplierCode: {type: string, example: SUP-100245}
+    EntitlementWrite:
+      type: object
+      description: Create requires consumerId, displayName, consumerType, scopes and suppliers (or allSuppliers).
+      properties:
+        consumerId: {type: string, pattern: '^[a-z0-9][a-z0-9-]*$', description: Create only}
+        displayName: {type: string}
+        consumerType: {type: string, enum: [supplier-partner, internal-application, operations-support]}
+        allSuppliers: {type: boolean}
+        suppliers:
+          type: array
+          items: {type: string, pattern: '^SUP-[0-9]{6}$'}
+        scopes:
+          type: array
+          items: {type: string, enum: [supplier-orders.read, supplier-orders.write]}
+        active: {type: boolean}
+        costCenter: {type: string}
+        contactEmail: {type: string, format: email}
     VendorXref:
       type: object
       properties:
@@ -490,6 +823,13 @@ components:
           schema: {$ref: '#/components/schemas/SrmError'}
           example:
             errors: [{code: SUPPLIER_NOT_FOUND, message: Supplier SUP-999999 does not exist}]
+    Conflict:
+      description: Duplicate key or the record is still referenced
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/SrmError'}
+          example:
+            errors: [{code: SUPPLIER_HAS_ENTITLEMENTS, message: 'Supplier is referenced by consumer entitlement(s): apex-supplier-portal. Remove it from those first.'}]
     TooManyRequests:
       description: Rate limited
       content:

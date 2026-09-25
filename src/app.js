@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -34,10 +35,12 @@ function landingHtml(req, names) {
   table{border-collapse:collapse;width:100%;margin-top:1rem} td,th{border-bottom:1px solid #e3e7ee;padding:.7rem .5rem;vertical-align:top;text-align:left}
   th{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#5a6475} small{color:#5a6475} code{background:#f2f4f8;padding:.1rem .3rem;border-radius:4px}
   a{color:#0b5bd3;text-decoration:none} a:hover{text-decoration:underline}
+  a.dash{display:inline-block;background:#34508f;color:#fff;padding:.55rem 1rem;border-radius:6px;font-weight:600}
   @media (prefers-color-scheme:dark){body{background:#12151c;color:#e6e9ef}td,th{border-color:#2a303c}code{background:#232937}small,p.sub,th{color:#9aa4b5}a{color:#6ea8ff}}
 </style></head><body>
 <h1>Mock Purchase Order Backends</h1>
 <p class="sub">Three independent systems of record behind the <em>Supplier Order Collaboration API</em>. Base URL: <code>${base}</code></p>
+${config.dashboardEnabled ? '<p><a class="dash" href="/dashboard/">Open the data dashboard</a> to browse and edit ERP, SRM and TMS records.</p>' : ''}
 <table><thead><tr><th>Base path</th><th>System</th><th>Docs</th><th>API key header</th></tr></thead><tbody>${rows}</tbody></table>
 <p><small>Mode: ${config.serviceMode} · Chaos headers: ${config.chaosEnabled ? 'enabled' : 'disabled'} · <a href="/health">aggregate health</a></small></p>
 </body></html>`;
@@ -72,6 +75,31 @@ function buildApp(names) {
     }
     return res.type('html').send(landingHtml(req, names));
   });
+
+  if (config.dashboardEnabled) {
+    // Where each backend lives from the browser's point of view.
+    app.get('/dashboard/config.json', (req, res) => {
+      const proto = req.get('x-forwarded-proto') || req.protocol;
+      const host = req.hostname;
+      const services = config.enabledServices.map((n) => {
+        const s = config.services[n];
+        let baseUrl = `/${n}`;
+        if (s.publicUrl) baseUrl = `${s.publicUrl}/${n}`;
+        else if (config.serviceMode === 'separate' && !names.includes(n)) baseUrl = `${proto}://${host}:${s.port}/${n}`;
+        return {
+          name: n,
+          title: s.title,
+          description: s.description,
+          baseUrl,
+          authMode: s.authMode,
+          apiKeyHeader: s.apiKeyHeader,
+          apiKey: config.dashboardPrefillDemoKeys && s.apiKey === s.demoApiKey ? s.apiKey : null,
+        };
+      });
+      res.set('Cache-Control', 'no-store').json({ mode: config.serviceMode, chaosEnabled: config.chaosEnabled, services });
+    });
+    app.use('/dashboard', express.static(path.join(__dirname, '..', 'public', 'dashboard'), { index: 'index.html', maxAge: 0 }));
+  }
 
   app.get('/health', async (req, res) => {
     const checks = await Promise.all(
