@@ -4,3 +4,7 @@ node_modules/
 *.log
 .DS_Store
 coverage/
+
+# Python helper scripts in tools/
+__pycache__/
+*.pyc

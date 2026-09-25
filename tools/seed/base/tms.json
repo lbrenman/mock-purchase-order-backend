@@ -1,0 +1,76 @@
+{
+  "carriers": [
+    { "carrier_code": "UPS", "scac": "UPSN", "name": "United Parcel Service", "mode": "PARCEL", "tracking_url_template": "https://www.ups.com/track?tracknum={trackingId}" },
+    { "carrier_code": "FEDEX", "scac": "FDEG", "name": "FedEx Ground", "mode": "PARCEL", "tracking_url_template": "https://www.fedex.com/fedextrack/?trknbr={trackingId}" },
+    { "carrier_code": "DHL", "scac": "DHLE", "name": "DHL Express", "mode": "AIR", "tracking_url_template": "https://www.dhl.com/track?tracking-id={trackingId}" },
+    { "carrier_code": "XPO", "scac": "XPOL", "name": "XPO Logistics Freight", "mode": "LTL", "tracking_url_template": null },
+    { "carrier_code": "ODFL", "scac": "ODFL", "name": "Old Dominion Freight Line", "mode": "LTL", "tracking_url_template": null },
+    { "carrier_code": "MAERSK", "scac": "MAEU", "name": "Maersk Line", "mode": "OCEAN", "tracking_url_template": null }
+  ],
+  "shipments": [
+    {
+      "shipment_id": "SHP-20260828-00088", "asn_number": "ASN-437120", "supplier_code": "SUP-100245", "carrier_scac": "UPSN", "tracking_id": "1Z999AA10123450088",
+      "milestone": "DLV", "milestone_since": "2026-08-29T14:02:00Z",
+      "origin": { "locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "street": "4500 Fulton Industrial Blvd SW", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US" },
+      "destination": { "locationCode": "US-AUBURN-HILLS", "name": "Jabil Manufacturing Site", "street": "100 Manufacturing Way", "city": "Auburn Hills", "state": "MI", "zip": "48326", "country": "US" },
+      "planned_ship_at": "2026-08-26T15:00:00Z", "eta": "2026-08-29T17:00:00Z",
+      "contents": [ { "poNumber": "4500123459", "poLine": 10, "quantity": { "value": 150, "uom": "EA" }, "lotNumber": "LOT-87650" } ],
+      "handling_units": [ { "huId": "PALLET-0901", "type": "PLT", "weight": { "value": 180, "unit": "kg" } } ],
+      "created_at": "2026-08-26T18:00:00Z", "updated_at": "2026-08-29T14:02:00Z",
+      "events": [
+        { "event_code": "PU", "description": "Picked up by carrier", "location": "Atlanta, GA, US", "occurred_at": "2026-08-26T16:20:00Z" },
+        { "event_code": "DEP", "description": "Departed origin hub", "location": "Atlanta, GA, US", "occurred_at": "2026-08-26T23:05:00Z" },
+        { "event_code": "ARR", "description": "Arrived at destination hub", "location": "Pontiac, MI, US", "occurred_at": "2026-08-29T06:40:00Z" },
+        { "event_code": "DLV", "description": "Delivered - signed by RECEIVING DOCK 4", "location": "Auburn Hills, MI, US", "occurred_at": "2026-08-29T14:02:00Z" }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260915-00107", "asn_number": "PRC-ASN-7781", "supplier_code": "SUP-100402", "carrier_scac": "MAEU", "tracking_id": "MAEU2601554817",
+      "milestone": "EXC", "milestone_since": "2026-09-15T08:30:00Z",
+      "origin": { "locationCode": "SUP-HSZ-01", "name": "PRC Hsinchu Fab 2", "street": "No. 18, Science Park Rd", "city": "Hsinchu", "state": "HSZ", "zip": "300", "country": "TW" },
+      "destination": { "locationCode": "SG-SINGAPORE", "name": "Jabil Singapore Operations", "street": "20 Loyang Way", "city": "Singapore", "state": "SG", "zip": "508774", "country": "SG" },
+      "planned_ship_at": "2026-09-01T06:00:00Z", "eta": "2026-09-29T09:00:00Z",
+      "contents": [ { "poNumber": "4500123462", "poLine": 10, "quantity": { "value": 1000, "uom": "EA" }, "lotNumber": "LOT-TW-5521" } ],
+      "handling_units": [
+        { "huId": "CRATE-7781-01", "type": "CRT", "weight": { "value": 310, "unit": "kg" } },
+        { "huId": "CRATE-7781-02", "type": "CRT", "weight": { "value": 295, "unit": "kg" } }
+      ],
+      "created_at": "2026-09-01T04:45:00Z", "updated_at": "2026-09-15T08:30:00Z",
+      "events": [
+        { "event_code": "PU", "description": "Container loaded at shipper", "location": "Hsinchu, TW", "occurred_at": "2026-09-02T03:00:00Z" },
+        { "event_code": "DEP", "description": "Vessel departed port of loading", "location": "Kaohsiung, TW", "occurred_at": "2026-09-04T11:00:00Z" },
+        { "event_code": "ARR", "description": "Vessel arrived port of discharge", "location": "Singapore, SG", "occurred_at": "2026-09-12T22:15:00Z" },
+        { "event_code": "EXC", "description": "Held at customs - commercial invoice query", "location": "Singapore, SG", "occurred_at": "2026-09-15T08:30:00Z" }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260918-00121", "asn_number": "ASN-439901", "supplier_code": "SUP-100245", "carrier_scac": "UPSN", "tracking_id": "1Z999AA10123450121",
+      "milestone": "ITR", "milestone_since": "2026-09-18T16:10:00Z",
+      "origin": { "locationCode": "SUP-ATL-01", "name": "Supplier Distribution Center", "street": "4500 Fulton Industrial Blvd SW", "city": "Atlanta", "state": "GA", "zip": "30301", "country": "US" },
+      "destination": { "locationCode": "US-ST-PETERSBURG", "name": "Jabil Tampa Bay Operations", "street": "2400 Gateway Centre Blvd", "city": "St. Petersburg", "state": "FL", "zip": "33716", "country": "US" },
+      "planned_ship_at": "2026-09-18T15:00:00Z", "eta": "2026-09-25T17:00:00Z",
+      "contents": [ { "poNumber": "4500123458", "poLine": 10, "quantity": { "value": 300, "uom": "EA" }, "lotNumber": "LOT-88104" } ],
+      "handling_units": [
+        { "huId": "PALLET-0981", "type": "PLT", "weight": { "value": 210, "unit": "kg" } },
+        { "huId": "PALLET-0982", "type": "PLT", "weight": { "value": 195, "unit": "kg" } }
+      ],
+      "created_at": "2026-09-18T19:05:10Z", "updated_at": "2026-09-20T06:15:00Z",
+      "events": [
+        { "event_code": "PU", "description": "Picked up by carrier", "location": "Atlanta, GA, US", "occurred_at": "2026-09-18T16:10:00Z" },
+        { "event_code": "DEP", "description": "Departed origin hub", "location": "Atlanta, GA, US", "occurred_at": "2026-09-18T22:40:00Z" },
+        { "event_code": "ARR", "description": "Arrived at regional hub", "location": "Jacksonville, FL, US", "occurred_at": "2026-09-20T06:15:00Z" }
+      ]
+    },
+    {
+      "shipment_id": "SHP-20260922-00188", "asn_number": "NW-ASN-20260922-01", "supplier_code": "SUP-100311", "carrier_scac": "DHLE", "tracking_id": null,
+      "milestone": "PLN", "milestone_since": "2026-09-22T09:00:00Z",
+      "origin": { "locationCode": "SUP-STR-01", "name": "Nordwerk Werk Stuttgart", "street": "Industriestrasse 44", "city": "Stuttgart", "state": "BW", "zip": "70565", "country": "DE" },
+      "destination": { "locationCode": "DE-NUREMBERG", "name": "Jabil Nuremberg Engineering Center", "street": "Industriestrasse 12", "city": "Nuremberg", "state": "BY", "zip": "90411", "country": "DE" },
+      "planned_ship_at": "2026-09-28T07:00:00Z", "eta": "2026-09-30T12:00:00Z",
+      "contents": [ { "poNumber": "4500123461", "poLine": 10, "quantity": { "value": 40, "uom": "EA" }, "lotNumber": "NW-L-26-3301" } ],
+      "handling_units": [ { "huId": "KARTON-5501", "type": "CTN", "weight": { "value": 18.5, "unit": "kg" } } ],
+      "created_at": "2026-09-22T09:00:00Z", "updated_at": "2026-09-22T09:00:00Z",
+      "events": []
+    }
+  ]
+}

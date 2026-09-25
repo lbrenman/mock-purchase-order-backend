@@ -103,6 +103,20 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
     return rows[0];
   }
 
+  /** Resolves carrier.scac or carrier.carrierCode to a configured SCAC, or throws 422 UNKNOWN_CARRIER. */
+  async function resolveScac(db, scac, carrierCode) {
+    const { rows } = scac
+      ? await db.query('SELECT scac FROM tms.carriers WHERE scac = $1', [scac.toUpperCase()])
+      : await db.query('SELECT scac FROM tms.carriers WHERE carrier_code = $1', [carrierCode.toUpperCase()]);
+    if (!rows[0]) {
+      const field = scac ? 'carrier.scac' : 'carrier.carrierCode';
+      throw new ApiError(422, 'UNKNOWN_CARRIER', `Carrier ${scac || carrierCode} is not configured in TMS (see GET /tms/v1/carriers)`, [
+        { field, message: scac ? 'unknown SCAC' : 'unknown carrier code' },
+      ]);
+    }
+    return rows[0].scac;
+  }
+
   const loadEvents = async (db, id) =>
     (await db.query('SELECT * FROM tms.tracking_events WHERE shipment_id = $1 ORDER BY occurred_at, event_id', [id])).rows;
 
@@ -208,7 +222,10 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
       const asnNumber = v.string(b, 'asnNumber', { required: true, max: 80 });
       const supplierCode = v.string(b, 'supplierCode', { required: true, pattern: SUPPLIER_RE });
       const carrier = v.object(b, 'carrier', { required: true }) || {};
-      const scac = v.string(carrier, 'scac', { required: true, max: 4, path: 'carrier.scac' });
+      // Either the SCAC or the business carrier code (UPS, DHL, ...) identifies the carrier; TMS resolves it.
+      const scacIn = v.string(carrier, 'scac', { max: 4, path: 'carrier.scac' });
+      const carrierCodeIn = v.string(carrier, 'carrierCode', { max: 40, path: 'carrier.carrierCode' });
+      if (b.carrier && typeof b.carrier === 'object' && !carrier.scac && !carrier.carrierCode) v.add('carrier', 'provide carrier.carrierCode or carrier.scac');
       const trackingId = v.string(carrier, 'trackingId', { max: 100, path: 'carrier.trackingId' });
       const route = v.object(b, 'route', { required: true }) || {};
       const hasRoute = b.route && typeof b.route === 'object';
@@ -256,16 +273,12 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
       }
 
       const created = await withTransaction(pool, async (c) => {
-        const car = await c.query('SELECT scac FROM tms.carriers WHERE scac = $1', [scac.toUpperCase()]);
-        if (!car.rows[0]) {
-          throw new ApiError(422, 'UNKNOWN_CARRIER', `Carrier SCAC ${scac} is not configured in TMS (see GET /tms/v1/carriers)`, [
-            { field: 'carrier.scac', message: 'unknown SCAC' },
-          ]);
-        }
-        const dup = await c.query('SELECT shipment_id FROM tms.shipments WHERE supplier_code = $1 AND asn_number = $2', [
-          supplierCode,
-          asnNumber,
-        ]);
+        const scac = await resolveScac(c, scacIn, carrierCodeIn);
+        // A cancelled shipment frees its ASN number, so a saga can retry with the same ASN after compensating.
+        const dup = await c.query(
+          "SELECT shipment_id FROM tms.shipments WHERE supplier_code = $1 AND asn_number = $2 AND milestone <> 'CXL'",
+          [supplierCode, asnNumber]
+        );
         if (dup.rows[0]) {
           throw new ApiError(409, 'DUPLICATE_ASN', `ASN ${asnNumber} already exists for ${supplierCode} as ${dup.rows[0].shipment_id}`);
         }
@@ -277,7 +290,7 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
           `INSERT INTO tms.shipments (shipment_id, asn_number, supplier_code, carrier_scac, tracking_id, milestone,
               origin, destination, planned_ship_at, eta, contents, handling_units)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-          [id, asnNumber, supplierCode, scac.toUpperCase(), trackingId || null, milestone, JSON.stringify(origin),
+          [id, asnNumber, supplierCode, scac, trackingId || null, milestone, JSON.stringify(origin),
             JSON.stringify(destination), planned, eta, JSON.stringify(contents), JSON.stringify(handlingUnits)]
         );
         if (milestone === 'TND') {
@@ -485,7 +498,9 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
       const b = req.body || {};
       const v = new Validator();
       const carrier = v.object(b, 'carrier') || {};
-      const scac = v.string(carrier, 'scac', { max: 4, path: 'carrier.scac' });
+      const scacIn = v.string(carrier, 'scac', { max: 4, path: 'carrier.scac' });
+      const carrierCodeIn = v.string(carrier, 'carrierCode', { max: 40, path: 'carrier.carrierCode' });
+      const carrierChange = scacIn || carrierCodeIn;
       const trackingId = v.string(carrier, 'trackingId', { max: 100, path: 'carrier.trackingId' });
       const schedule = v.object(b, 'schedule') || {};
       const planned = v.timestamp(schedule, 'plannedShipDate', { path: 'schedule.plannedShipDate' });
@@ -527,7 +542,7 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
             };
           })
         : null;
-      const changes = [scac, trackingId, planned, eta, asnNumber, origin, destination, contents, hus].filter((x) => x !== undefined && x !== null);
+      const changes = [carrierChange, trackingId, planned, eta, asnNumber, origin, destination, contents, hus].filter((x) => x !== undefined && x !== null);
       if (!changes.length) v.add('body', 'provide at least one updatable field');
       v.throwIfErrors();
 
@@ -536,15 +551,12 @@ module.exports = function buildTmsRoutes({ pool, idem }) {
         if (CLOSED.includes(s.milestone)) throw new ApiError(409, 'SHIPMENT_CLOSED', `Shipment is ${MILESTONES[s.milestone].toLowerCase()} and cannot be changed`);
         const early = ['PLN', 'TND'].includes(s.milestone);
         const locked = [];
-        if (!early && (scac || origin || destination || planned || hus)) locked.push('carrier.scac, route, schedule.plannedShipDate, handlingUnits');
+        if (!early && (carrierChange || origin || destination || planned || hus)) locked.push('carrier.scac, route, schedule.plannedShipDate, handlingUnits');
         if (s.milestone !== 'PLN' && (contents || asnNumber)) locked.push('contents, asnNumber');
         if (locked.length) {
           throw new ApiError(409, 'FIELD_LOCKED', `Shipment is ${MILESTONES[s.milestone].toLowerCase()}; these fields can no longer change: ${locked.join('; ')}`);
         }
-        if (scac) {
-          const car = await c.query('SELECT scac FROM tms.carriers WHERE scac = $1', [scac.toUpperCase()]);
-          if (!car.rows[0]) throw new ApiError(422, 'UNKNOWN_CARRIER', `Carrier SCAC ${scac} is not configured in TMS`, [{ field: 'carrier.scac', message: 'unknown SCAC' }]);
-        }
+        const scac = carrierChange ? await resolveScac(c, scacIn, carrierCodeIn) : null;
         const newPlanned = planned || s.planned_ship_at;
         const newEta = eta || s.eta;
         if (new Date(newEta) < new Date(newPlanned)) {

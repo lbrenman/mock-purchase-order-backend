@@ -1,12 +1,17 @@
 openapi: 3.0.3
 info:
   title: Supplier Master (SRM) API (mock)
-  version: 1.0.0
+  version: 1.1.0
   description: |
     Mock **Supplier Relationship Management / supplier master** backend. Owns the enterprise
     supplier identity (`SUP-100245`), ship-from sites, contacts, the **cross-reference to ERP
     vendor numbers**, and **consumer entitlements** used to enforce "which consumer may see or
     act for which supplier".
+
+    **The one SRM call per façade request** is `GET /entitlements/{consumerId}/check`. It returns the
+    authorization decision *and* resolves the supplier: pass `supplierCode` or `erpVendorNumber`, and
+    read `supplier.erpVendorNumber` / `supplier.supplierCode` plus `allowedVendors` (the vendor numbers
+    of every supplier the consumer may see) from the response. `/vendor-xref` remains for ad-hoc lookups.
 
     Differences from the façade the iPaaS must handle:
     * Nested camelCase (`name.legal`, `classification.tier`, `address.postalCode`).
@@ -551,17 +556,33 @@ paths:
       - $ref: '#/components/parameters/ConsumerId'
     get:
       tags: [Entitlements]
-      summary: Authorization decision (query string form)
+      summary: Authorization decision and supplier/vendor resolution (query string form)
+      description: |
+        Identify the supplier with `supplierCode` **or** `erpVendorNumber` (ERP `vendor_id`), or with
+        neither for list operations. Always 200; see the POST form for the list of `reason` values.
       operationId: checkEntitlementGet
       parameters:
         - {name: scope, in: query, required: true, schema: {type: string, enum: [supplier-orders.read, supplier-orders.write]}}
-        - {name: supplierCode, in: query, schema: {type: string, example: SUP-100245}}
+        - {name: supplierCode, in: query, schema: {type: string, pattern: '^SUP-[0-9]{6}$', example: SUP-100245}}
+        - {name: erpVendorNumber, in: query, description: 'Alternative to supplierCode: the ERP vendor_id of a purchase order.', schema: {type: string, pattern: '^[0-9]{10}$', example: '0000710245'}}
       responses:
         '200':
           description: Decision (allowed may be false)
           content:
             application/json:
               schema: {$ref: '#/components/schemas/EntitlementDecision'}
+              example:
+                consumerId: apex-supplier-portal
+                consumerType: supplier-partner
+                scope: supplier-orders.read
+                supplierCode: SUP-100245
+                allowed: true
+                reason: OK
+                supplier: {supplierCode: SUP-100245, erpVendorNumber: '0000710245', legalName: 'Apex Precision Components, Inc.', status: ACTIVE, asnEnabled: true}
+                allowedSuppliers: [SUP-100245]
+                allowedVendors:
+                  - {supplierCode: SUP-100245, erpVendorNumber: '0000710245'}
+                evaluatedAt: '2026-09-24T12:00:00.000Z'
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -583,6 +604,7 @@ paths:
               properties:
                 scope: {type: string, enum: [supplier-orders.read, supplier-orders.write]}
                 supplierCode: {type: string, pattern: '^SUP-[0-9]{6}$'}
+                erpVendorNumber: {type: string, pattern: '^[0-9]{10}$', description: Alternative to supplierCode}
             example:
               scope: supplier-orders.write
               supplierCode: SUP-100245
@@ -599,7 +621,10 @@ paths:
                 supplierCode: SUP-100402
                 allowed: false
                 reason: SCOPE_NOT_GRANTED
+                supplier: {supplierCode: SUP-100402, erpVendorNumber: '0000710402', legalName: Pacific Rim Circuits Co., Ltd., status: ACTIVE, asnEnabled: true}
                 allowedSuppliers: [SUP-100402]
+                allowedVendors:
+                  - {supplierCode: SUP-100402, erpVendorNumber: '0000710402'}
                 evaluatedAt: '2026-09-24T12:00:00.000Z'
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
@@ -784,10 +809,31 @@ components:
         scope: {type: string}
         supplierCode: {type: string, nullable: true}
         allowed: {type: boolean}
-        reason: {type: string}
+        reason:
+          type: string
+          enum: [OK, CONSUMER_INACTIVE, SCOPE_NOT_GRANTED, SUPPLIER_NOT_FOUND, SUPPLIER_SCOPE_DENIED, SUPPLIER_BLOCKED, SUPPLIER_ON_HOLD]
+        supplier:
+          type: object
+          nullable: true
+          description: The supplier named in the request (null when none was given or it does not exist).
+          properties:
+            supplierCode: {type: string, example: SUP-100245}
+            erpVendorNumber: {type: string, example: '0000710245'}
+            legalName: {type: string}
+            status: {type: string, enum: [ACTIVE, ON_HOLD, BLOCKED]}
+            asnEnabled: {type: boolean, description: May the supplier send advance shipment notices}
         allowedSuppliers:
           type: array
+          description: Supplier codes the consumer may see, or ['*'] for all.
           items: {type: string}
+        allowedVendors:
+          type: array
+          description: supplierCode and ERP vendor number of every supplier the consumer may see (all suppliers for '*').
+          items:
+            type: object
+            properties:
+              supplierCode: {type: string}
+              erpVendorNumber: {type: string}
         evaluatedAt: {type: string, format: date-time}
     SrmError:
       type: object

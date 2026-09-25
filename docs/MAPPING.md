@@ -1,272 +1,271 @@
-# Façade ↔ Backend Mapping & Orchestration Guide
+# Façade ↔ Backend Mapping Guide
 
-This document is the "answer key" for building the **Jabil Supplier Order Collaboration API**
-(`Jabil_Supplier_Order_Collaboration_OpenAPI_3.1.yaml`) in Amplify Fusion on top of the three mock
-backends. Every façade operation needs at least two backends and non-trivial transformation.
+This is the answer key for implementing the **Supplier Order Collaboration API** façade (OpenAPI 3.1) in
+Amplify Fusion on top of the three mock backends. Each façade operation needs **two or three backend
+calls**: always exactly one SRM call (authorization plus supplier resolution), and one or two calls to
+the ERP or TMS. The rest is transformation.
 
 | Backend | Base path | Owns | Dialect |
 |---|---|---|---|
-| **ERP** (SAP-style purchasing) | `/erp/v1` | POs, items, confirmations, inbound deliveries, plants, purchasing orgs | snake_case, `YYYYMMDD` dates, decimals as strings, status codes `01..09`, `{data, pagination}` |
-| **SRM** (supplier master) | `/srm/v1` | Supplier identity `SUP-xxxxxx`, sites, contacts, ERP vendor xref, consumer entitlements | nested camelCase, offset paging `{total, offset, limit, items}` |
-| **TMS** (logistics) | `/tms/v1` | Shipments/ASNs, carriers (SCAC), milestones, tracking events | nested objects, milestone codes, cursor paging `{count, results, nextCursor}` |
+| **ERP** (SAP-style purchasing) | `/erp/v1` | Purchase orders and items, confirmations, inbound deliveries | snake_case, `YYYYMMDD` dates, decimals as strings, status codes `01`–`09`, `{data, pagination}` |
+| **SRM** (supplier master) | `/srm/v1` | Supplier identity `SUP-xxxxxx`, ERP vendor numbers, consumer entitlements | nested camelCase, `{total, offset, limit, items}` |
+| **TMS** (logistics) | `/tms/v1` | Shipments (ASNs), carriers, milestones, tracking events | nested objects, milestone codes, `{count, results, nextCursor}` |
 
-Headers to pass to every backend: `x-api-key` (per backend), `X-Correlation-Id` (propagate the
-façade's value — every backend echoes it and includes it in errors). Optional `Idempotency-Key` on POSTs
-(derive per-backend keys from the façade key, e.g. `<key>-tms`, `<key>-erp`).
+Send to every backend: its `x-api-key`, and the façade's `X-Correlation-Id` (every backend echoes it and
+puts it in its errors). On POSTs, derive a per-backend `Idempotency-Key` from the façade key
+(`<key>-tms`, `<key>-erp`).
 
----
+## At a glance
 
-## 1. Identifier & code mappings
-
-| Concept | Façade | ERP | SRM | TMS |
-|---|---|---|---|---|
-| Purchase order | `PO-4500123456` | `4500123456` (strict: prefix → 400 `INVALID_PO_NUMBER`) | — | `contents[].poNumber` = `4500123456` |
-| PO line | `lineNumber: 10` (int) | `item_no: "00010"` (5-digit zero-padded string) | — | `poLine: 10` |
-| Supplier | `supplierId: SUP-100245` | `vendor_id: "0000710245"` | `supplierCode` ↔ `erpVendorNumber` via `/vendor-xref` | `supplierCode: SUP-100245` |
-| Buying org | `buyingOrganization: Jabil-US` | `purch_org: JBUS` | — | — |
-| Ship-to | `shipTo.siteCode: US-AUBURN-HILLS` | `plant: "1101"` → `/plants/1101` → `site_code` | — | `route.destination.locationCode` |
-| Ship-from | `shipFrom.siteCode: SUP-ATL-01` | — | `/sites/SUP-ATL-01` | `route.origin.locationCode` |
-| Carrier | `carrierCode: UPS` | — | — | `carrier.scac: UPSN` (`/carriers?code=UPS`) |
-| ASN number | `shipmentNoticeNumber` | `asn_reference` | — | `asnNumber` |
-| Acknowledgement id | `ACK-20260923-000184` | `confirmation_no: 7100000101` | — | — |
-
-Suggested acknowledgement id: `ACK-` + `posted_at[0..8]` + `-` + last 6 digits of `confirmation_no`.
-
-### Address shapes
-
-| Façade `Address` | ERP plant | SRM site `address` | TMS location |
-|---|---|---|---|
-| `siteCode` | `site_code` | `siteCode` (top level) | `locationCode` |
-| `name` | `name` | `name` (top level) | `name` |
-| `addressLine1` | `street` | `line1` | `street` |
-| `city` | `city` | `city` | `city` |
-| `region` | `region` | `region` | `state` |
-| `postalCode` | `postal_code` | `postalCode` | `zip` |
-| `countryCode` | `country` | `countryCode` | `country` |
-
-### Dates, numbers, enums
-
-| Field | Façade | Backend | Transform |
-|---|---|---|---|
-| `orderDate` | `2026-09-15` | ERP `doc_date: "20260915"` | insert dashes |
-| `requestedDeliveryDate` | `2026-10-05` | ERP `delivery_date: "20261005"` | insert dashes |
-| `lastUpdatedAt` | `2026-09-23T14:22:31Z` | ERP `changed_at: "20260923142231"` | reformat (UTC) |
-| `orderedQuantity`, `unitPrice` | numbers | ERP `"250.000"`, `"84.50"` | `Number()` |
-| `acknowledgedQuantity` | number | ERP `confirmed_qty: "0.000"` | `Number()` |
-| `confirmedDeliveryDate` | `2026-10-08` | ERP `confirmed_date: "20261008"` | strip dashes |
-| `packages[].packageType` | `PALLET/CARTON/CRATE/OTHER` | TMS `PLT/CTN/CRT/OTH` | lookup |
-| `packages[].weightUnit` | `KG/LB` | TMS `weight.unit: kg/lb` | case |
-| `packages[].grossWeight` | number | TMS `weight.value` | nest |
-| `lines[].shippedQuantity`, `unitOfMeasure` | flat | TMS `quantity.value`, `quantity.uom` | nest |
-| `plannedShipAt`, `expectedArrivalAt` | ISO | TMS `schedule.plannedShipDate`, `schedule.estimatedArrival` | nest |
-
-### Status mappings
-
-**PO status** (ERP `status_code` → façade `status`)
-
-| ERP | Text | Façade |
-|---|---|---|
-| `01` | Open | `OPEN` |
-| `02` | Partially confirmed | `PARTIALLY_ACKNOWLEDGED` |
-| `03` | Confirmed | `ACKNOWLEDGED` |
-| `04` | In delivery | `IN_FULFILLMENT` |
-| `05` | Closed | `CLOSED` |
-| `09` | Cancelled | `CANCELLED` |
-
-The façade `status` query filter is an array of façade values → map each back to ERP codes and send `status=01,02`.
-
-**Acknowledgement** (façade → ERP `conf_category`, ERP result → façade `status`)
-
-| Façade `acknowledgementType` | ERP `conf_category` | ERP rule |
-|---|---|---|
-| `ACCEPT` | `AB` | full ordered qty and requested date on every line |
-| `ACCEPT_WITH_CHANGES` | `AC` | reduced qty or later date → `IN_REVIEW` |
-| `REJECT` | `RJ` | `confirmed_qty` must be 0 |
-
-| ERP result | Façade `status` |
+| Façade operation | Backend calls, in order |
 |---|---|
-| `conf_category = RJ` | `REJECTED` |
-| `status = IN_REVIEW` | `PENDING_REVIEW` |
-| `status = POSTED` | `RECORDED` |
+| `GET /purchase-orders` | SRM check (read) → ERP list |
+| `GET /purchase-orders/{id}` | ERP get → SRM check (read, by vendor) |
+| `POST /purchase-orders/{id}/acknowledgements` | ERP get → SRM check (write, by vendor) → ERP confirmation |
+| `POST /shipments` | SRM check (write) → TMS create → ERP inbound delivery (on failure: TMS cancel) |
+| `GET /shipments` | SRM check (read) → TMS list |
+| `GET /shipments/{id}` | TMS get → SRM check (read) |
 
-**Shipment status** (TMS `milestone.code` → façade `status`)
+Every one of these is a runnable folder in the Postman collection under **Scenarios - façade walkthroughs**.
 
-| TMS | Meaning | Façade |
-|---|---|---|
-| `PLN` | Planned (created with `tender:false`) | `DRAFT` |
-| `TND` | Tendered to carrier | `SUBMITTED` |
-| `ITR` | In transit | `IN_TRANSIT` |
-| `DLV` | Delivered | `DELIVERED` |
-| `EXC` | Exception | `DELAYED` |
-| `CXL` | Cancelled | `CANCELLED` |
+### The one SRM call
+
+```
+GET /srm/v1/entitlements/{consumerId}/check?scope=supplier-orders.read|write
+        [&supplierCode=SUP-100245 | &erpVendorNumber=0000710245]
+```
+
+`consumerId` comes from the façade credential (for example the Fusion or Engage application mapped to a
+consumer). The answer is always 200 (404 only for an unknown consumer) and contains everything the façade
+needs from the SRM:
+
+```json
+{
+  "allowed": true,
+  "reason": "OK",
+  "supplierCode": "SUP-100245",
+  "supplier": { "supplierCode": "SUP-100245", "erpVendorNumber": "0000710245", "status": "ACTIVE", "asnEnabled": true, "legalName": "..." },
+  "allowedSuppliers": ["SUP-100245"],
+  "allowedVendors": [ { "supplierCode": "SUP-100245", "erpVendorNumber": "0000710245" } ]
+}
+```
+
+- Starting from a façade `supplierId`? Pass `supplierCode` and read `supplier.erpVendorNumber`.
+- Starting from an ERP purchase order? Pass its `vendor_id` as `erpVendorNumber` and read `supplierCode`.
+- Listing? Pass neither. `allowedVendors` lists the vendor numbers to query and maps them back to
+  `supplierId`. For consumers with access to every supplier (`allowedSuppliers: ["*"]`) it lists all suppliers.
+
+`allowed: false` becomes a façade error (section 3). `/srm/v1/vendor-xref` still exists for ad-hoc lookups,
+but the façade does not need it.
 
 ---
 
-## 2. Authorization (façade 403)
+## 1. Field mappings
 
-The façade must enforce "which consumer may see/act for which supplier". SRM makes the decision
-but **always returns 200** — the iPaaS turns `allowed:false` into a façade error.
+### Identifiers and codes
+
+| Concept | Façade | ERP | TMS | How |
+|---|---|---|---|---|
+| Purchase order | `PO-4500123456` | `po_number: "4500123456"` | `contents[].poNumber` | add or strip `PO-` (ERP answers 400 `INVALID_PO_NUMBER` to a prefixed id) |
+| Line | `lineNumber: 10` | `item_no: "00010"` | `contents[].poLine: 10` | ERP: zero-pad to 5 digits |
+| Supplier | `supplierId: SUP-100245` | `vendor_id: "0000710245"` | `supplierCode: SUP-100245` | SRM check (above) |
+| Buying org | `buyingOrganization` | `purch_org_name` | — | copy |
+| Carrier | `carrierCode: UPS` | — | send `carrier.carrierCode`, read `carrier.carrierCode` | copy (TMS resolves the SCAC itself) |
+| ASN number | `shipmentNoticeNumber` | `asn_reference` | `asnNumber` | copy |
+| Acknowledgement id | `ACK-20260924-000101` | `confirmation_no: "7100000101"` | — | `ACK-` + `posted_at[0..8]` + `-` + last 6 digits |
+
+### Addresses
+
+| Façade `Address` | ERP `ship_to` (embedded in every PO) | TMS `route.origin` / `route.destination` |
+|---|---|---|
+| `siteCode` | `site_code` | `locationCode` |
+| `name` | `name` | `name` |
+| `addressLine1` | `street` | `street` |
+| `city` | `city` | `city` |
+| `region` | `region` | `state` |
+| `postalCode` | `postal_code` | `zip` |
+| `countryCode` | `country` | `country` |
+
+### Dates, numbers, nesting
+
+| Façade | Backend | Transform |
+|---|---|---|
+| `orderDate`, `requestedDeliveryDate`, `confirmedDeliveryDate` | ERP `doc_date`, `delivery_date`, `confirmed_date` (`YYYYMMDD`) | insert or strip dashes |
+| `lastUpdatedAt` | ERP `changed_at` (`YYYYMMDDhhmmss`, UTC) | reformat to RFC 3339 |
+| `orderedQuantity`, `acknowledgedQuantity`, `unitPrice` | ERP `quantity`, `confirmed_qty`, `net_price` (strings) | `Number()` |
+| `description`, `materialId`, `unitOfMeasure` | ERP `short_text`, `material`, `uom` | rename |
+| `plannedShipAt`, `expectedArrivalAt` | TMS `schedule.plannedShipDate`, `schedule.estimatedArrival` | nest or flatten |
+| `createdAt`, `lastUpdatedAt` (shipment) | TMS `audit.createdAt`, `audit.updatedAt` | flatten |
+| `lines[].shippedQuantity`, `unitOfMeasure` | TMS `contents[].quantity.value`, `.uom` | nest or flatten |
+| `packages[].packageId`, `packageType`, `grossWeight`, `weightUnit` | TMS `handlingUnits[].huId`, `type`, `weight.value`, `weight.unit` | rename; `PALLET/CARTON/CRATE/OTHER` ↔ `PLT/CTN/CRT/OTH`; `KG/LB` ↔ `kg/lb` |
+| `purchaseOrders` | TMS `contents[].poNumber` | distinct values, `PO-` prefix |
+
+### Status codes
+
+| ERP `status_code` | Façade PO `status` | | TMS `milestone.code` | Façade shipment `status` |
+|---|---|---|---|---|
+| `01` Open | `OPEN` | | `PLN` planned | `DRAFT` |
+| `02` Partially confirmed | `PARTIALLY_ACKNOWLEDGED` | | `TND` tendered | `SUBMITTED` |
+| `03` Confirmed | `ACKNOWLEDGED` | | `ITR` in transit | `IN_TRANSIT` |
+| `04` In delivery | `IN_FULFILLMENT` | | `DLV` delivered | `DELIVERED` |
+| `05` Closed | `CLOSED` | | `EXC` exception | `DELAYED` |
+| `09` Cancelled | `CANCELLED` | | `CXL` cancelled | `CANCELLED` |
+
+Status filters are arrays in the façade: map each value and join with commas (`status=01,02`, `status=ITR,EXC`).
+
+| Façade `acknowledgementType` | ERP `conf_category` | ERP result | Façade acknowledgement `status` |
+|---|---|---|---|
+| `ACCEPT` | `AB` (full quantity, requested date) | `POSTED` | `RECORDED` |
+| `ACCEPT_WITH_CHANGES` | `AC` (less quantity or a later date goes to review) | `IN_REVIEW` or `POSTED` | `PENDING_REVIEW` or `RECORDED` |
+| `REJECT` | `RJ` (`confirmed_qty` must be 0) | `POSTED`, category `RJ` | `REJECTED` |
+
+---
+
+## 2. Recipes
+
+### `GET /purchase-orders`
 
 ```
-GET /srm/v1/entitlements/{consumerId}/check?scope=supplier-orders.read&supplierCode=SUP-100245
-→ { "allowed": false, "reason": "SUPPLIER_SCOPE_DENIED", "allowedSuppliers": ["SUP-100245"], ... }
+1. SRM  GET /entitlements/{consumer}/check?scope=supplier-orders.read[&supplierCode={supplierId}]
+        allowed=false -> 403.  Vendors = supplier.erpVendorNumber, or every allowedVendors[].erpVendorNumber
+2. ERP  GET /purchase-orders?vendor_id=<vendors, comma separated>&status=01,02&changed_since=<updatedSince>&page=N&limit=M
+        (leave vendor_id out for '*' consumers)
+3. Map each entry. supplierId comes from allowedVendors. Items, ship_to and purch_org_name are already there.
+   Paging: pageToken <-> ERP page (for example base64("p=2")); nextPageToken = null when pagination.hasNext is false.
 ```
 
-`consumerId` comes from the façade credential (e.g. the Fusion/Engage application or API key → consumer
-mapping). Demo consumers:
+### `GET /purchase-orders/{purchaseOrderId}`
+
+```
+1. ERP  GET /purchase-orders/4500123456                                 404 -> 404 PURCHASE_ORDER_NOT_FOUND
+2. SRM  GET /entitlements/{consumer}/check?scope=supplier-orders.read&erpVendorNumber={vendor_id}
+        allowed=false -> 403 (or 404 if you prefer not to reveal that the order exists)
+3. Map; supplierId = supplierCode from step 2. Pass the ERP ETag through.
+```
+
+### `POST /purchase-orders/{purchaseOrderId}/acknowledgements`
+
+```
+1. Require Idempotency-Key at the façade.
+2. ERP  GET /purchase-orders/{po}                                        -> vendor_id, ETag
+3. SRM  GET /entitlements/{consumer}/check?scope=supplier-orders.write&erpVendorNumber={vendor_id}
+4. ERP  POST /purchase-orders/{po}/confirmations   (If-Match: <ETag> optional, Idempotency-Key: <key>-erp)
+        { conf_category, vendor_reference, note,
+          items: [{ item_no: "00010", confirmed_qty, confirmed_date: "YYYYMMDD", reject_reason }] }
+5. Respond 201 { acknowledgementId, purchaseOrderId, acknowledgementType, supplierReference, status, recordedAt }
+```
+
+To acknowledge the same PO again in a demo, simulate a buyer change so a new revision exists:
+`PATCH /erp/v1/purchase-orders/4500123456 {"delivery_date": "20261012"}`.
+
+### `POST /shipments` (saga with compensation)
+
+```
+1. SRM  GET /entitlements/{consumer}/check?scope=supplier-orders.write&supplierCode={supplierId}
+        allowed=false -> 403;  supplier.asnEnabled=false -> 422 ASN_NOT_ENABLED;  keep supplier.erpVendorNumber
+2. TMS  POST /shipments   { asnNumber, supplierCode, carrier: { carrierCode, trackingId }, route, schedule,
+                            contents, handlingUnits, tender: true }          -> shipmentId, milestone TND
+3. ERP  POST /inbound-deliveries  { asn_reference: shipmentNoticeNumber, vendor_id,
+                                    items: [{ po_number, item_no, quantity }] }
+        Reserves open quantity and checks vendor and PO status.
+   On any failure in step 3:
+        TMS POST /shipments/{shipmentId}/cancel { reason: "Compensation: ..." }
+        and return the step-3 error (mapped as in section 4).
+4. Respond 201 with the mapped TMS shipment (status SUBMITTED).
+```
+
+A cancelled shipment frees its ASN number, so the client can retry the same ASN. Ways to demo a
+failure: send `x-mock-status: 503` on step 3, set `ERP_ERROR_RATE=0.5`, or ship more than the open
+quantity (ERP 422). `POST /erp/v1/inbound-deliveries/{deliveryNo}/reverse` exists if you prefer an
+ERP-first saga.
+
+### `GET /shipments` and `GET /shipments/{shipmentId}`
+
+```
+list: SRM check (read) -> TMS GET /shipments?supplierCode=<allowed codes>&poNumber=<without PO->&status=TND,ITR&limit=N&cursor=<pageToken>
+      nextPageToken = nextCursor (pass through as is)
+get:  TMS GET /shipments/{id} -> SRM check (read) with supplierCode = shipment.supplierCode
+```
+
+`POST /tms/v1/shipments/{id}/events` is the demo lever: `EXC` with `newEstimatedArrival` turns the
+façade status to `DELAYED` with a new `expectedArrivalAt`; `RES` resumes; `DLV` delivers.
+
+---
+
+## 3. Authorization results
+
+| SRM `reason` | Façade response |
+|---|---|
+| `OK` | continue |
+| `SUPPLIER_SCOPE_DENIED` | 403 `SUPPLIER_SCOPE_DENIED` |
+| `SCOPE_NOT_GRANTED`, `CONSUMER_INACTIVE` | 403 with the same code |
+| `SUPPLIER_ON_HOLD`, `SUPPLIER_BLOCKED` (write only) | 403 `SUPPLIER_NOT_ACTIVE` |
+| `SUPPLIER_NOT_FOUND` | 404 on reads, 422 on writes |
+
+---
+
+## 4. Errors → RFC 7807 `ProblemDetails`
+
+| Backend | Error body | Code and fields |
+|---|---|---|
+| ERP | `{ "error": { code, message, details:[{field,message}], timestamp, correlation_id } }` | `error.code`, `error.details[]` |
+| SRM | `{ "errors": [ { code, message, field? } ], "traceId" }` | `errors[0].code`, `errors[].field` |
+| TMS | `{ "fault": { faultCode: "tms.X", faultString, httpStatus, detail:[{path,issue}], correlationId } }` | strip `tms.`, `detail[].path` |
+
+Façade body: `{ type, title, status, detail, instance, correlationId, timestamp, errorCode, violations[] }`,
+content type `application/problem+json`.
+
+| Backend error | Façade |
+|---|---|
+| ERP 404 `PO_NOT_FOUND`, TMS 404 `SHIPMENT_NOT_FOUND` | 404 `PURCHASE_ORDER_NOT_FOUND` / `SHIPMENT_NOT_FOUND` |
+| ERP 409 `CONFIRMATION_EXISTS` | 409 `ACKNOWLEDGEMENT_ALREADY_EXISTS` |
+| ERP 412 `REVISION_MISMATCH` | 409 `PURCHASE_ORDER_REVISION_CHANGED` |
+| ERP 422 `PO_NOT_CONFIRMABLE` | 422 `PURCHASE_ORDER_NOT_ACKNOWLEDGEABLE` |
+| ERP 422 `CONFIRMATION_RULE_VIOLATION` | 422 with `violations[]` (`items[0].confirmed_qty` → `lines[0].acknowledgedQuantity`) |
+| TMS 409 `tms.DUPLICATE_ASN`, ERP 409 `DELIVERY_EXISTS` | 409 `SHIPMENT_NOTICE_ALREADY_EXISTS` |
+| ERP 422 `SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY` | 422, same code |
+| ERP 422 `DELIVERY_RULE_VIOLATION` | 422 `PURCHASE_ORDER_LINE_NOT_SHIPPABLE` |
+| TMS 422 `tms.UNKNOWN_CARRIER` | 422 `UNKNOWN_CARRIER` |
+| TMS 422 `tms.INVALID_SCHEDULE` | 400 `REQUEST_VALIDATION_FAILED` (violation on `expectedArrivalAt`) |
+| any 400 `VALIDATION_FAILED` | 400 `REQUEST_VALIDATION_FAILED` with mapped field names |
+| any 503 | 503 `DOWNSTREAM_SERVICE_UNAVAILABLE` with `Retry-After` |
+
+---
+
+## 5. Seed data cheat-sheet
+
+**Consumers**
 
 | consumerId | Suppliers | Scopes | Notes |
 |---|---|---|---|
 | `apex-supplier-portal` | SUP-100245 | read, write | happy path |
 | `nordwerk-b2b-gateway` | SUP-100311 | read, write | |
 | `prc-edi-bridge` | SUP-100402 | read | write → `SCOPE_NOT_GRANTED` |
-| `greatlakes-portal` | SUP-100518 | read, write | supplier ON_HOLD → write denied |
+| `greatlakes-portal` | SUP-100518 | read, write | supplier on hold → write denied |
 | `mmw-legacy-portal` | SUP-100627 | read, write | consumer inactive |
-| `jabil-procurement-workbench` | `*` | read | internal app |
-| `jabil-ops-console` | `*` | read, write | internal app |
+| `asia-pacific-edi-network`, `europe-supplier-hub`, `americas-supplier-portal` | three each | read, write | one consumer, several suppliers |
+| `jabil-procurement-workbench`, `jabil-logistics-control-tower`, `jabil-spend-analytics`, `jabil-l2-support-desk` | `*` | read | internal applications |
+| `jabil-ops-console` | `*` | read, write | internal application |
+| `tristar-portal`, `rm-sensorik-onboarding` | one each | | inactive |
 
-| SRM `reason` | Façade response |
-|---|---|
-| `OK` | continue |
-| `SUPPLIER_SCOPE_DENIED` | 403 `SUPPLIER_SCOPE_DENIED` |
-| `SCOPE_NOT_GRANTED`, `CONSUMER_INACTIVE` | 403 `SCOPE_NOT_GRANTED` / `CONSUMER_INACTIVE` |
-| `SUPPLIER_BLOCKED`, `SUPPLIER_ON_HOLD` | 403 (or 422) `SUPPLIER_NOT_ACTIVE` |
-| `SUPPLIER_NOT_FOUND` | 404 (read) / 422 (write) |
-
-For GET-by-id operations the supplier isn't known up front: fetch the ERP PO (or TMS shipment), resolve
-its supplier, **then** check the entitlement, and return 404 (not 403) if you prefer not to leak existence.
-
----
-
-## 3. Orchestration recipes
-
-### 3.1 `GET /purchase-orders` — aggregation + fan-out
-
-```
-1. SRM  GET /entitlements/{consumer}/check?scope=supplier-orders.read[&supplierCode=SUP-…]
-2. SRM  GET /vendor-xref?supplierCode=SUP-100245          → erpVendorNumber 0000710245
-        (no supplierId filter → use allowedSuppliers; '*' = no vendor filter)
-3. ERP  GET /purchase-orders?vendor_id=0000710245&status=01,02&changed_since=…&page=N&limit=M&include=items
-4. For each distinct plant    → ERP GET /plants/{plant}          (cache!)
-   For each distinct purch_org → ERP GET /reference/purchasing-orgs (cache!)
-   For each distinct vendor_id → SRM GET /vendor-xref?erpVendorNumber=a,b,c (batch)
-5. Transform each ERP header+items → façade PurchaseOrder
-6. Paging: façade pageToken ⇄ ERP page number (e.g. base64("p=2&l=50")); nextPageToken=null when !hasNext
-```
-
-`include=items` is optional on purpose: without it the ERP only returns headers + `item_count`, so the
-iPaaS must fan out to `GET /purchase-orders/{po}/items` — a nice way to demo parallel for-each.
-
-### 3.2 `GET /purchase-orders/{id}`
-
-```
-1. strip "PO-" → ERP GET /purchase-orders/4500123456  (ETag W/"4500123456-r1")
-2. SRM GET /vendor-xref/{vendor_id}   → supplierId
-3. SRM entitlement check (read) for that supplier
-4. ERP GET /plants/{plant} + purchasing org lookup → shipTo, buyingOrganization
-5. Transform; pass ETag through
-```
-
-### 3.3 `POST /purchase-orders/{id}/acknowledgements`
-
-```
-1. Validate Idempotency-Key (required at the façade)
-2. ERP  GET /purchase-orders/{po}                     → vendor_id, revision (ETag)
-3. SRM  GET /vendor-xref/{vendor_id}                   → supplierCode
-4. SRM  entitlement check scope=supplier-orders.write  → 403 if denied
-5. ERP  POST /purchase-orders/{po}/confirmations  (If-Match: <ETag>, Idempotency-Key: <key>-erp)
-        { conf_category: AB|AC|RJ, vendor_reference, note,
-          items: [{ item_no: "00010", confirmed_qty, confirmed_date: "YYYYMMDD", reject_reason }] }
-6. Map result → { acknowledgementId, purchaseOrderId: "PO-…", acknowledgementType, supplierReference, status, recordedAt }
-   Location: /purchase-orders/{id}/acknowledgements/{acknowledgementId}
-```
-
-| ERP error | Façade |
-|---|---|
-| 409 `CONFIRMATION_EXISTS` | 409 `ACKNOWLEDGEMENT_ALREADY_EXISTS` |
-| 412 `REVISION_MISMATCH` | 409 `PURCHASE_ORDER_REVISION_CHANGED` |
-| 422 `PO_NOT_CONFIRMABLE` | 422 `PURCHASE_ORDER_NOT_ACKNOWLEDGEABLE` |
-| 422 `CONFIRMATION_RULE_VIOLATION` (+`details[]`) | 422 with `violations[]` (map `items[0].confirmed_qty` → `lines[0].acknowledgedQuantity`) |
-| 404 `PO_NOT_FOUND` | 404 `PURCHASE_ORDER_NOT_FOUND` |
-
-Demo: PO `4500123456` is open with one line (250 EA). After a successful acknowledgement a second
-attempt returns 409. To re-arm, simulate a buyer change: `PATCH /erp/v1/purchase-orders/4500123456 { "delivery_date": "20261012" }` → revision 2.
-
-### 3.4 `POST /shipments` — the saga
-
-```
-1. SRM  entitlement check scope=supplier-orders.write&supplierCode=SUP-100245
-2. SRM  GET /suppliers/SUP-100245                     → status ACTIVE, capabilities.asn = true
-        GET /sites/{shipFrom.siteCode}                → must belong to supplier (enrich address)
-3. SRM  GET /vendor-xref?supplierCode=SUP-100245      → vendor 0000710245
-4. ERP  GET /purchase-orders?po_number=a,b&include=items  → pre-validate vendor + open_qty (optional; step 7 enforces)
-5. ERP  GET /plants?site_code={shipTo.siteCode}      → validate ship-to is a Jabil plant
-6. TMS  GET /carriers?code=UPS                        → scac UPSN (422 UNKNOWN_CARRIER otherwise)
-7. TMS  POST /shipments                               → SHP-20260924-00200 (TND)
-8. ERP  POST /inbound-deliveries { asn_reference: <shipmentId or ASN>, vendor_id, items:[{po_number,item_no,quantity}] }
-        reserves shipped qty; 422 SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY if over
-   ↳ on failure: TMS POST /shipments/{id}/cancel { reason: "Compensation: …" }   ← compensation
-9. Map TMS shipment → façade Shipment (status SUBMITTED, purchaseOrders = distinct "PO-"+poNumber)
-```
-
-Alternative ordering (ERP first, then TMS) is also valid; then compensate with
-`POST /erp/v1/inbound-deliveries/{deliveryNo}/reverse`. Both compensations exist so you can demo either.
-
-| Backend error | Façade |
-|---|---|
-| TMS 409 `tms.DUPLICATE_ASN` / ERP 409 `DELIVERY_EXISTS` | 409 `SHIPMENT_NOTICE_ALREADY_EXISTS` |
-| ERP 422 `SHIPPED_QUANTITY_EXCEEDS_OPEN_QUANTITY` | 422 same code |
-| ERP 422 `DELIVERY_RULE_VIOLATION` (vendor mismatch, closed PO) | 422 `PURCHASE_ORDER_LINE_NOT_SHIPPABLE` |
-| TMS 422 `tms.UNKNOWN_CARRIER` | 422 `UNKNOWN_CARRIER` |
-| TMS 422 `tms.INVALID_SCHEDULE` | 400 `REQUEST_VALIDATION_FAILED` (violation on `expectedArrivalAt`) |
-
-Failure demos: send `x-mock-status: 503` to the ERP step to force compensation, or set `ERP_ERROR_RATE=0.5`.
-
-### 3.5 `GET /shipments` and `GET /shipments/{id}`
-
-```
-list: SRM entitlement (read) → TMS GET /shipments?supplierCode=…&poNumber=…&status=TND,ITR&limit=…&cursor=…
-      façade pageToken ⇄ TMS nextCursor (pass through as-is)
-get:  TMS GET /shipments/{id} → SRM entitlement check for shipment.supplierCode
-map:  carrier.scac → carrierCode (TMS returns both), milestone → status,
-      schedule → plannedShipAt/expectedArrivalAt, audit → createdAt/lastUpdatedAt,
-      contents → lines (+ "PO-" prefix), handlingUnits → packages, route → shipFrom/shipTo
-```
-
-`TMS POST /shipments/{id}/events` is the demo lever: post `EXC` with `newEstimatedArrival` and the
-façade status flips to `DELAYED` with a new `expectedArrivalAt`; post `RES` to resume, `DLV` to deliver.
-
----
-
-## 4. Error normalization → RFC 7807 `ProblemDetails`
-
-| Backend | Error body | Where to find code / fields |
-|---|---|---|
-| ERP | `{ "error": { code, message, details:[{field,message}], timestamp, correlation_id } }` | `error.code`, `error.details` |
-| SRM | `{ "errors": [ { code, message, field? } ], "traceId" }` | `errors[0].code`, `errors[].field` |
-| TMS | `{ "fault": { faultCode: "tms.X", faultString, httpStatus, detail:[{path,issue}], correlationId } }` | strip `tms.` prefix, `detail[].path` |
-
-Façade shape: `{ type, title, status, detail, instance, correlationId, timestamp, errorCode, violations[] }`,
-content type `application/problem+json`. Map any backend 503 to façade 503
-`DOWNSTREAM_SERVICE_UNAVAILABLE` with `Retry-After`.
-
----
-
-## 5. Seed data cheat-sheet
+**Purchase orders**
 
 | PO | Supplier | ERP status | Use it for |
 |---|---|---|---|
-| 4500123456 | SUP-100245 Apex | 01 Open | acknowledgement + ASN happy path (250 EA MAT-778210, plant 1101) |
+| 4500123456 | SUP-100245 Apex | 01 Open | acknowledgement and ASN happy path (250 EA, plant 1101) |
 | 4500123457 | SUP-100245 Apex | 03 Confirmed | ASN target (2 lines) |
-| 4500123458 | SUP-100245 Apex | 04 In delivery (300/500 shipped) | partial shipment; SHP-20260918-00121 in transit |
-| 4500123459 | SUP-100245 Apex | 05 Closed | 422 not acknowledgeable / not shippable |
+| 4500123458 | SUP-100245 Apex | 04 In delivery (300 of 500 shipped) | partial shipment; SHP-20260918-00121 in transit |
+| 4500123459 | SUP-100245 Apex | 05 Closed | 422 not acknowledgeable or shippable |
 | 4500123467 | SUP-100245 Apex | 01 Open | second open Apex PO (plant 1102) |
-| 4500123460, 4500123468 | SUP-100311 Nordwerk | 01 Open | `apex-supplier-portal` → 403 SUPPLIER_SCOPE_DENIED |
-| 4500123461 | SUP-100311 Nordwerk | 02 Partially confirmed (confirmation IN_REVIEW) | PARTIALLY_ACKNOWLEDGED / PENDING_REVIEW |
+| 4500123460, 4500123468 | SUP-100311 Nordwerk | 01 Open | `apex-supplier-portal` → 403 `SUPPLIER_SCOPE_DENIED` |
+| 4500123461 | SUP-100311 Nordwerk | 02 (confirmation `IN_REVIEW`) | `PARTIALLY_ACKNOWLEDGED` / `PENDING_REVIEW` |
 | 4500123462 / 4500123463 | SUP-100402 Pacific Rim | 04 / 01 | read-only consumer `prc-edi-bridge` |
-| 4500123464 | SUP-100518 Great Lakes (ON_HOLD) | 01 Open | write denied: supplier on hold |
-| 4500123465 | SUP-100627 Monterrey (BLOCKED) | 09 Cancelled | CANCELLED; blocked supplier |
-| 4500123466 | SUP-100733 Bharat | 01 Open | list/paging/filters |
+| 4500123464 | SUP-100518 Great Lakes (on hold) | 01 Open | write denied |
+| 4500123465 | SUP-100627 Monterrey (blocked) | 09 Cancelled | `CANCELLED`, blocked supplier |
+| 4500123466 | SUP-100733 Bharat | 01 Open | list, paging, filters |
+| 4500123471 | JBCN, CNY | 01 Open | supplier rejection (`RJ`) while still open |
+
+**Shipments**
 
 | Shipment | Milestone | Façade status |
 |---|---|---|
@@ -274,25 +273,11 @@ content type `application/problem+json`. Map any backend 503 to façade 503
 | SHP-20260915-00107 | EXC (Maersk) | DELAYED |
 | SHP-20260918-00121 | ITR (ASN-439901) | IN_TRANSIT |
 | SHP-20260922-00188 | PLN (Nordwerk) | DRAFT |
+| SHP-20260923-00131, -00132, -00152 | CXL, with reversed deliveries | CANCELLED (completed compensations) |
+| SHP-20260923-00140, -00142, -00145, -00155, -00157 | PLN | DRAFT |
 
-### Additional seed records (expanded data set)
-
-| Record | What it shows |
-|---|---|
-| SUP-100917 Danube Magnetics (ON_HOLD, financial review): POs 4500123482, 4500123489, 4500123519 | Write access denied `SUPPLIER_ON_HOLD` for open orders |
-| SUP-100951 Tri-Star Surplus (BLOCKED): POs 4500123478, 4500123498 (09), 4500123522 (05) | Blocked supplier with only closed/cancelled history; consumer `tristar-portal` inactive |
-| SUP-100938 Campinas Eletronica (CONDITIONAL, HIGH risk) | Active but risky supplier |
-| SUP-100996 RM Sensorik (onboarded 2026-09-01) | Supplier with no ERP orders; consumer `rm-sensorik-onboarding` pending activation |
-| PO 4500123471 (JBCN, CNY) | Supplier rejection (RJ) while the PO is still 01 Open |
-| POs in EUR (JBDE, JBHU), PLN (JBPL), CNY (JBCN) | Currency pass-through in the façade |
-| `asia-pacific-edi-network`, `europe-supplier-hub`, `americas-supplier-portal` | One consumer acting for several suppliers |
-| `jabil-logistics-control-tower`, `jabil-spend-analytics`, `jabil-l2-support-desk` | Internal / operations consumers with `*` read access |
-| Shipments SHP-20260923-00131, SHP-20260924-00132, SHP-20260923-00152 (CXL) with deliveries 180000131, 180000132, 180000149 (REVERSED) | Completed saga compensations |
-| Shipments SHP-20260915-00107, SHP-20260922-00123, SHP-20260921-00143, SHP-20260909-00149 (EXC) | Façade status DELAYED |
-| Planned shipments SHP-20260923-00140, -00142, -00145, -00155, -00157 | Façade status DRAFT (not yet posted to ERP) |
-| Carriers SAIA, ESTES/EXLA, EXPEDITORS/EXDO, KUEHNE/KHNN, CMACGM/CMDU, SCHENKER/SHKK | More code ↔ SCAC translations |
+More: suppliers SUP-100917 (on hold), SUP-100951 (blocked), SUP-100938 (conditional, high risk) and
+SUP-100996 (no orders yet); POs in EUR, PLN and CNY; 12 carriers.
 
 Totals: 23 suppliers, 74 POs, 54 confirmations, 34 inbound deliveries, 40 shipments, 137 tracking events.
-The easiest way to browse them is the dashboard at `/dashboard/`.
-
-Reset everything at any time: `npm run seed:reset`.
+Browse them in the dashboard at `/dashboard/`. Reset with `npm run seed:reset`.

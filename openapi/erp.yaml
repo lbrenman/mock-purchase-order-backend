@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ERP Purchasing API (mock)
-  version: 1.0.0
+  version: 1.1.0
   description: |
     Mock **ERP purchasing system of record** (SAP-flavoured). One of three independent backends
     behind the *Supplier Order Collaboration API* façade. It deliberately does **not** match the
@@ -16,12 +16,13 @@ info:
     | Dates | `YYYYMMDD` | `YYYY-MM-DD` |
     | Timestamps | `YYYYMMDDhhmmss` (UTC) | RFC 3339 |
     | Decimals | strings `"250.000"` | numbers |
-    | Ship-to | `plant` code (resolve via `/plants/{plantCode}`) | `shipTo` address |
-    | Buying org | `purch_org` `JBUS` (resolve via `/reference/purchasing-orgs`) | `Jabil-US` |
+    | Ship-to | `ship_to` (snake_case address, embedded in every PO) | `shipTo` address |
+    | Buying org | `purch_org_name` (embedded in every PO) | `buyingOrganization` |
     | Errors | `{ "error": { "code", "message", "details" } }` | RFC 7807 ProblemDetails |
 
-    **List vs detail:** `GET /purchase-orders` returns headers only (fan-out to
-    `/purchase-orders/{poNumber}` or pass `include=items`).
+    **One call per view:** every purchase order (list and detail) already carries its items, its
+    `ship_to` address and its `purch_org_name`, so the façade never needs follow-up lookups to
+    `/plants` or `/reference/purchasing-orgs`. Those endpoints stay for maintenance and the dashboard.
 
     **Demo headers** (when `CHAOS_ENABLED=true`): `x-mock-status: 503` forces an error,
     `x-mock-delay-ms: 2000` adds latency. `ERP_LATENCY_MS` makes every call slow.
@@ -310,7 +311,7 @@ paths:
   /v1/purchase-orders:
     get:
       tags: [Purchase Orders]
-      summary: List purchase order headers
+      summary: List purchase orders (with items, ship-to and buying org)
       operationId: listPurchaseOrders
       parameters:
         - name: vendor_id
@@ -337,7 +338,8 @@ paths:
           schema: {type: string}
         - name: include
           in: query
-          description: Set to `items` to embed items (avoids fan-out).
+          deprecated: true
+          description: Accepted for compatibility and ignored; items are always included.
           schema: {type: string, enum: [items]}
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Limit'
@@ -352,12 +354,21 @@ paths:
                   - po_number: '4500123456'
                     vendor_id: '0000710245'
                     purch_org: JBUS
+                    purch_org_name: Jabil-US
                     doc_date: '20260915'
                     currency: USD
                     status_code: '01'
                     status_text: Open
                     delivery_date: '20261005'
                     plant: '1101'
+                    ship_to:
+                      site_code: US-AUBURN-HILLS
+                      name: Jabil Manufacturing Site
+                      street: 100 Manufacturing Way
+                      city: Auburn Hills
+                      region: MI
+                      postal_code: '48326'
+                      country: US
                     incoterms: FCA
                     payment_terms: NET60
                     buyer_name: Maria Alvarez
@@ -365,6 +376,19 @@ paths:
                     created_at: '20260915130500'
                     changed_at: '20260923142231'
                     item_count: 1
+                    items:
+                      - item_no: '00010'
+                        material: MAT-778210
+                        short_text: Industrial controller assembly
+                        quantity: '250.000'
+                        uom: EA
+                        net_price: '84.50'
+                        price_unit: 1
+                        confirmed_qty: '0.000'
+                        confirmed_date: null
+                        shipped_qty: '0.000'
+                        open_qty: '250.000'
+                        reject_reason: null
                 pagination: {total: 1, page: 1, limit: 25, totalPages: 1, hasNext: false, hasPrev: false}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
@@ -437,12 +461,21 @@ paths:
                   po_number: '4500123456'
                   vendor_id: '0000710245'
                   purch_org: JBUS
+                  purch_org_name: Jabil-US
                   doc_date: '20260915'
                   currency: USD
                   status_code: '01'
                   status_text: Open
                   delivery_date: '20261005'
                   plant: '1101'
+                  ship_to:
+                    site_code: US-AUBURN-HILLS
+                    name: Jabil Manufacturing Site
+                    street: 100 Manufacturing Way
+                    city: Auburn Hills
+                    region: MI
+                    postal_code: '48326'
+                    country: US
                   incoterms: FCA
                   payment_terms: NET60
                   buyer_name: Maria Alvarez
@@ -912,18 +945,34 @@ components:
         region: {type: string, example: MI}
         postal_code: {type: string, example: '48326'}
         country: {type: string, example: US}
+    ShipTo:
+      type: object
+      properties:
+        site_code: {type: string, example: US-AUBURN-HILLS}
+        name: {type: string, example: Jabil Manufacturing Site}
+        street: {type: string, nullable: true, example: 100 Manufacturing Way}
+        city: {type: string, nullable: true, example: Auburn Hills}
+        region: {type: string, nullable: true, example: MI}
+        postal_code: {type: string, nullable: true, example: '48326'}
+        country: {type: string, example: US}
     PurchaseOrderHeader:
       type: object
       properties:
         po_number: {type: string, example: '4500123456'}
         vendor_id: {type: string, example: '0000710245'}
         purch_org: {type: string, example: JBUS}
+        purch_org_name: {type: string, nullable: true, description: 'Buying organisation name (from the purchasing org master)', example: Jabil-US}
         doc_date: {type: string, description: YYYYMMDD, example: '20260915'}
         currency: {type: string, example: USD}
         status_code: {type: string, enum: ['01', '02', '03', '04', '05', '09']}
         status_text: {type: string, example: Open}
         delivery_date: {type: string, description: YYYYMMDD, example: '20261005'}
         plant: {type: string, example: '1101'}
+        ship_to:
+          allOf:
+            - $ref: '#/components/schemas/ShipTo'
+          nullable: true
+          description: Address of the receiving plant, embedded so no `/plants` lookup is needed.
         incoterms: {type: string, nullable: true, example: FCA}
         payment_terms: {type: string, nullable: true, example: NET60}
         buyer_name: {type: string, nullable: true, example: Maria Alvarez}

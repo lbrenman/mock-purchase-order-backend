@@ -26,9 +26,12 @@ CREATE TABLE IF NOT EXISTS tms.shipments (
   handling_units   JSONB NOT NULL DEFAULT '[]'::jsonb,
   cancel_reason    TEXT,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (supplier_code, asn_number)
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- One live shipment per supplier ASN. A cancelled (CXL) shipment frees its ASN number so a saga can retry.
+-- The DROP upgrades databases created by v2.1 and earlier, which had a table-level UNIQUE constraint.
+ALTER TABLE tms.shipments DROP CONSTRAINT IF EXISTS shipments_supplier_code_asn_number_key;
+CREATE UNIQUE INDEX IF NOT EXISTS tms_shp_asn_uq ON tms.shipments(supplier_code, asn_number) WHERE milestone <> 'CXL';
 CREATE INDEX IF NOT EXISTS tms_shp_supplier_idx ON tms.shipments(supplier_code);
 CREATE INDEX IF NOT EXISTS tms_shp_contents_idx ON tms.shipments USING GIN (contents jsonb_path_ops);
 

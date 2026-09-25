@@ -314,40 +314,70 @@ module.exports = function buildSrmRoutes({ pool, idem }) {
     })
   );
 
-  /** Authorization decision. Always 200 with allowed=true|false (404 only for unknown consumer). */
+  /**
+   * Authorization decision plus supplier <-> ERP vendor resolution, in one call.
+   * Always 200 with allowed=true|false (404 only for an unknown consumer).
+   *
+   * Identify the supplier with supplierCode (SUP-xxxxxx) or erpVendorNumber (10 digits), or with neither
+   * for list operations. The response always carries allowedVendors (supplierCode <-> erpVendorNumber for
+   * every supplier the consumer may see; all suppliers for '*' consumers), so the iPaaS never needs a
+   * separate cross-reference call.
+   */
   const check = asyncHandler(async (req, res) => {
     const input = req.method === 'GET' ? req.query : req.body || {};
     const v = new Validator();
     const scope = v.string(input, 'scope', { required: true, oneOf: SCOPES });
-    const supplierCode = v.string(input, 'supplierCode', { pattern: SUPPLIER_RE });
+    const supplierCodeIn = v.string(input, 'supplierCode', { pattern: SUPPLIER_RE });
+    const vendorIn = v.string(input, 'erpVendorNumber', { pattern: /^[0-9]{10}$/ });
     v.throwIfErrors();
     const e = await loadEntitlement(req.params.consumerId);
+    const all = e.supplier_codes.includes('*');
 
     let supplier = null;
-    if (supplierCode) {
-      const { rows } = await pool.query('SELECT supplier_code, status, asn_enabled FROM srm.suppliers WHERE supplier_code = $1', [supplierCode]);
+    const asked = Boolean(supplierCodeIn || vendorIn);
+    if (asked) {
+      const { rows } = supplierCodeIn
+        ? await pool.query('SELECT * FROM srm.suppliers WHERE supplier_code = $1', [supplierCodeIn])
+        : await pool.query('SELECT * FROM srm.suppliers WHERE erp_vendor_number = $1', [vendorIn]);
       supplier = rows[0] || null;
     }
+    const supplierCode = supplier ? supplier.supplier_code : supplierCodeIn || null;
 
     let allowed = true;
     let reason = 'OK';
     if (!e.active) [allowed, reason] = [false, 'CONSUMER_INACTIVE'];
     else if (!e.scopes.includes(scope)) [allowed, reason] = [false, 'SCOPE_NOT_GRANTED'];
-    else if (supplierCode && !supplier) [allowed, reason] = [false, 'SUPPLIER_NOT_FOUND'];
-    else if (supplierCode && !e.supplier_codes.includes('*') && !e.supplier_codes.includes(supplierCode)) {
+    else if (asked && !supplier) [allowed, reason] = [false, 'SUPPLIER_NOT_FOUND'];
+    else if (supplier && !all && !e.supplier_codes.includes(supplier.supplier_code)) {
       [allowed, reason] = [false, 'SUPPLIER_SCOPE_DENIED'];
     } else if (supplier && scope === 'supplier-orders.write' && supplier.status !== 'ACTIVE') {
       [allowed, reason] = [false, supplier.status === 'BLOCKED' ? 'SUPPLIER_BLOCKED' : 'SUPPLIER_ON_HOLD'];
     }
 
+    const vendors = all
+      ? await pool.query('SELECT supplier_code, erp_vendor_number FROM srm.suppliers ORDER BY supplier_code')
+      : await pool.query('SELECT supplier_code, erp_vendor_number FROM srm.suppliers WHERE supplier_code = ANY($1) ORDER BY supplier_code', [
+          e.supplier_codes,
+        ]);
+
     res.json({
       consumerId: e.consumer_id,
       consumerType: e.consumer_type,
       scope,
-      supplierCode: supplierCode || null,
+      supplierCode,
       allowed,
       reason,
-      allowedSuppliers: e.supplier_codes.includes('*') ? ['*'] : e.supplier_codes,
+      supplier: supplier
+        ? {
+            supplierCode: supplier.supplier_code,
+            erpVendorNumber: supplier.erp_vendor_number,
+            legalName: supplier.legal_name,
+            status: supplier.status,
+            asnEnabled: supplier.asn_enabled,
+          }
+        : null,
+      allowedSuppliers: all ? ['*'] : e.supplier_codes,
+      allowedVendors: vendors.rows.map((x) => ({ supplierCode: x.supplier_code, erpVendorNumber: x.erp_vendor_number })),
       evaluatedAt: new Date().toISOString(),
     });
   });

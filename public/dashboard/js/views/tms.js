@@ -163,7 +163,7 @@ async function shipmentAcross(s) {
   const matching = dels && sup ? dels.filter((d) => d.vendor_id === sup.erpVendorNumber) : dels;
   const originKnown = sup && sup.sites && sup.sites.some((x) => s.route.origin && x.siteCode === s.route.origin.locationCode);
   return h('div', null,
-    dialectNote('The ASN saga writes to ERP first (inbound delivery) and TMS second (shipment). A cancelled shipment should have a reversed delivery.'),
+    dialectNote('The ASN saga creates the TMS shipment first and the ERP inbound delivery second; if the ERP step fails, the shipment is cancelled. A cancelled shipment has either no delivery or a reversed one.'),
     xrefBox('srm', 'Supplier', `GET /srm/v1/suppliers/${s.supplierCode}`, sup ? kv([
       ['Supplier', link('srm/suppliers', sup.supplierCode, `${sup.name.legal} (${sup.supplierCode})`)],
       ['Status', badge(sup.status)],
@@ -308,7 +308,7 @@ const carrierPage = {
   render(main, ctx) {
     return listPage(main, {
       id: this.id, sys: 'tms', paging: 'none',
-      lede: 'Carrier master. The façade accepts common carrier codes (UPS) and TMS stores the SCAC (UPSN), so this list is the translation table.',
+      lede: 'Carrier master. TMS stores the SCAC (UPSN) but also accepts the common carrier code (UPS) that the façade uses, so no translation step is needed.',
       dialect: 'TMS: {count, results}',
       actions: [h('button', { type: 'button', class: 'btn primary', 'data-sys': 'tms', onclick: () => this.edit(null, ctx) }, 'New carrier')],
       load: async () => ({ rows: (await get('tms', '/v1/carriers')).results }),

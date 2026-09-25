@@ -3,30 +3,39 @@
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lbrenman/mock-purchase-order-backend)
 
 Three **independent, deliberately different** mock systems of record — built with Node.js/Express and
-PostgreSQL — that sit behind the **Jabil Supplier Order Collaboration API**
-(`Jabil_Supplier_Order_Collaboration_OpenAPI_3.1.yaml`) implemented in **Axway Amplify Fusion**.
+PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1) implemented in
+**Axway Amplify Fusion**.
 
 The backends are *not* a proxy target for the façade. Each one owns a different slice of the data,
 speaks its own dialect (naming, identifiers, dates, status codes, pagination, error format), and none of
 them can answer a façade request on its own. That's the point: the iPaaS has to **orchestrate,
-transform and aggregate** — visibly.
+transform and aggregate** — visibly. The orchestration is kept deliberately compact: every façade
+operation is two or three backend calls, always one SRM call plus one or two ERP or TMS calls.
 
 ```mermaid
 flowchart LR
     C[Supplier portal / internal app] -->|Supplier Order Collaboration API<br/>PO-4500123456 · SUP-100245 · ProblemDetails| F[Amplify Fusion<br/>integration]
-    F -->|entitlements · supplier · sites · vendor xref| SRM[(SRM<br/>/srm/v1)]
-    F -->|POs · items · confirmations · inbound deliveries · plants| ERP[(ERP<br/>/erp/v1)]
-    F -->|ASNs · carriers · milestones · tracking| TMS[(TMS<br/>/tms/v1)]
+    F -->|entitlement check: may this consumer act,<br/>and which ERP vendor is the supplier?| SRM[(SRM<br/>/srm/v1)]
+    F -->|POs with items and ship-to · confirmations · inbound deliveries| ERP[(ERP<br/>/erp/v1)]
+    F -->|ASNs · milestones · tracking| TMS[(TMS<br/>/tms/v1)]
 ```
 
 | Backend | Path | Plays the role of | Dialect highlights |
 |---|---|---|---|
-| **ERP** | `/erp` | SAP-style purchasing system | `po_number` 10 digits (no `PO-`), `vendor_id` `0000710245`, `item_no` `"00010"`, status `01…09`, dates `YYYYMMDD`, decimals as strings, `{data, pagination}` page/limit, plant & purchasing-org codes |
-| **SRM** | `/srm` | Supplier master / supplier relationship mgmt | nested camelCase, owns `SUP-xxxxxx`, **ERP vendor cross-reference**, supplier sites, **consumer entitlements** (who may see/act for which supplier), offset paging |
-| **TMS** | `/tms` | Transportation management system | carriers by **SCAC** (`UPSN` not `UPS`), milestones `PLN/TND/ITR/DLV/EXC/CXL`, nested quantities/weights, **cursor** paging, SOAP-fault-style errors |
+| **ERP** | `/erp` | SAP-style purchasing system | `po_number` 10 digits (no `PO-`), `vendor_id` `0000710245`, `item_no` `"00010"`, status `01…09`, dates `YYYYMMDD`, decimals as strings, `{data, pagination}` page/limit; every PO embeds its items, `ship_to` address and `purch_org_name` |
+| **SRM** | `/srm` | Supplier master / supplier relationship mgmt | nested camelCase, owns `SUP-xxxxxx` and the ERP vendor numbers, supplier sites, **consumer entitlements**; one **check** call answers "may this consumer act?" and "which ERP vendor is this supplier?", offset paging |
+| **TMS** | `/tms` | Transportation management system | carriers stored by **SCAC** (`UPSN`) but accepted by business code (`UPS`), milestones `PLN/TND/ITR/DLV/EXC/CXL`, nested quantities/weights, **cursor** paging, SOAP-fault-style errors |
 
 ➡️ **[docs/MAPPING.md](docs/MAPPING.md)** is the answer key: every field, code and status mapping plus
-step-by-step orchestration recipes (including saga compensation) for each façade operation.
+the backend calls for each façade operation (including the ASN saga with compensation):
+
+| Façade operation | Backend calls |
+|---|---|
+| `GET /purchase-orders` | SRM check → ERP list |
+| `GET /purchase-orders/{id}` | ERP get → SRM check |
+| `POST /purchase-orders/{id}/acknowledgements` | ERP get → SRM check → ERP confirmation |
+| `POST /shipments` | SRM check → TMS create → ERP inbound delivery (TMS cancel if it fails) |
+| `GET /shipments`, `GET /shipments/{id}` | SRM check → TMS list, or TMS get → SRM check |
 
 ---
 
@@ -45,6 +54,7 @@ step-by-step orchestration recipes (including saga compensation) for each façad
 - [Façade coverage](#façade-coverage)
 - [Demo controls (chaos, latency, state changes)](#demo-controls)
 - [Using the specs in Amplify Fusion](#using-the-specs-in-amplify-fusion)
+- [Development tools](#development-tools)
 - [Project structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
 
@@ -60,8 +70,8 @@ step-by-step orchestration recipes (including saga compensation) for each façad
   `/<svc>/api-docs`. The spec's `servers` URL is rewritten to the public URL (ngrok / Codespaces aware).
 - **Optional API key security**, per backend (different key per system), switchable with `AUTH_MODE=none`.
 - **Real business rules** the façade depends on: over-shipment (422), duplicate acknowledgement per PO
-  revision (409), locked POs, supplier scope (403 via SRM), duplicate ASN, unknown carrier, stale revision
-  (412 `If-Match`), plus **compensation endpoints** for saga demos.
+  revision (409), locked POs, supplier scope (403 via SRM), duplicate ASN (a cancelled shipment frees its ASN
+  for a retry), unknown carrier, stale revision (412 `If-Match`), plus **compensation endpoints** for saga demos.
 - **Idempotency-Key** support on every POST (safe retries; replays flagged with `Idempotent-Replayed: true`).
 - **X-Correlation-Id** accepted/generated and echoed in headers and errors (end-to-end tracing).
 - **Chaos & latency controls** to show retries, timeouts, parallel fan-out and circuit breaking.
@@ -71,8 +81,9 @@ step-by-step orchestration recipes (including saga compensation) for each façad
   sites, contacts, entitlements, carriers, shipments) with realistic referential-integrity conflicts (409).
 - **Data dashboard** at `/dashboard/`: list and detail views for every entity, create/edit/delete forms,
   cross-system views of one record, and a live **wire log** of every backend call.
-- **Postman collection** covering all 74 operations with example bodies, saved example responses, tests
-  and chained IDs, plus orchestration scenarios (aggregation, ASN saga with compensation, governance).
+- **Postman collection** covering all 74 operations: 159 requests, each with a description, tests and a saved
+  example response, chained IDs with clear messages when a prerequisite is missing, plus one scenario folder
+  per façade operation with exactly the calls the iPaaS makes.
 
 ---
 
@@ -224,42 +235,57 @@ and `TMS_PUBLIC_URL` to the tunnel URLs (without the `/erp` suffix).
 
 | File | Purpose |
 |---|---|
-| `mock-po-backends.postman_collection.json` | 150 requests covering **every operation** of all three backends (74), plus error and security cases and orchestration scenarios |
+| `mock-po-backends.postman_collection.json` | 159 requests covering **every operation** of all three backends (74), plus error and security cases and one scenario per façade operation |
 | `local.postman_environment.json` | `baseUrl = http://localhost:3000` (combined mode) |
 | `local-separate.postman_environment.json` | `erpUrl`, `srmUrl`, `tmsUrl` on ports 3001/3002/3003 |
 | `tunnel.postman_environment.json` | Set `baseUrl` to your ngrok or Codespaces URL (`https://<codespace-name>-3000.app.github.dev`) |
 
-**Import:** Postman → *Import* → drop the four files → select an environment.
+**Import:** Postman → *Import* → drop the four files → select an environment (or just edit the `baseUrl`
+collection variable).
+
+**What every request has:**
+
+- a **description** with the expected status, the variables it needs and which earlier request sets
+  them (**Needs**), and the variables it saves (**Saves**);
+- **tests** (expected status plus business assertions such as "status is 04" or "reason is SUPPLIER_ON_HOLD");
+- a **saved example response**, so you can read the whole API in Postman without a running server.
 
 **Structure:**
 
-- **ERP / SRM / TMS folders**: one folder per backend with the right API key configured as folder auth
-  (`{{erpApiKey}}`, `{{srmApiKey}}`, `{{tmsApiKey}}`). Requests run top to bottom as a lifecycle: create
-  → read → change → business actions → negative cases → delete. IDs returned by create calls
-  (`poNumber`, `confirmationNo`, `deliveryNo`, `supplierCode`, `siteCode`, `contactId`, `consumerId`,
-  `carrierCode`, `shipmentId`, …) are captured into collection variables by test scripts, and every folder
-  cleans up what it created. A fresh `runId` is generated at the start of each backend folder so repeated runs
-  never collide.
-- **Tests** on every request (expected status plus business assertions such as "status is 04" or
-  "reason is SUPPLIER_ON_HOLD"). 59 requests carry a **saved example response**.
-- **Scenarios** folder: the multi-backend sequences the iPaaS implements:
-  1. aggregate `GET /purchase-orders/PO-4500123458` (ERP PO → SRM vendor xref → SRM entitlement check → ERP plant → ERP purchasing org → TMS shipments);
-  2. the **ASN saga**: ERP inbound delivery, TMS failure forced with `x-mock-status: 503`, ERP reversal (compensation), then a successful retry;
-  3. governance decisions (supplier on hold, revoked consumer, multi-supplier network).
+- **ERP / SRM / TMS folders**: one folder per backend with its API key as folder auth (`{{erpApiKey}}`,
+  `{{srmApiKey}}`, `{{tmsApiKey}}`). Requests run top to bottom as a lifecycle: create → read → change →
+  business actions → negative cases → delete. IDs returned by create calls (`poNumber`, `supplierCode`,
+  `shipmentId`, …) are saved in collection variables, each folder cleans up what it created, and a fresh
+  `runId` at the start of each backend folder keeps repeated runs from colliding.
+- **Scenarios - façade walkthroughs**: for each façade operation, exactly the backend calls from
+  [docs/MAPPING.md](docs/MAPPING.md), in order:
+  1. get one purchase order (ERP → SRM check by vendor number);
+  2. list purchase orders (SRM check → ERP list for the allowed vendors);
+  3. acknowledge a purchase order (ERP → SRM check → ERP confirmation, then the 409 on a repeat);
+  4. create an ASN: SRM check → TMS shipment → ERP delivery forced to fail with `x-mock-status: 503` →
+     TMS cancel (compensation) → successful retry with the same ASN → clean-up;
+  5. track a shipment (TMS → SRM check);
+  6. governance decisions (supplier on hold, revoked consumer, multi-supplier network).
+
+**Sending single requests:** requests on seed data (fixed IDs such as PO `4500123458`) work on their own.
+A request that uses an ID created by an earlier request stops before sending if that variable is still empty,
+with a message such as *"{{poNumber}} is empty. Send "ERP - Purchasing / Purchase orders / Create purchase
+order" first, or run the folder in order."*
 
 **Run from the command line** (Newman):
 
 ```bash
 npx newman run postman/mock-po-backends.postman_collection.json \
   -e postman/local.postman_environment.json
-# a single backend:
+# a single backend or scenario:
 npx newman run postman/mock-po-backends.postman_collection.json \
   -e postman/local.postman_environment.json --folder "TMS - Logistics"
 ```
 
 `npm run postman` is a shortcut for the first command. Some requests deliberately use `x-mock-status` and
-`x-mock-delay-ms`, so keep `CHAOS_ENABLED=true` (the default) for a green run. The saga scenario adds 10 EA to
-PO 4500123457 on each run; `npm run seed:reset` restores the original data.
+`x-mock-delay-ms`, so keep `CHAOS_ENABLED=true` (the default) for a green run. The scenarios clean up after
+themselves; purchase orders created by the ERP folder and scenario 3 stay (cancelled or open) until
+`npm run seed:reset`.
 
 ---
 
@@ -344,15 +370,15 @@ Full request/response schemas and examples are in Swagger UI for each backend. S
 |---|---|---|
 | GET | `/reference/status-codes` | `01`–`09` PO status codes |
 | GET | `/reference/confirmation-categories` | `AB` / `AC` / `RJ` |
-| GET | `/reference/purchasing-orgs` | `JBUS` → `Jabil-US`, … |
+| GET | `/reference/purchasing-orgs` | Purchasing org codes and names (maintenance; POs already carry `purch_org_name`) |
 | POST | `/reference/purchasing-orgs` | Create a purchasing org |
 | GET / PATCH / DELETE | `/reference/purchasing-orgs/{code}` | Read, change, delete (409 `PURCH_ORG_IN_USE`) |
-| GET | `/plants` `?site_code=` | Plants (`1101` ↔ `US-AUBURN-HILLS`) with addresses |
+| GET | `/plants` `?site_code=` | Plants (`1101` ↔ `US-AUBURN-HILLS`) with addresses (maintenance; POs already carry `ship_to`) |
 | POST | `/plants` | Create a plant |
 | GET / PATCH / DELETE | `/plants/{plantCode}` | Read, change, delete (409 `PLANT_IN_USE`) |
-| GET | `/purchase-orders` | Filters: `vendor_id`, `status`, `changed_since`, `plant`, `purch_org`, `po_number` (CSV); `page`, `limit`; `include=items` (headers only by default) |
+| GET | `/purchase-orders` | Filters: `vendor_id`, `status`, `changed_since`, `plant`, `purch_org`, `po_number` (CSV); `page`, `limit`. Every entry includes items, `ship_to` and `purch_org_name` |
 | POST | `/purchase-orders` | Create a PO (buyer side, for demos) |
-| GET | `/purchase-orders/{poNumber}` | Header + items, `ETag: W/"<po>-r<revision>"` |
+| GET | `/purchase-orders/{poNumber}` | Header, `ship_to`, `purch_org_name` and items; `ETag: W/"<po>-r<revision>"` |
 | PATCH | `/purchase-orders/{poNumber}` | Buyer change (`delivery_date`, `buyer_name`, `incoterms`, `payment_terms`, item qty/price) → **revision + 1** (or `status_code` `05`/`09`) |
 | DELETE | `/purchase-orders/{poNumber}` | Only without confirmations/deliveries (409 `PO_HAS_FOLLOW_ON_DOCUMENTS`) |
 | GET | `/purchase-orders/{poNumber}/items` | Items with `confirmed_qty`, `shipped_qty`, `open_qty` |
@@ -384,12 +410,12 @@ Errors: `{ "error": { "code", "message", "details": [{field, message}], "timesta
 | GET / PATCH / DELETE | `/sites/{siteCode}` | One site (e.g. `SUP-ATL-01`) |
 | GET | `/contacts` | All contacts; filters `supplierCode`, `role`, `q`; offset paging |
 | GET / PATCH / DELETE | `/contacts/{contactId}` | One contact |
-| GET | `/vendor-xref` `?supplierCode=&erpVendorNumber=` | **Batch** SUP ↔ ERP vendor cross-reference (`items` + `unresolved`) |
+| GET | `/vendor-xref` `?supplierCode=&erpVendorNumber=` | Batch SUP ↔ ERP vendor cross-reference (`items` + `unresolved`); ad-hoc lookups, the check already covers the façade |
 | GET | `/vendor-xref/{erpVendorNumber}` | Single lookup |
 | GET | `/entitlements` | Consumer applications and their supplier/scope grants |
 | POST | `/entitlements` | Register a consumer (`suppliers[]` or `allSuppliers`, `scopes[]`) |
 | GET / PATCH / DELETE | `/entitlements/{consumerId}` | One consumer |
-| GET/POST | `/entitlements/{consumerId}/check` | `{scope, supplierCode}` → always 200 `{allowed, reason}` |
+| GET/POST | `/entitlements/{consumerId}/check` | `scope` plus `supplierCode` **or** `erpVendorNumber` (or neither for lists) → always 200 `{allowed, reason, supplier, allowedSuppliers, allowedVendors}`. The one SRM call per façade request |
 
 Errors: `{ "errors": [ { "code", "message", "field" } ], "traceId" }`
 
@@ -397,15 +423,15 @@ Errors: `{ "errors": [ { "code", "message", "field" } ], "traceId" }`
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/carriers` `?code=UPS` `&scac=` | Carrier directory, façade code ↔ SCAC |
+| GET | `/carriers` `?code=UPS` `&scac=` | Carrier directory, business code ↔ SCAC |
 | POST | `/carriers` | Create a carrier |
 | GET / PATCH / DELETE | `/carriers/{carrierCode}` | By code or SCAC; GET adds `shipmentsByMilestone`; DELETE 409 `CARRIER_IN_USE` |
 | GET | `/milestones` | `PLN TND ITR DLV EXC CXL` |
 | GET | `/event-codes` | `PU DEP ARR OFD RES DLV EXC` → resulting milestone |
 | GET | `/shipments` | Filters: `supplierCode`, `status` (milestones), `poNumber`, `asnNumber`, `carrier` (SCAC or code), `updatedSince`; `limit`, `cursor` |
-| POST | `/shipments` | Create ASN (`TND`; `"tender": false` → `PLN`), 409 duplicate ASN, 422 unknown carrier / bad schedule |
+| POST | `/shipments` | Create ASN (`TND`; `"tender": false` → `PLN`); carrier by `carrier.carrierCode` (`UPS`) or `carrier.scac`; 409 duplicate ASN (cancelled shipments excluded), 422 unknown carrier / bad schedule |
 | GET | `/shipments/{shipmentId}` | `?include=events` |
-| PATCH | `/shipments/{shipmentId}` | Tracking ID and ETA while open; carrier, route, ship date, handling units only in PLN/TND; contents and ASN only in PLN (409 `FIELD_LOCKED`) |
+| PATCH | `/shipments/{shipmentId}` | Tracking ID and ETA while open; carrier (code or SCAC), route, ship date, handling units only in PLN/TND; contents and ASN only in PLN (409 `FIELD_LOCKED`) |
 | DELETE | `/shipments/{shipmentId}` | Planned (PLN) drafts only (409 `SHIPMENT_NOT_DRAFT`) |
 | GET | `/shipments/{shipmentId}/events` | Tracking history |
 | POST | `/shipments/{shipmentId}/events` | Demo control: carrier event, optional `newEstimatedArrival` |
@@ -419,24 +445,24 @@ Errors: `{ "fault": { "faultCode": "tms.X", "faultString", "httpStatus", "detail
 ```bash
 B=http://localhost:3000
 
-# Who is SUP-100245 in the ERP?
-curl -s -H "x-api-key: srm-demo-key" "$B/srm/v1/vendor-xref?supplierCode=SUP-100245"
-
-# May the Apex portal act for that supplier?
+# May the Apex portal act for SUP-100245, and which ERP vendor is it? (one call)
 curl -s -H "x-api-key: srm-demo-key" \
   "$B/srm/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245"
 
-# The PO in ERP format
-curl -s -H "x-api-key: erp-demo-key" "$B/erp/v1/purchase-orders/4500123456"
+# Its open orders in ERP format, with items, ship-to address and buying org embedded
+curl -s -H "x-api-key: erp-demo-key" "$B/erp/v1/purchase-orders?vendor_id=0000710245&status=01"
 
-# Accept it with a later date (→ IN_REVIEW, façade PENDING_REVIEW)
+# Starting from a PO instead: resolve and authorize by the ERP vendor number
+curl -s -H "x-api-key: srm-demo-key" \
+  "$B/srm/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.read&erpVendorNumber=0000710245"
+
+# Accept PO 4500123456 with a later date (→ IN_REVIEW, façade PENDING_REVIEW)
 curl -s -X POST -H "x-api-key: erp-demo-key" -H "content-type: application/json" \
   -H "Idempotency-Key: ack-4500123456-demo" \
   -d '{"conf_category":"AC","vendor_reference":"SUP-ACK-88419","items":[{"item_no":"00010","confirmed_qty":250,"confirmed_date":"20261008"}]}' \
   "$B/erp/v1/purchase-orders/4500123456/confirmations"
 
-# Map UPS to its SCAC, then look at an in-transit shipment
-curl -s -H "x-api-key: tms-demo-key" "$B/tms/v1/carriers?code=UPS"
+# An in-transit shipment with its tracking history
 curl -s -H "x-api-key: tms-demo-key" "$B/tms/v1/shipments/SHP-20260918-00121?include=events"
 ```
 
@@ -446,17 +472,17 @@ curl -s -H "x-api-key: tms-demo-key" "$B/tms/v1/shipments/SHP-20260918-00121?inc
 
 Every capability implied by the Supplier Order Collaboration API is backed by real behaviour:
 
-| Façade operation | Backends involved | Key behaviours |
+| Façade operation | Backend calls | Key behaviours |
 |---|---|---|
-| `GET /purchase-orders` | SRM (entitlement, xref) → ERP (list, items, plants, purch orgs) | supplier filter via xref, status/updatedSince filters, paging, fan-out |
-| `GET /purchase-orders/{id}` | ERP → SRM (xref + entitlement) | `PO-` prefix stripping, ETag, shipTo from plant, 403/404 |
-| `POST /purchase-orders/{id}/acknowledgements` | SRM (write entitlement) → ERP (confirmation) | ACCEPT/ACCEPT_WITH_CHANGES/REJECT → AB/AC/RJ, 409 per revision, 422 rules, RECORDED/PENDING_REVIEW/REJECTED, idempotency |
-| `POST /shipments` | SRM (entitlement, supplier status, site) → TMS (carrier map, create) → ERP (inbound delivery) | 422 over-shipment, 409 duplicate ASN, **compensation** via TMS cancel or ERP reverse |
-| `GET /shipments` | SRM → TMS | purchaseOrderId → poNumber filter, milestone → status, cursor ↔ pageToken |
-| `GET /shipments/{id}` | TMS → SRM | reshaping, carrier SCAC → code, milestone → status |
+| `GET /purchase-orders` | SRM check → ERP list | supplier filter via `allowedVendors`, status and updatedSince filters, paging |
+| `GET /purchase-orders/{id}` | ERP get → SRM check (by vendor) | `PO-` prefix stripping, ETag, shipTo and buyingOrganization already embedded, 403/404 |
+| `POST /purchase-orders/{id}/acknowledgements` | ERP get → SRM check (write) → ERP confirmation | ACCEPT/ACCEPT_WITH_CHANGES/REJECT → AB/AC/RJ, 409 per revision, 422 rules, RECORDED/PENDING_REVIEW/REJECTED, idempotency |
+| `POST /shipments` | SRM check (write) → TMS create → ERP inbound delivery | carrier code passed through, 422 over-shipment, 409 duplicate ASN, **compensation** by TMS cancel, retry with the same ASN |
+| `GET /shipments` | SRM check → TMS list | purchaseOrderId → poNumber filter, milestone → status, cursor ↔ pageToken |
+| `GET /shipments/{id}` | TMS get → SRM check | reshaping, milestone → status |
 | Cross-cutting | all | 401 per backend, 429 rate limits, 503 chaos, correlation IDs, three error dialects → ProblemDetails |
 
-See [docs/MAPPING.md](docs/MAPPING.md) for the exact recipes and seed-data cheat-sheet.
+See [docs/MAPPING.md](docs/MAPPING.md) for the field mappings, recipes and seed-data cheat-sheet.
 
 ---
 
@@ -489,12 +515,41 @@ See [docs/MAPPING.md](docs/MAPPING.md) for the exact recipes and seed-data cheat
    already contains the public base URL (e.g. `https://<id>.ngrok-free.app/erp`).
 2. Create one **HTTP/OpenAPI connection per backend** in Fusion with an API-key header `x-api-key` and the
    matching key — three connections make the multi-system story obvious in the flows.
-3. Implement the façade from `Jabil_Supplier_Order_Collaboration_OpenAPI_3.1.yaml` using the recipes in
-   [docs/MAPPING.md](docs/MAPPING.md): SRM entitlement check → ERP/TMS calls → transformations →
-   ProblemDetails normalization.
+3. Implement the façade (Supplier Order Collaboration API, OpenAPI 3.1) using the recipes in
+   [docs/MAPPING.md](docs/MAPPING.md): one SRM check → one or two ERP/TMS calls → transformations →
+   ProblemDetails normalization. The Postman *Scenarios* folder shows each sequence with real responses.
 4. Propagate `X-Correlation-Id` to each backend so a single ID shows up in every backend log line and error.
 
 If your URL changes (new ngrok session / new Codespace), only the connection base URLs need updating.
+
+---
+
+## Development tools
+
+Helpers for changing the project safely live in `tools/`. The two checks need only Node; the generators
+and the stub need Python 3 (preinstalled in the Codespaces image) and no extra packages.
+
+| Command | What it does |
+|---|---|
+| `npm run check` | Runs both checks below; do this before every commit |
+| `npm run validate:seed` | Cross-system consistency of `src/data/*.json` (shipped quantities vs. deliveries, PO status rule, ERP delivery ↔ TMS shipment contents, reversed ↔ cancelled, ID sequences, no future dates) |
+| `npm run check:postman` | Every operation in `openapi/*.yaml` has at least one request in the Postman collection |
+| `npm run build:seed` | Regenerates `src/data/*.json` from the hand-curated records in `tools/seed/base/` (deterministic: an unchanged generator reproduces the committed files byte for byte) |
+| `npm run build:postman` | Regenerates the Postman collection and environments from `tools/build-postman.py` (edit the script, not the JSON) |
+| `npm run dashboard:stub` | Serves the dashboard with a dependency-free stub backend on `http://127.0.0.1:8765/dashboard/`, reading the seed files; handy for UI work without Postgres (writes are echoed, not stored) |
+
+Typical change workflows:
+
+- **New or changed endpoint:** routes in `src/services/<svc>/routes.js` → `openapi/<svc>.yaml` → request(s) in
+  `tools/build-postman.py` → `npm run build:postman` → dashboard view in `public/dashboard/js/views/` →
+  README API table → `npm run check`.
+- **Seed data:** edit `tools/seed/expand_seed.py` (or the base records) → `npm run build:seed` →
+  `npm run validate:seed` → `npm run seed:reset` to load it. Keep the anchor records unchanged, because the
+  docs and Postman scenarios rely on them.
+- **Dashboard only:** `npm run dashboard:stub`, edit files under `public/dashboard/`, reload the browser.
+
+`CLAUDE.md` summarises the conventions for AI assistants (Claude Code in Codespaces, or a Claude project)
+and `CHANGELOG.md` records what changed in each version.
 
 ---
 
@@ -505,7 +560,15 @@ mock-purchase-order-backend/
 ├── .devcontainer/devcontainer.json     Codespaces: Node 20 + docker-in-docker, auto-starts Postgres
 ├── openapi/                            erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
 ├── public/dashboard/                   data dashboard (index.html, css/, js/ ES modules, js/views/{erp,srm,tms,overview}.js)
-├── postman/                            collection + local / local-separate / tunnel environments
+├── postman/                            collection + local / local-separate / tunnel environments (generated)
+├── tools/
+│   ├── validate-seed.js                seed consistency check (npm run validate:seed)
+│   ├── check-postman-coverage.js       spec ↔ collection coverage (npm run check:postman)
+│   ├── build-postman.py                generates postman/ (npm run build:postman)
+│   ├── dashboard-stub.py               stub backend for dashboard work (npm run dashboard:stub)
+│   └── seed/expand_seed.py + base/     generates src/data/*.json (npm run build:seed)
+├── CLAUDE.md                           conventions for AI-assisted changes
+├── CHANGELOG.md
 ├── docs/MAPPING.md                     façade ↔ backend mappings & orchestration recipes
 ├── scripts/
 │   ├── start-postgres.sh               (re)creates the local Postgres container
@@ -544,10 +607,12 @@ mock-purchase-order-backend/
 | Dashboard shows "Could not reach the ERP backend" | Check *Connection settings*: in separate mode behind tunnels set `ERP_PUBLIC_URL` etc., or type the URLs in the dialog. |
 | Dashboard calls return 401 | You changed the API keys: enter them in *Connection settings* (keys are pre-filled only for the demo defaults). |
 | Postman run fails on the chaos requests | Keep `CHAOS_ENABLED=true`, or skip the *Errors & security* folders. |
+| Postman: *"{{poNumber}} is empty. Send … first"* | The request uses an ID created earlier in its folder. Send the named request first, or run the whole folder. |
 | Postman `409` on create after an interrupted run | Run the backend folder from its first request (it generates a new `runId`) or `npm run seed:reset`. |
+| TMS `409` on an ASN whose shipment was cancelled | You are on a database created before v2.2: restart the server once so the migration replaces the old unique constraint. |
 | Postgres container won't start after a crash | `docker rm -f po-backends-postgres && npm run db:start`; as a last resort delete `.pgdata/` (data is re-seeded). |
 
 ---
 
-**Disclaimer:** all data is fictitious and for demonstration only. This is not a representation of any
-production Jabil system.
+**Disclaimer:** all data is fictitious and for demonstration only. It does not represent any production
+system.

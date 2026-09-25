@@ -75,21 +75,22 @@ async function main() {
   const noKey = await call('erp', 'GET', '/v1/purchase-orders', { key: null });
   check(`ERP without key -> ${noKey.status} (401 expected unless AUTH_MODE=none)`, [200, 401].includes(noKey.status));
 
-  console.log('\nGET /purchase-orders?supplierId=SUP-100245 (aggregation, by hand)');
+  console.log('\nGET /purchase-orders?supplierId=SUP-100245 (two calls, see docs/MAPPING.md)');
   const ent = await call('srm', 'GET', '/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.read&supplierCode=SUP-100245');
-  check(`1. SRM entitlement check -> allowed=${ent.body && ent.body.allowed}`, ent.body && ent.body.allowed === true, ent.body);
-  const xref = await call('srm', 'GET', '/v1/vendor-xref?supplierCode=SUP-100245');
-  const vendor = xref.body && xref.body.items && xref.body.items[0] && xref.body.items[0].erpVendorNumber;
-  check(`2. SRM xref SUP-100245 -> vendor ${vendor}`, vendor === '0000710245', xref.body);
-  const list = await call('erp', 'GET', `/v1/purchase-orders?vendor_id=${vendor}&include=items`);
-  check(`3. ERP POs for vendor -> ${list.body && list.body.pagination && list.body.pagination.total} found`, list.status === 200, list.body);
+  const vendor = ent.body && ent.body.supplier && ent.body.supplier.erpVendorNumber;
+  check(`1. SRM check -> allowed=${ent.body && ent.body.allowed}, vendor ${vendor}`, ent.body && ent.body.allowed === true && vendor === '0000710245', ent.body);
+  const list = await call('erp', 'GET', `/v1/purchase-orders?vendor_id=${vendor}`);
+  check(`2. ERP POs for vendor -> ${list.body && list.body.pagination && list.body.pagination.total} found`, list.status === 200, list.body);
   const po = list.body && list.body.data && list.body.data.find((p) => p.po_number === '4500123456');
-  check('   PO 4500123456 present with items', po && po.items && po.items.length > 0, po);
-  const plant = await call('erp', 'GET', `/v1/plants/${po ? po.plant : '1101'}`);
-  check(`4. ERP plant ${po && po.plant} -> site ${plant.body && plant.body.data && plant.body.data.site_code}`, plant.status === 200, plant.body);
-  const orgs = await call('erp', 'GET', '/v1/reference/purchasing-orgs');
-  const org = orgs.body && orgs.body.data && orgs.body.data.find((o) => po && o.code === po.purch_org);
-  check(`5. ERP purch_org ${po && po.purch_org} -> ${org && org.name}`, !!org, orgs.body);
+  check('   PO 4500123456 has items, ship_to and purch_org_name', po && po.items && po.items.length > 0 && po.ship_to && po.ship_to.site_code && po.purch_org_name, po);
+
+  console.log('\nGET /purchase-orders/PO-4500123456 (two calls)');
+  const one = await call('erp', 'GET', '/v1/purchase-orders/4500123456');
+  check(`1. ERP PO -> ${one.status}, ship_to ${one.body && one.body.data && one.body.data.ship_to && one.body.data.ship_to.site_code}`, one.status === 200 && one.body.data.ship_to, one.body);
+  const byVendor = await call('srm', 'GET', `/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.read&erpVendorNumber=${one.body && one.body.data && one.body.data.vendor_id}`);
+  check(`2. SRM check by vendor -> ${byVendor.body && byVendor.body.supplierCode}, allowed=${byVendor.body && byVendor.body.allowed}`, byVendor.body && byVendor.body.supplierCode === 'SUP-100245' && byVendor.body.allowed === true, byVendor.body);
+  const wide = await call('srm', 'GET', '/v1/entitlements/jabil-procurement-workbench/check?scope=supplier-orders.read');
+  check(`   '*' consumer -> allowedVendors has ${wide.body && wide.body.allowedVendors && wide.body.allowedVendors.length} entries`, wide.body && wide.body.allowedVendors && wide.body.allowedVendors.length > 1, wide.body);
 
   console.log('\nNegative paths the façade must translate');
   const denied = await call('srm', 'GET', '/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.read&supplierCode=SUP-100311');
@@ -98,9 +99,6 @@ async function main() {
   check(`ERP with façade id PO-4500123456 -> ${badPo.status} ${badPo.body && badPo.body.error && badPo.body.error.code}`, badPo.status === 400);
   const missing = await call('tms', 'GET', '/v1/shipments/SHP-20990101-99999');
   check(`TMS unknown shipment -> ${missing.status} ${missing.body && missing.body.fault && missing.body.fault.faultCode}`, missing.status === 404);
-  const carriers = await call('tms', 'GET', '/v1/carriers?code=UPS');
-  const scac = carriers.body && carriers.body.results && carriers.body.results[0] && carriers.body.results[0].scac;
-  check(`TMS carrier map UPS -> ${scac}`, scac === 'UPSN');
   const chaos = await call('tms', 'GET', '/v1/carriers', { headers: { 'x-mock-status': '503' } });
   check(`Chaos header x-mock-status: 503 -> ${chaos.status} (503 when CHAOS_ENABLED)`, [200, 503].includes(chaos.status));
 
@@ -111,50 +109,62 @@ async function main() {
   if (!WRITE) {
     console.log('\n(skipping write saga — run with --write to exercise createASN + compensation)');
   } else {
-    console.log('\nPOST /shipments saga (createASN) with compensation');
+    console.log('\nPOST /shipments saga: SRM check -> TMS shipment -> ERP delivery (-> TMS cancel on failure)');
     const asn = `ASN-SMOKE-${Date.now()}`;
     const openBefore = await call('erp', 'GET', '/v1/purchase-orders/4500123456/items');
     const openQty = openBefore.body && openBefore.body.data && openBefore.body.data[0] && openBefore.body.data[0].open_qty;
     check(`ERP open qty line 00010 = ${openQty}`, openBefore.status === 200);
 
-    const tms = await call('tms', 'POST', '/v1/shipments', {
-      headers: { 'idempotency-key': `${asn}-tms` },
-      body: {
-        asnNumber: asn,
-        supplierCode: 'SUP-100245',
-        carrier: { scac: 'UPSN', trackingId: '1Z999AA10123456784' },
-        route: {
-          origin: { locationCode: 'SUP-ATL-01', name: 'Supplier Distribution Center', city: 'Atlanta', state: 'GA', zip: '30301', country: 'US' },
-          destination: { locationCode: 'US-AUBURN-HILLS', name: 'Jabil Manufacturing Site', city: 'Auburn Hills', state: 'MI', zip: '48326', country: 'US' },
-        },
-        schedule: { plannedShipDate: '2026-10-03T12:00:00Z', estimatedArrival: '2026-10-07T15:00:00Z' },
-        contents: [{ poNumber: '4500123456', poLine: 10, quantity: { value: 5, uom: 'EA' }, lotNumber: 'LOT-SMOKE' }],
-        handlingUnits: [{ huId: 'CTN-SMOKE-1', type: 'CTN', weight: { value: 12, unit: 'kg' } }],
-      },
-    });
-    const shipmentId = tms.body && tms.body.shipmentId;
-    check(`TMS create -> ${tms.status} ${shipmentId}`, tms.status === 201, tms.body);
+    const w = await call('srm', 'GET', '/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245');
+    check(`1. SRM write check -> allowed=${w.body && w.body.allowed}, asnEnabled=${w.body && w.body.supplier && w.body.supplier.asnEnabled}`, w.body && w.body.allowed === true, w.body);
 
-    const del = await call('erp', 'POST', '/v1/inbound-deliveries', {
-      headers: { 'idempotency-key': `${asn}-erp` },
-      body: { asn_reference: shipmentId || asn, vendor_id: '0000710245', items: [{ po_number: '4500123456', item_no: '00010', quantity: 5 }] },
+    const shipmentBody = (asnNumber) => ({
+      asnNumber,
+      supplierCode: 'SUP-100245',
+      carrier: { carrierCode: 'UPS', trackingId: '1Z999AA10123456784' },
+      route: {
+        origin: { locationCode: 'SUP-ATL-01', name: 'Supplier Distribution Center', city: 'Atlanta', state: 'GA', zip: '30301', country: 'US' },
+        destination: { locationCode: 'US-AUBURN-HILLS', name: 'Manufacturing Site', city: 'Auburn Hills', state: 'MI', zip: '48326', country: 'US' },
+      },
+      schedule: { plannedShipDate: '2026-10-03T12:00:00Z', estimatedArrival: '2026-10-07T15:00:00Z' },
+      contents: [{ poNumber: '4500123456', poLine: 10, quantity: { value: 5, uom: 'EA' }, lotNumber: 'LOT-SMOKE' }],
+      handlingUnits: [{ huId: 'CTN-SMOKE-1', type: 'CTN', weight: { value: 12, unit: 'kg' } }],
     });
-    const deliveryNo = del.body && del.body.data && del.body.data.delivery_no;
-    check(`ERP inbound delivery -> ${del.status} ${deliveryNo}`, del.status === 201, del.body);
+
+    const tms = await call('tms', 'POST', '/v1/shipments', { headers: { 'idempotency-key': `${asn}-tms` }, body: shipmentBody(asn) });
+    const shipmentId = tms.body && tms.body.shipmentId;
+    check(`2. TMS create with carrierCode UPS -> ${tms.status} ${shipmentId} (SCAC ${tms.body && tms.body.carrier && tms.body.carrier.scac})`, tms.status === 201 && tms.body.carrier.scac === 'UPSN', tms.body);
 
     const over = await call('erp', 'POST', '/v1/inbound-deliveries', {
-      body: { asn_reference: `${asn}-X`, vendor_id: '0000710245', items: [{ po_number: '4500123456', item_no: '00010', quantity: 999999 }] },
+      body: { asn_reference: asn, vendor_id: '0000710245', items: [{ po_number: '4500123456', item_no: '00010', quantity: 999999 }] },
     });
-    check(`ERP over-shipment -> ${over.status} ${over.body && over.body.error && over.body.error.code}`, over.status === 422);
+    check(`3. ERP delivery over open qty -> ${over.status} ${over.body && over.body.error && over.body.error.code}`, over.status === 422);
 
     console.log('  compensating...');
+    if (shipmentId) {
+      const cxl = await call('tms', 'POST', `/v1/shipments/${shipmentId}/cancel`, { body: { reason: 'Compensation: ERP inbound delivery failed' } });
+      check(`4. TMS cancel ${shipmentId} -> ${cxl.body && cxl.body.milestone && cxl.body.milestone.code}`, cxl.status === 200, cxl.body);
+    }
+
+    console.log('  retrying with the same ASN and a valid quantity...');
+    const retry = await call('tms', 'POST', '/v1/shipments', { headers: { 'idempotency-key': `${asn}-tms-retry` }, body: shipmentBody(asn) });
+    const retryId = retry.body && retry.body.shipmentId;
+    check(`2. TMS create again (ASN freed by cancel) -> ${retry.status} ${retryId}`, retry.status === 201, retry.body);
+    const del = await call('erp', 'POST', '/v1/inbound-deliveries', {
+      headers: { 'idempotency-key': `${asn}-erp` },
+      body: { asn_reference: asn, vendor_id: '0000710245', items: [{ po_number: '4500123456', item_no: '00010', quantity: 5 }] },
+    });
+    const deliveryNo = del.body && del.body.data && del.body.data.delivery_no;
+    check(`3. ERP inbound delivery -> ${del.status} ${deliveryNo}`, del.status === 201, del.body);
+
+    console.log('  cleaning up so the seed data is unchanged...');
     if (deliveryNo) {
       const rev = await call('erp', 'POST', `/v1/inbound-deliveries/${deliveryNo}/reverse`, { body: { reason: 'smoke test cleanup' } });
       check(`ERP reverse ${deliveryNo} -> ${rev.status}`, rev.status === 200, rev.body);
     }
-    if (shipmentId) {
-      const cxl = await call('tms', 'POST', `/v1/shipments/${shipmentId}/cancel`, { body: { reason: 'smoke test cleanup' } });
-      check(`TMS cancel ${shipmentId} -> ${cxl.body && cxl.body.milestone && cxl.body.milestone.code}`, cxl.status === 200, cxl.body);
+    if (retryId) {
+      const cxl = await call('tms', 'POST', `/v1/shipments/${retryId}/cancel`, { body: { reason: 'smoke test cleanup' } });
+      check(`TMS cancel ${retryId} -> ${cxl.body && cxl.body.milestone && cxl.body.milestone.code}`, cxl.status === 200, cxl.body);
     }
     const openAfter = await call('erp', 'GET', '/v1/purchase-orders/4500123456/items');
     const after = openAfter.body && openAfter.body.data && openAfter.body.data[0] && openAfter.body.data[0].open_qty;

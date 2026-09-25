@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Logistics / TMS API (mock)
-  version: 1.0.0
+  version: 1.1.0
   description: |
     Mock **Transportation Management System**. Owns advance shipment notices (ASNs), carrier
     tendering, milestones and tracking events. It knows nothing about purchase-order quantities
@@ -9,8 +9,9 @@ info:
     orchestrate those checks around it.
 
     Differences from the façade the iPaaS must handle:
-    * Carriers are identified by **SCAC** (`UPSN`, `FDEG`, `DHLE`, `XPOL`, `ODFL`, `MAEU`), not the
-      façade's `carrierCode` (`UPS`, `FEDEX`, ...). Use `GET /v1/carriers?code=UPS` to map.
+    * Carriers are stored and returned by **SCAC** (`UPSN`, `FDEG`, `DHLE`, ...) next to the business
+      `carrierCode` (`UPS`, `FEDEX`, ...). On create or change you may send either
+      `carrier.carrierCode` (the façade value, passed straight through) or `carrier.scac`.
     * Status is a **milestone code**: `PLN` planned, `TND` tendered, `ITR` in transit,
       `DLV` delivered, `EXC` exception, `CXL` cancelled.
     * PO references use the **raw 10-digit ERP number** (`4500123456`) and integer `poLine`.
@@ -238,6 +239,10 @@ paths:
         Creates the shipment and (by default) tenders it to the carrier (`TND`). Send
         `"tender": false` to create it as planned (`PLN`, façade `DRAFT`).
         TMS does **not** validate PO quantities — the ERP inbound delivery does.
+
+        Identify the carrier with `carrier.carrierCode` (`UPS`) or `carrier.scac` (`UPSN`).
+        An ASN number is unique per supplier among shipments that are not cancelled, so after a
+        compensating cancel the same ASN can be sent again.
       operationId: createShipment
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
@@ -249,7 +254,7 @@ paths:
             example:
               asnNumber: ASN-440882
               supplierCode: SUP-100245
-              carrier: {scac: UPSN, trackingId: 1Z999AA10123456784}
+              carrier: {carrierCode: UPS, trackingId: 1Z999AA10123456784}
               route:
                 origin: {locationCode: SUP-ATL-01, name: Supplier Distribution Center, city: Atlanta, state: GA, zip: '30301', country: US}
                 destination: {locationCode: US-AUBURN-HILLS, name: Jabil Manufacturing Site, street: 100 Manufacturing Way, city: Auburn Hills, state: MI, zip: '48326', country: US}
@@ -269,7 +274,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '409':
-          description: DUPLICATE_ASN (same asnNumber already exists for supplier)
+          description: DUPLICATE_ASN (same asnNumber already exists for the supplier on a shipment that is not cancelled)
           content:
             application/json:
               schema: {$ref: '#/components/schemas/TmsFault'}
@@ -283,7 +288,7 @@ paths:
               example:
                 fault:
                   faultCode: tms.UNKNOWN_CARRIER
-                  faultString: Carrier SCAC UPS is not configured in TMS (see GET /tms/v1/carriers)
+                  faultString: Carrier ZZZZ is not configured in TMS (see GET /tms/v1/carriers)
                   httpStatus: 422
                   detail: [{path: carrier.scac, issue: unknown SCAC}]
         '429': {$ref: '#/components/responses/TooManyRequests'}
@@ -312,7 +317,7 @@ paths:
       description: |
         Field locks follow the milestone:
         * any open shipment: `carrier.trackingId`, `schedule.estimatedArrival`
-        * PLN or TND only: `carrier.scac`, `route`, `schedule.plannedShipDate`, `handlingUnits`
+        * PLN or TND only: `carrier.scac` or `carrier.carrierCode`, `route`, `schedule.plannedShipDate`, `handlingUnits`
         * PLN only: `contents`, `asnNumber`
 
         Locked fields return 409 `FIELD_LOCKED`; DLV and CXL return 409 `SHIPMENT_CLOSED`.
@@ -521,8 +526,9 @@ components:
         supplierCode: {type: string, pattern: '^SUP-[0-9]{6}$'}
         carrier:
           type: object
-          required: [scac]
+          description: Send carrierCode or scac (at least one).
           properties:
+            carrierCode: {type: string, maxLength: 40, example: UPS, description: 'Business carrier code, as used by the façade'}
             scac: {type: string, maxLength: 4, example: UPSN}
             trackingId: {type: string, maxLength: 100}
         route:
@@ -552,6 +558,7 @@ components:
         carrier:
           type: object
           properties:
+            carrierCode: {type: string, description: Alternative to scac}
             scac: {type: string}
             trackingId: {type: string}
         route:

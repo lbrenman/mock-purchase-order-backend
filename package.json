@@ -1,6 +1,6 @@
 {
   "name": "mock-purchase-order-backend",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "description": "Three independent mock backends (ERP purchasing, SRM supplier master, TMS logistics) with Postgres persistence and OpenAPI specs, built to demonstrate orchestration, transformation and aggregation in an iPaaS (Axway Amplify Fusion) behind the Supplier Order Collaboration API.",
   "main": "src/index.js",
   "license": "MIT",
@@ -17,7 +17,13 @@
     "seed:reset": "node src/data/seed.js --reset",
     "db:start": "bash scripts/start-postgres.sh",
     "smoke": "node scripts/smoke-test.js",
-    "postman": "npx --yes newman run postman/mock-po-backends.postman_collection.json -e postman/local.postman_environment.json"
+    "postman": "npx --yes newman run postman/mock-po-backends.postman_collection.json -e postman/local.postman_environment.json",
+    "validate:seed": "node tools/validate-seed.js",
+    "check:postman": "node tools/check-postman-coverage.js",
+    "check": "npm run validate:seed && npm run check:postman",
+    "build:seed": "python3 tools/seed/expand_seed.py",
+    "build:postman": "python3 tools/build-postman.py",
+    "dashboard:stub": "python3 tools/dashboard-stub.py"
   },
   "dependencies": {
     "cors": "^2.8.5",

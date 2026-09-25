@@ -44,17 +44,35 @@ function mapItem(r) {
   };
 }
 
-function mapHeader(r) {
+/**
+ * Header mapper. `ref` carries the plant and purchasing-org rows for the PO, so every PO response
+ * already contains the ship-to address and the buying organisation name (no extra lookups needed).
+ */
+function mapHeader(r, ref = {}) {
+  const plant = ref.plants && ref.plants.get(r.plant);
+  const org = ref.orgs && ref.orgs.get(r.purch_org);
   const h = {
     po_number: r.po_number,
     vendor_id: r.vendor_id,
     purch_org: r.purch_org,
+    purch_org_name: org ? org.name : null,
     doc_date: toSapDate(r.doc_date),
     currency: r.currency,
     status_code: r.status_code,
     status_text: STATUS_CODES[r.status_code] || 'Unknown',
     delivery_date: toSapDate(r.delivery_date),
     plant: r.plant,
+    ship_to: plant
+      ? {
+          site_code: plant.site_code,
+          name: plant.name,
+          street: plant.street,
+          city: plant.city,
+          region: plant.region,
+          postal_code: plant.postal_code,
+          country: plant.country,
+        }
+      : null,
     incoterms: r.incoterms,
     payment_terms: r.payment_terms,
     buyer_name: r.buyer_name,
@@ -64,6 +82,21 @@ function mapHeader(r) {
   };
   if (r.item_count !== undefined) h.item_count = r.item_count;
   return h;
+}
+
+/** Loads the plants and purchasing orgs referenced by a set of PO rows (one query each). */
+async function loadRefs(db, rows) {
+  const plantCodes = [...new Set(rows.map((x) => x.plant))];
+  const orgCodes = [...new Set(rows.map((x) => x.purch_org))];
+  const plants = await db.query(
+    'SELECT plant_code, site_code, name, street, city, region, postal_code, country FROM erp.plants WHERE plant_code = ANY($1)',
+    [plantCodes]
+  );
+  const orgs = await db.query('SELECT code, name FROM erp.purchasing_orgs WHERE code = ANY($1)', [orgCodes]);
+  return {
+    plants: new Map(plants.rows.map((x) => [x.plant_code, x])),
+    orgs: new Map(orgs.rows.map((x) => [x.code, x])),
+  };
 }
 
 function mapConfirmation(r) {
@@ -142,7 +175,8 @@ async function recomputeStatus(client, poNumber) {
 async function fullPo(db, poNumber) {
   const po = await loadPo(db, poNumber);
   const items = await loadItems(db, [poNumber]);
-  return { po, body: { ...mapHeader(po), items: items.map(mapItem) } };
+  const ref = await loadRefs(db, [po]);
+  return { po, body: { ...mapHeader(po, ref), items: items.map(mapItem) } };
 }
 
 module.exports = function buildErpRoutes({ pool, idem }) {
@@ -245,8 +279,11 @@ module.exports = function buildErpRoutes({ pool, idem }) {
         params
       );
 
-      const data = rows.map(mapHeader);
-      if (csv(req.query.include).includes('items') && rows.length) {
+      // Every list entry carries its ship-to address, buying organisation name and items, so one ERP call
+      // is enough for the façade's list view. `include=items` is still accepted for older clients.
+      const ref = await loadRefs(pool, rows);
+      const data = rows.map((x) => mapHeader(x, ref));
+      if (rows.length) {
         const items = await loadItems(pool, rows.map((x) => x.po_number));
         data.forEach((h) => {
           h.items = items.filter((i) => i.po_number === h.po_number).map(mapItem);

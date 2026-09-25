@@ -96,9 +96,9 @@ async function openPo(poNumber, ctx) {
 }
 
 async function poDetails(po, refresh) {
-  const [plants, orgs, sup] = await Promise.all([cache.plants().catch(() => []), cache.purchOrgs().catch(() => []), cache.vendorsToSuppliers([po.vendor_id])]);
-  const plant = plants.find((p) => p.plant_code === po.plant);
-  const org = orgs.find((o) => o.code === po.purch_org);
+  // The ERP embeds ship_to and purch_org_name in every purchase order, so no plant or org lookups are needed.
+  const sup = await cache.vendorsToSuppliers([po.vendor_id]);
+  const plant = po.ship_to;
   const s = sup[po.vendor_id];
   const locked = LOCKED.includes(po.status_code);
   const total = po.items.reduce((a, i) => a + Number(i.quantity) * Number(i.net_price), 0);
@@ -106,8 +106,9 @@ async function poDetails(po, refresh) {
     h('section', { class: 'cols-2' },
       kv([
         ['Vendor', h('span', null, h('span', { class: 'mono' }, po.vendor_id), s ? h('span', null, ' ', link('srm/suppliers', s.supplierCode, s.legalName)) : h('em', { class: 'muted' }, ' unmapped'))],
-        ['Purchasing org', `${po.purch_org}${org ? ` (${org.name})` : ''}`],
+        ['Purchasing org', `${po.purch_org}${po.purch_org_name ? ` (${po.purch_org_name})` : ''}`],
         ['Plant', h('span', null, h('span', { class: 'mono' }, po.plant), plant ? ` ${plant.name}, ${plant.site_code}` : '')],
+        ['Ship-to address', plant ? [plant.street, plant.city, [plant.region, plant.postal_code].filter(Boolean).join(' '), plant.country].filter(Boolean).join(', ') : '—'],
         ['Buyer', po.buyer_name],
       ]),
       kv([
