@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.2
+
+- Added the façade (front-end) spec `Supplier_Order_Collaboration_OpenAPI_3_1.yaml` to the repository root, kept apart from
+  the backend specs in `openapi/`. README, `docs/MAPPING.md` and `CLAUDE.md` link to it.
+
 ## 2.2.1
 
 - **Postman:** new scenario *4. Create an ASN (POST /shipments)*, the happy path for one shipment covering two

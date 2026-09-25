@@ -6,6 +6,10 @@ Three **independent, deliberately different** mock systems of record — built w
 PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1) implemented in
 **Axway Amplify Fusion**.
 
+> **The front-end API:** [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) in the repository root is the spec of the
+> façade that Fusion exposes to consumers: purchase orders, acknowledgements and shipments. The specs in
+> [`openapi/`](openapi/) describe the three **backends** behind it. Consumers never call those directly.
+
 The backends are *not* a proxy target for the façade. Each one owns a different slice of the data,
 speaks its own dialect (naming, identifiers, dates, status codes, pagination, error format), and none of
 them can answer a façade request on its own. That's the point: the iPaaS has to **orchestrate,
@@ -517,7 +521,7 @@ See [docs/MAPPING.md](docs/MAPPING.md) for the field mappings, recipes and seed-
    already contains the public base URL (e.g. `https://<id>.ngrok-free.app/erp`).
 2. Create one **HTTP/OpenAPI connection per backend** in Fusion with an API-key header `x-api-key` and the
    matching key — three connections make the multi-system story obvious in the flows.
-3. Implement the façade (Supplier Order Collaboration API, OpenAPI 3.1) using the recipes in
+3. Implement the façade from [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) using the recipes in
    [docs/MAPPING.md](docs/MAPPING.md): one SRM check → one or two ERP/TMS calls → transformations →
    ProblemDetails normalization. The Postman *Scenarios* folder shows each sequence with real responses.
 4. Propagate `X-Correlation-Id` to each backend so a single ID shows up in every backend log line and error.
@@ -560,7 +564,8 @@ and `CHANGELOG.md` records what changed in each version.
 ```
 mock-purchase-order-backend/
 ├── .devcontainer/devcontainer.json     Codespaces: Node 20 + docker-in-docker, auto-starts Postgres
-├── openapi/                            erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
+├── Supplier_Order_Collaboration_OpenAPI_3_1.yaml   the façade (front-end) API Fusion exposes (OpenAPI 3.1)
+├── openapi/                            backend specs: erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
 ├── public/dashboard/                   data dashboard (index.html, css/, js/ ES modules, js/views/{erp,srm,tms,overview}.js)
 ├── postman/                            collection + local / local-separate / tunnel environments (generated)
 ├── tools/

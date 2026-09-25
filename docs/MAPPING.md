@@ -1,7 +1,8 @@
 # Façade ↔ Backend Mapping Guide
 
-This is the answer key for implementing the **Supplier Order Collaboration API** façade (OpenAPI 3.1) in
-Amplify Fusion on top of the three mock backends. Each façade operation needs **two or three backend
+This is the answer key for implementing the **Supplier Order Collaboration API** façade in Amplify Fusion
+on top of the three mock backends. The façade spec is [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](../Supplier_Order_Collaboration_OpenAPI_3_1.yaml) in the repository
+root; the backend specs are in [`openapi/`](../openapi/). Each façade operation needs **two or three backend
 calls**: always exactly one SRM call (authorization plus supplier resolution), and one or two calls to
 the ERP or TMS. The rest is transformation.
 
