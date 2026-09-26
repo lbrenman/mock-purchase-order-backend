@@ -118,13 +118,14 @@ paths:
             $ref: '#/components/schemas/SupplierId'
         - name: status
           in: query
-          description: Filters orders by lifecycle status.
+          description: |
+            Filters orders by lifecycle status. Accepts a single status or a comma-separated
+            list of statuses (no spaces). Allowed values: OPEN, PARTIALLY_ACKNOWLEDGED,
+            ACKNOWLEDGED, IN_FULFILLMENT, CLOSED, CANCELLED.
           schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/PurchaseOrderStatus'
-          style: form
-          explode: false
+            type: string
+            pattern: '^(OPEN|PARTIALLY_ACKNOWLEDGED|ACKNOWLEDGED|IN_FULFILLMENT|CLOSED|CANCELLED)(,(OPEN|PARTIALLY_ACKNOWLEDGED|ACKNOWLEDGED|IN_FULFILLMENT|CLOSED|CANCELLED))*$'
+          example: OPEN,PARTIALLY_ACKNOWLEDGED
         - name: updatedSince
           in: query
           description: Returns orders updated at or after this timestamp.
@@ -341,11 +342,14 @@ paths:
           schema: {$ref: '#/components/schemas/SupplierId'}
         - name: status
           in: query
+          description: |
+            Filters shipments by status. Accepts a single status or a comma-separated
+            list of statuses (no spaces). Allowed values: DRAFT, SUBMITTED, IN_TRANSIT,
+            DELIVERED, DELAYED, CANCELLED.
           schema:
-            type: array
-            items: {$ref: '#/components/schemas/ShipmentStatus'}
-          style: form
-          explode: false
+            type: string
+            pattern: '^(DRAFT|SUBMITTED|IN_TRANSIT|DELIVERED|DELAYED|CANCELLED)(,(DRAFT|SUBMITTED|IN_TRANSIT|DELIVERED|DELAYED|CANCELLED))*$'
+          example: IN_TRANSIT,DELAYED
         - $ref: '#/components/parameters/PageSize'
         - $ref: '#/components/parameters/PageToken'
       responses:
