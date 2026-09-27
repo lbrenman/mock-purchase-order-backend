@@ -6,9 +6,10 @@ Three **independent, deliberately different** mock systems of record — built w
 PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1) implemented in
 **Axway Amplify Fusion**.
 
-> **The front-end API:** [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) in the repository root is the spec of the
+> **The front-end API:** [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml) is the spec of the
 > façade that Fusion exposes to consumers: purchase orders, acknowledgements and shipments. The specs in
 > [`openapi/`](openapi/) describe the three **backends** behind it. Consumers never call those directly.
+> [`facade/`](facade/) also holds a single-file [façade console](#façade-console) for calling the façade from a browser.
 
 The backends are *not* a proxy target for the façade. Each one owns a different slice of the data,
 speaks its own dialect (naming, identifiers, dates, status codes, pagination, error format), and none of
@@ -58,6 +59,7 @@ the backend calls for each façade operation (including the ASN saga with compen
 - [Façade coverage](#façade-coverage)
 - [Demo controls (chaos, latency, state changes)](#demo-controls)
 - [Using the specs in Amplify Fusion](#using-the-specs-in-amplify-fusion)
+- [Façade console](#façade-console)
 - [Development tools](#development-tools)
 - [Project structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
@@ -549,12 +551,40 @@ See [docs/MAPPING.md](docs/MAPPING.md) for the field mappings, recipes and seed-
    already contains the public base URL (e.g. `https://<id>.ngrok-free.app/erp`).
 2. Create one **HTTP/OpenAPI connection per backend** in Fusion with an API-key header `x-api-key` and the
    matching key — three connections make the multi-system story obvious in the flows.
-3. Implement the façade from [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) using the recipes in
+3. Implement the façade from [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml) using the recipes in
    [docs/MAPPING.md](docs/MAPPING.md): one SRM check → one or two ERP/TMS calls → transformations →
    ProblemDetails normalization. The Postman *Scenarios* folder shows each sequence with real responses.
 4. Propagate `X-Correlation-Id` to each backend so a single ID shows up in every backend log line and error.
 
 If your URL changes (new ngrok session / new Codespace), only the connection base URLs need updating.
+
+The façade spec's `status` query parameters (on `GET /purchase-orders` and `GET /shipments`) are plain strings
+holding a comma-separated list (`OPEN,PARTIALLY_ACKNOWLEDGED`, no spaces) validated by a pattern, rather than
+arrays, because Fusion handles array query parameters poorly.
+
+If Fusion reports *Failed to update API proxy: Cursor returned more than one result* on import, the tenant has
+more than one proxy matching the same API. Remove the duplicates, or change `info.title` or bump `info.version`.
+
+---
+
+## Façade console
+
+[`facade/facade-console.html`](facade/facade-console.html) is a single-file web app (HTML, CSS and JavaScript,
+no build, no dependencies) for calling the **façade** from a browser once it is running in Fusion. It is handy
+for demos: switch between consumers and watch what each one is allowed to see.
+
+- **Settings:** the façade base address, the API key header name (default `X-API-Key`), and one entry per
+  consumer with its API key or bearer token. Each consumer has *Test connection*. Settings are kept in the
+  browser's localStorage and can be exported and imported as JSON (the file contains the keys).
+- **Purchase orders and Shipments:** the four read operations, with filters, paging (`nextPageToken`), open
+  by ID, a lifecycle track for orders, a route view for shipments, and links between the two.
+- **Calling as:** the consumer switcher in the header re-runs the loaded lists and details with the other key.
+- **Activity:** every request with status, timing, masked headers, correlation IDs, ETag and body, plus
+  *Copy as cURL*. Errors show the ProblemDetails fields.
+
+The façade must allow CORS from wherever the page is served, including the headers `X-API-Key`,
+`X-Correlation-Id` and `Authorization`, and should expose `ETag` and `X-Correlation-Id`. See
+[`facade/README.md`](facade/README.md) for how to open it and troubleshoot.
 
 ---
 
@@ -592,7 +622,10 @@ and `CHANGELOG.md` records what changed in each version.
 ```
 mock-purchase-order-backend/
 ├── .devcontainer/devcontainer.json     Codespaces: Node 20 + docker-in-docker, auto-starts Postgres
-├── Supplier_Order_Collaboration_OpenAPI_3_1.yaml   the façade (front-end) API Fusion exposes (OpenAPI 3.1)
+├── facade/
+│   ├── Supplier_Order_Collaboration_OpenAPI_3_1.yaml   the façade (front-end) API Fusion exposes (OpenAPI 3.1)
+│   ├── facade-console.html             single-file browser app for calling the façade
+│   └── README.md
 ├── openapi/                            backend specs: erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
 ├── public/dashboard/                   data dashboard (index.html, css/, js/ ES modules, js/views/{erp,srm,tms,overview}.js)
 ├── postman/                            collection + local / local-separate / tunnel environments (generated)

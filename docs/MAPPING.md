@@ -1,8 +1,8 @@
 # Façade ↔ Backend Mapping Guide
 
 This is the answer key for implementing the **Supplier Order Collaboration API** façade in Amplify Fusion
-on top of the three mock backends. The façade spec is [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](../Supplier_Order_Collaboration_OpenAPI_3_1.yaml) in the repository
-root; the backend specs are in [`openapi/`](../openapi/). Each façade operation needs **two or three backend
+on top of the three mock backends. The façade spec is [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](../facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml);
+the backend specs are in [`openapi/`](../openapi/). Each façade operation needs **two or three backend
 calls**: always exactly one SRM call (authorization plus supplier resolution), and one or two calls to
 the ERP or TMS. The rest is transformation.
 
@@ -113,7 +113,9 @@ but the façade does not need it.
 | `05` Closed | `CLOSED` | | `EXC` exception | `DELAYED` |
 | `09` Cancelled | `CANCELLED` | | `CXL` cancelled | `CANCELLED` |
 
-Status filters are arrays in the façade: map each value and join with commas (`status=01,02`, `status=ITR,EXC`).
+Status filters in the façade are comma-separated strings (`status=OPEN,PARTIALLY_ACKNOWLEDGED`, no spaces,
+checked by a pattern in the spec): split on commas, map each value, and join with commas again
+(`status=01,02`, `status=ITR,EXC`).
 
 | Façade `acknowledgementType` | ERP `conf_category` | ERP result | Façade acknowledgement `status` |
 |---|---|---|---|

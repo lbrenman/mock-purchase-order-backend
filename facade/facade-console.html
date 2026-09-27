@@ -1,0 +1,1369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supplier Order Collaboration console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<!--
+  Supplier Order Collaboration console
+  Single-file SPA for the façade API (facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml).
+  See facade/README.md for serving it, CORS requirements and troubleshooting.
+  - Settings tab: API base address, API key header name, one API key (or bearer token) per consumer.
+  - Purchase orders:  GET /purchase-orders, GET /purchase-orders/{purchaseOrderId}
+  - Shipments:        GET /shipments,       GET /shipments/{shipmentId}
+  - Activity:         every request with status, timing, correlation ID, headers and body; copy as cURL.
+  Settings (including API keys) are stored in this browser's localStorage only.
+  The façade must allow CORS from wherever this page is served.
+-->
+<style>
+:root {
+  --bar: #15283c;
+  --action: #15283c;
+  --action-text: #ffffff;
+  --paper: #eef1f4;
+  --panel: #ffffff;
+  --line: #d3dbe2;
+  --text: #18232e;
+  --muted: #56687a;
+  --accent: #2c4f74;
+  --signal: #f2b705;
+  --go: #1e7a4b;
+  --warn: #a86400;
+  --stop: #b3261e;
+  --info: #1f5fa6;
+  --idle: #6f7f8e;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --font: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-head: "Barlow Condensed", "Arial Narrow", "Barlow", system-ui, sans-serif;
+  --font-id: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bar: #0d1b29;
+    --action: #2f6db0;
+    --paper: #0f1720;
+    --panel: #17222d;
+    --line: #2a3a4a;
+    --text: #e3eaf0;
+    --muted: #9aabbb;
+    --accent: #8fb3d9;
+    --go: #4cc38a;
+    --warn: #f0a640;
+    --stop: #f07167;
+    --info: #79aef0;
+    --idle: #7d8d9c;
+  }
+}
+* { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--text);
+  font: 16px/1.45 var(--font);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+/* Header */
+.bar {
+  background: var(--bar);
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px 20px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) clamp(12px, 3vw, 32px) 12px;
+  border-bottom: 4px solid var(--signal);
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mark {
+  flex: none;
+  width: 14px; height: 24px;
+  background: var(--signal);
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+}
+.brand strong { display: block; font: 600 22px/1.1 var(--font-head); letter-spacing: .01em; }
+.brand #envLabel { display: block; font-size: 13.5px; color: #b9c8d6; overflow-wrap: anywhere; }
+.consumer { display: flex; align-items: center; gap: 8px; color: #d5e0ea; font-size: 14px; font-weight: 500; }
+.consumer select { min-width: 200px; background: #fff; color: #15283c; border-color: transparent; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 clamp(12px, 3vw, 32px);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.tabs button {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  padding: 12px 14px 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  min-height: 0;
+}
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--signal); }
+.tabs button:hover { color: var(--text); }
+.count {
+  display: inline-block; min-width: 1.6em; padding: 0 6px; margin-left: 4px;
+  border-radius: 999px; background: var(--paper); color: var(--muted);
+  font-size: 12.5px; text-align: center;
+}
+
+main { max-width: 1440px; margin: 0 auto; padding: 20px clamp(12px, 3vw, 32px) 48px; }
+
+/* Controls */
+label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); font-weight: 500; }
+input, select, textarea {
+  font: inherit; font-size: 15px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 7px 10px;
+  min-height: 38px;
+}
+input::placeholder { color: var(--idle); }
+button, .filebtn {
+  font: inherit; font-size: 15px; font-weight: 600;
+  color: var(--accent);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  padding: 7px 14px;
+  min-height: 38px;
+  cursor: pointer;
+}
+button:hover, .filebtn:hover { border-color: var(--accent); }
+button.primary { background: var(--action); color: var(--action-text); border-color: var(--action); }
+button.primary:hover { filter: brightness(1.12); }
+button.danger { color: var(--stop); }
+button.linkbtn { border: 0; padding: 0; min-height: 0; background: none; text-decoration: underline; text-underline-offset: 3px; }
+button:disabled { opacity: .45; cursor: default; }
+.filebtn { display: inline-flex; align-items: center; }
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px;
+  margin: 0 0 14px;
+}
+.filters .grow { flex: 1 1 180px; }
+fieldset.chips { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+fieldset.chips legend { font-size: 14px; color: var(--muted); font-weight: 500; padding: 0; margin-bottom: 4px; float: left; width: 100%; }
+.chip { display: inline-block; position: relative; }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+.chip span {
+  display: inline-block; padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+  font-size: 14px; cursor: pointer; user-select: none;
+}
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.chip input:focus-visible + span { outline: 3px solid var(--info); outline-offset: 2px; }
+
+.lookup { display: flex; gap: 8px; align-items: end; }
+
+/* List + detail */
+.split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); }
+.detailPane { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; padding: 20px 22px; }
+@media (max-width: 980px) {
+  .split { grid-template-columns: 1fr; }
+  .detailPane { position: static; max-height: none; }
+}
+.tablewrap { overflow-x: auto; }
+table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
+.grid th {
+  text-align: left; font: 600 15px/1.2 var(--font-head); color: var(--muted);
+  padding: 11px 12px 9px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.grid td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.grid tbody tr:last-child td { border-bottom: 0; }
+.grid tr[tabindex] { cursor: pointer; }
+.grid tr[tabindex]:hover td { background: color-mix(in srgb, var(--info) 6%, transparent); }
+.grid tr.selected td { background: color-mix(in srgb, var(--signal) 16%, transparent); }
+.grid tr.selected td:first-child { box-shadow: inset 4px 0 0 var(--signal); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.grid th.num { text-align: right; }
+.id { font-family: var(--font-id); font-size: .9em; overflow-wrap: anywhere; }
+.grid .id { white-space: nowrap; overflow-wrap: normal; }
+.grid td .sub { min-width: 12ch; }
+.sub { color: var(--muted); font-size: 13.5px; }
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+.pager:empty { display: none; }
+
+.badge {
+  display: inline-block; white-space: nowrap;
+  font-size: 13px; font-weight: 600; line-height: 1;
+  padding: 5px 9px; border-radius: 999px;
+  color: var(--info);
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+.s-acknowledged, .s-partially_acknowledged { color: var(--accent); }
+.s-closed, .s-delivered { color: var(--go); }
+.s-delayed { color: var(--warn); }
+.s-cancelled, .s-draft { color: var(--idle); }
+.s-cancelled { text-decoration: line-through; }
+
+.empty { padding: 36px 22px; color: var(--muted); }
+.empty strong { display: block; color: var(--text); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.loading { padding: 28px 22px; color: var(--muted); }
+.loading::before {
+  content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 10px; vertical-align: -1px;
+  border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.problem {
+  margin: 16px; padding: 14px 16px;
+  border-left: 4px solid var(--stop);
+  background: color-mix(in srgb, var(--stop) 7%, var(--panel));
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+}
+.detailPane .problem { margin: 0; }
+.problem h3 { margin: 0 0 4px; font: 600 19px/1.2 var(--font-head); }
+.problem p { margin: 4px 0; max-width: 70ch; }
+.problem dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 10px 0 0; font-size: 14px; }
+.problem dt { color: var(--muted); }
+.problem dd { margin: 0; overflow-wrap: anywhere; }
+.problem ul { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
+.hint { color: var(--muted); font-size: 14px; max-width: 72ch; }
+
+/* Detail */
+.dhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.dhead h2 { margin: 0; font: 600 25px/1.15 var(--font-id); letter-spacing: -.01em; }
+.dhead p { margin: 4px 0 0; }
+.detail h3 { font: 600 18px/1.2 var(--font-head); margin: 24px 0 8px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 18px; margin: 18px 0 0; }
+.facts dt { font-size: 13px; color: var(--muted); }
+.facts dd { margin: 2px 0 0; font-weight: 500; overflow-wrap: anywhere; }
+.addr { font-style: normal; line-height: 1.5; }
+.dactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.meter { display: inline-block; width: 46px; height: 5px; margin-left: 6px; vertical-align: middle; background: var(--line); border-radius: 3px; overflow: hidden; }
+.meter span { display: block; height: 100%; background: var(--go); }
+.polinks { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+
+details.raw { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 12px; }
+details.raw summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+pre {
+  margin: 10px 0 0; padding: 12px 14px; max-height: 420px; overflow: auto;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-s);
+  font: 13px/1.5 var(--font-id); white-space: pre;
+}
+
+/* Order lifecycle rail */
+.rail { list-style: none; padding: 0; margin: 22px 0 4px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+.step { position: relative; padding: 20px 6px 0 0; font-size: 13px; line-height: 1.25; color: var(--muted); }
+.step::before { content: ""; position: absolute; top: 6px; left: 0; right: 0; height: 4px; background: var(--line); }
+.step::after {
+  content: ""; position: absolute; top: 0; left: 0;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--panel); border: 3px solid var(--line);
+}
+.step.done::before, .step.current::before { background: var(--accent); }
+.step.current::before { background: linear-gradient(90deg, var(--accent) 0 16px, var(--line) 16px); }
+.step.done::after { background: var(--accent); border-color: var(--accent); }
+.step.current { color: var(--text); font-weight: 600; }
+.step.current::after { background: var(--signal); border-color: var(--accent); }
+.step:last-child::before { right: calc(100% - 16px); }
+.rail.halted .step::before { background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); }
+.halt-note { margin: 8px 0 0; color: var(--idle); font-weight: 600; font-size: 14px; }
+
+/* Shipment route */
+.route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: center; margin: 22px 0 4px; }
+.end { display: grid; gap: 1px; font-size: 14px; color: var(--muted); }
+.end strong { color: var(--text); font-size: 16px; font-weight: 600; }
+.end.to { text-align: right; }
+.end .when { color: var(--text); font-weight: 500; margin-top: 4px; }
+.track { --p: 0%; position: relative; height: 6px; border-radius: 3px; background: var(--line); }
+.track .fill { position: absolute; inset: 0 auto 0 0; width: var(--p); border-radius: 3px; background: var(--accent); transition: width .9s cubic-bezier(.2, .7, .2, 1); }
+.track .truck {
+  position: absolute; top: 50%; left: var(--p);
+  transform: translate(-50%, -50%);
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--signal); color: #15283c;
+  border: 3px solid var(--panel);
+  transition: left .9s cubic-bezier(.2, .7, .2, 1);
+}
+.route.delayed .fill { background: var(--warn); }
+.route.delayed .truck { background: var(--warn); color: #fff; }
+.route.arrived .fill { background: var(--go); }
+.route.arrived .truck { background: var(--go); color: #fff; }
+.route.cancelled .track { background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px); }
+@media (max-width: 560px) {
+  .route { grid-template-columns: 1fr; }
+  .end.to { text-align: left; }
+  .track { margin: 14px 16px; }
+}
+
+/* Activity */
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+.toolbar p { margin: 0; }
+.method { font: 600 12.5px/1 var(--font-id); padding: 3px 6px; border-radius: var(--radius-s); background: var(--paper); border: 1px solid var(--line); }
+.code { font-weight: 600; font-variant-numeric: tabular-nums; }
+.code.ok { color: var(--go); }
+.code.bad { color: var(--stop); }
+.code.net { color: var(--warn); }
+tr.logdetail td { background: var(--paper); }
+.logbody { display: grid; gap: 10px; }
+.logbody h4 { margin: 6px 0 0; font: 600 15px/1.2 var(--font-head); }
+.logbody pre { background: var(--panel); margin-top: 4px; }
+
+/* Settings */
+.settings { display: grid; gap: 18px; max-width: 1100px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 18px 20px 20px; }
+.card h2 { margin: 0 0 4px; font: 600 22px/1.2 var(--font-head); }
+.card > .hint { margin: 0 0 14px; }
+.formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 18px; }
+.formgrid .wide { grid-column: 1 / -1; }
+label.check { display: flex; align-items: center; gap: 8px; color: var(--text); }
+label.check input { min-height: 0; width: 18px; height: 18px; }
+.consumers { display: grid; gap: 12px; margin-bottom: 14px; }
+.crow {
+  display: grid;
+  grid-template-columns: auto minmax(140px, 1fr) 150px minmax(200px, 1.5fr) minmax(140px, 1fr);
+  gap: 10px 12px; align-items: end;
+  padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-s);
+}
+.crow.active { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--signal); }
+.crow .activepick { align-self: center; }
+.crow .activepick input { width: 18px; height: 18px; min-height: 0; }
+.secret { display: flex; gap: 6px; }
+.secret input { flex: 1; min-width: 0; }
+.secret button { padding: 7px 10px; font-size: 14px; }
+.crow .rowactions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.testresult { font-size: 14px; color: var(--muted); }
+.testresult.ok { color: var(--go); font-weight: 600; }
+.testresult.bad { color: var(--stop); font-weight: 600; }
+@media (max-width: 860px) {
+  .crow { grid-template-columns: 1fr; }
+  .crow .rowactions { grid-column: 1; }
+}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+#toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: var(--bar); color: #fff; padding: 10px 16px; border-radius: var(--radius-s);
+  border-left: 4px solid var(--signal); font-size: 15px; max-width: min(560px, 92vw);
+  transition: opacity .2s, transform .2s;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <div>
+      <strong>Supplier order collaboration</strong>
+      <span id="envLabel"></span>
+    </div>
+  </div>
+  <label class="consumer">Calling as
+    <select id="consumerSelect" aria-label="Consumer used for API calls"></select>
+  </label>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" data-tab="orders" aria-selected="true">Purchase orders</button>
+  <button role="tab" data-tab="shipments" aria-selected="false">Shipments</button>
+  <button role="tab" data-tab="activity" aria-selected="false">Activity <span class="count" id="activityCount">0</span></button>
+  <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+</nav>
+
+<main>
+  <!-- Purchase orders -->
+  <section id="tab-orders" class="tab" role="tabpanel" aria-label="Purchase orders">
+    <form class="filters" id="poFilters">
+      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" spellcheck="false"></label>
+      <fieldset class="chips" id="poStatus"></fieldset>
+      <label>Updated since (local time) <input type="datetime-local" name="updatedSince"></label>
+      <label>Page size
+        <select name="pageSize">
+          <option>10</option><option selected>25</option><option>50</option><option>100</option><option>200</option>
+        </select>
+      </label>
+      <button class="primary" type="submit">Load orders</button>
+    </form>
+    <form class="filters" id="poLookup">
+      <label class="grow">Open an order by ID <input name="id" placeholder="PO-4500123456" autocomplete="off" spellcheck="false"></label>
+      <button type="submit">Open order</button>
+    </form>
+    <div class="split">
+      <div class="pane">
+        <div id="poList"></div>
+        <div class="pager" id="poPager"></div>
+      </div>
+      <aside class="pane detailPane" id="poDetail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- Shipments -->
+  <section id="tab-shipments" class="tab" role="tabpanel" aria-label="Shipments" hidden>
+    <form class="filters" id="shpFilters">
+      <label>Purchase order <input name="purchaseOrderId" placeholder="PO-4500123456" autocomplete="off" spellcheck="false"></label>
+      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" spellcheck="false"></label>
+      <fieldset class="chips" id="shpStatus"></fieldset>
+      <label>Page size
+        <select name="pageSize">
+          <option>10</option><option selected>25</option><option>50</option><option>100</option><option>200</option>
+        </select>
+      </label>
+      <button class="primary" type="submit">Load shipments</button>
+    </form>
+    <form class="filters" id="shpLookup">
+      <label class="grow">Open a shipment by ID <input name="id" placeholder="SHP-20260923-00192" autocomplete="off" spellcheck="false"></label>
+      <button type="submit">Open shipment</button>
+    </form>
+    <div class="split">
+      <div class="pane">
+        <div id="shpList"></div>
+        <div class="pager" id="shpPager"></div>
+      </div>
+      <aside class="pane detailPane" id="shpDetail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- Activity -->
+  <section id="tab-activity" class="tab" role="tabpanel" aria-label="Activity" hidden>
+    <div class="toolbar">
+      <p class="hint">Every request this page sends, newest first. Select a row for headers, body and a cURL command. Keys are masked on screen.</p>
+      <button type="button" id="clearLog">Clear activity</button>
+    </div>
+    <div class="pane" id="activityList"></div>
+  </section>
+
+  <!-- Settings -->
+  <section id="tab-settings" class="tab" role="tabpanel" aria-label="Settings" hidden>
+    <form id="settingsForm" class="settings" autocomplete="off">
+      <section class="card">
+        <h2>Connection</h2>
+        <p class="hint">The base address is everything before <span class="id">/purchase-orders</span>, for example your Fusion proxy URL ending in <span class="id">/supplier-collaboration/v1</span>.</p>
+        <div class="formgrid">
+          <label class="wide">API base address
+            <input name="baseUrl" type="url" placeholder="https://your-tenant.example.com/supplier-collaboration/v1" spellcheck="false">
+          </label>
+          <label>API key header
+            <input name="authHeader" placeholder="X-API-Key" spellcheck="false">
+          </label>
+          <label>Timeout in seconds
+            <input name="timeoutSec" type="number" min="1" max="120" step="1">
+          </label>
+          <label class="check wide"><input type="checkbox" name="sendCorrelationId"> Send an X-Correlation-Id header with every request</label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Consumers</h2>
+        <p class="hint">Add one consumer per API key, for example each supplier and an internal procurement app. Switch between them at the top of the page to see what each one is allowed to see.</p>
+        <div class="consumers" id="consumerRows"></div>
+        <button type="button" id="addConsumer">Add consumer</button>
+      </section>
+
+      <div class="actions">
+        <button class="primary" type="submit">Save settings</button>
+        <button type="button" id="exportSettings">Export settings</button>
+        <label class="filebtn" tabindex="0">Import settings<input type="file" id="importSettings" accept="application/json,.json" hidden></label>
+        <button type="button" class="danger" id="resetSettings">Reset settings</button>
+      </div>
+      <p class="hint" id="storageNote">Settings, including API keys, are saved in this browser only. Exported files contain the keys in plain text.</p>
+    </form>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<template id="consumerRowTpl">
+  <div class="crow">
+    <label class="activepick" title="Use this consumer"><input type="radio" name="activeConsumer" aria-label="Use this consumer"></label>
+    <label>Name <input data-f="name" placeholder="Supplier 100245" required></label>
+    <label>Credential
+      <select data-f="authType">
+        <option value="apiKey">API key</option>
+        <option value="bearer">Bearer token</option>
+      </select>
+    </label>
+    <label>Key or token
+      <span class="secret">
+        <input data-f="secret" type="password" placeholder="Paste the key" spellcheck="false" autocomplete="off">
+        <button type="button" data-act="reveal" aria-label="Show key">Show</button>
+      </span>
+    </label>
+    <label>Note <input data-f="note" placeholder="Sees SUP-100245 only"></label>
+    <div class="rowactions">
+      <button type="button" data-act="test">Test connection</button>
+      <button type="button" data-act="remove" class="danger">Remove</button>
+      <span class="testresult" aria-live="polite"></span>
+    </div>
+  </div>
+</template>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- Constants ----------
+  const STORE_KEY = 'soc-console.settings.v1';
+  const LOG_LIMIT = 150;
+  const PO_STATUSES = ['OPEN', 'PARTIALLY_ACKNOWLEDGED', 'ACKNOWLEDGED', 'IN_FULFILLMENT', 'CLOSED', 'CANCELLED'];
+  const SHIP_STATUSES = ['DRAFT', 'SUBMITTED', 'IN_TRANSIT', 'DELIVERED', 'DELAYED', 'CANCELLED'];
+  const PO_FLOW = ['OPEN', 'PARTIALLY_ACKNOWLEDGED', 'ACKNOWLEDGED', 'IN_FULFILLMENT', 'CLOSED'];
+  const SHIP_PROGRESS = { DRAFT: 0, SUBMITTED: 10, IN_TRANSIT: 55, DELAYED: 55, DELIVERED: 100, CANCELLED: 0 };
+  const STATUS_HELP = {
+    400: ['Invalid request', 'The API rejected one of the filters or IDs. The details below say which.'],
+    401: ['Authentication required', 'Check the key for this consumer in Settings, and that the key header name matches the API.'],
+    403: ['Access denied', 'This consumer is not authorized for that supplier, record or operation.'],
+    404: ['Not found', 'The record does not exist, or this consumer is not allowed to see it.'],
+    409: ['State conflict', ''],
+    422: ['Business rule violation', ''],
+    429: ['Rate limit exceeded', 'Wait before trying again.'],
+    500: ['Internal server error', 'Give the correlation ID to support.'],
+    502: ['Bad gateway', 'The API gateway could not get a valid response from a backend.'],
+    503: ['Service temporarily unavailable', 'A required backend is down. Try again shortly.'],
+    504: ['Gateway timeout', 'A backend took too long to respond.']
+  };
+  const TRUCK_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M2 6.5A1.5 1.5 0 0 1 3.5 5h9A1.5 1.5 0 0 1 14 6.5V8h3.4a1.5 1.5 0 0 1 1.2.6l2.1 2.8c.2.3.3.6.3.9v3.2a1.5 1.5 0 0 1-1.5 1.5h-.6a2.8 2.8 0 0 1-5.4 0H9.6a2.8 2.8 0 0 1-5.4 0h-.7A1.5 1.5 0 0 1 2 15.5zm14 3.5v2.5h3.1L17.3 10zM6.9 15.7a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm9.6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>';
+
+  // ---------- Helpers ----------
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const label = s => s ? (s.charAt(0) + s.slice(1).toLowerCase()).replace(/_/g, ' ') : '';
+  const uid = () => 'c' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+
+  function uuid() {
+    try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* insecure context */ }
+    const b = crypto.getRandomValues(new Uint8Array(16));
+    b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+    const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }
+
+  const dateFmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const dateTimeFmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const timeFmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const numFmt = new Intl.NumberFormat();
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+    const dt = m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : new Date(d);
+    return isNaN(dt) ? esc(d) : dateFmt.format(dt);
+  }
+  function fmtDateTime(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return isNaN(dt) ? esc(d) : dateTimeFmt.format(dt);
+  }
+  const fmtNum = n => (typeof n === 'number' && isFinite(n)) ? numFmt.format(n) : '—';
+  function fmtMoney(n, cur) {
+    if (typeof n !== 'number' || !isFinite(n)) return '—';
+    try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'USD' }).format(n); }
+    catch (e) { return `${n.toFixed(2)} ${esc(cur || '')}`; }
+  }
+  function poValue(po) {
+    const lines = Array.isArray(po?.lines) ? po.lines : [];
+    let total = 0, any = false;
+    for (const l of lines) {
+      if (typeof l.unitPrice === 'number' && typeof l.orderedQuantity === 'number') { total += l.unitPrice * l.orderedQuantity; any = true; }
+    }
+    return any ? total : null;
+  }
+  const badge = s => s ? `<span class="badge s-${esc(String(s).toLowerCase())}">${esc(label(s))}</span>` : '—';
+  const emptyHtml = (title, text) => `<div class="empty"><strong>${esc(title)}</strong>${esc(text || '')}</div>`;
+  const loadingHtml = text => `<div class="loading">${esc(text)}</div>`;
+  const fact = (k, v) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
+  function placeLine(a) {
+    if (!a) return '';
+    const parts = [a.city, [a.region, a.postalCode].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return [parts, a.countryCode].filter(Boolean).join(', ');
+  }
+  function addressHtml(a) {
+    if (!a) return '<p class="hint">No address returned.</p>';
+    return `<address class="addr"><strong>${esc(a.name)}</strong> <span class="id sub">${esc(a.siteCode)}</span><br>${a.addressLine1 ? esc(a.addressLine1) + '<br>' : ''}${esc(placeLine(a))}</address>`;
+  }
+  function rawJson(obj, meta) {
+    const bits = [];
+    if (meta?.correlationId) bits.push(`Correlation ID <span class="id">${esc(meta.correlationId)}</span>`);
+    if (meta?.etag) bits.push(`ETag <span class="id">${esc(meta.etag)}</span>`);
+    return `<details class="raw"><summary>Response JSON</summary>${bits.length ? `<p class="hint">${bits.join('<br>')}</p>` : ''}<pre>${esc(JSON.stringify(obj, null, 2))}</pre></details>`;
+  }
+  const isNarrow = () => window.matchMedia('(max-width: 980px)').matches;
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ---------- Settings ----------
+  let storageBlocked = false;
+
+  function defaultSettings() {
+    const id = uid();
+    return {
+      baseUrl: '',
+      authHeader: 'X-API-Key',
+      sendCorrelationId: true,
+      timeoutSec: 20,
+      activeId: id,
+      consumers: [{ id, name: 'Consumer 1', authType: 'apiKey', secret: '', note: '' }]
+    };
+  }
+  function normalize(s) {
+    const d = defaultSettings();
+    if (!s || typeof s !== 'object') return d;
+    const out = {
+      baseUrl: typeof s.baseUrl === 'string' ? s.baseUrl.trim() : '',
+      authHeader: (typeof s.authHeader === 'string' && s.authHeader.trim()) ? s.authHeader.trim() : 'X-API-Key',
+      sendCorrelationId: s.sendCorrelationId !== false,
+      timeoutSec: Math.min(120, Math.max(1, parseInt(s.timeoutSec, 10) || 20)),
+      activeId: s.activeId,
+      consumers: Array.isArray(s.consumers)
+        ? s.consumers.filter(c => c && typeof c === 'object').map(c => ({
+            id: typeof c.id === 'string' && c.id ? c.id : uid(),
+            name: String(c.name || '').trim() || 'Unnamed consumer',
+            authType: c.authType === 'bearer' ? 'bearer' : 'apiKey',
+            secret: String(c.secret || '').trim(),
+            note: String(c.note || '').trim()
+          }))
+        : d.consumers
+    };
+    if (!out.consumers.some(c => c.id === out.activeId)) out.activeId = out.consumers[0]?.id || null;
+    return out;
+  }
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return normalize(JSON.parse(raw));
+    } catch (e) { storageBlocked = true; }
+    return defaultSettings();
+  }
+  function persist() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(settings)); storageBlocked = false; return true; }
+    catch (e) { storageBlocked = true; return false; }
+  }
+
+  let settings = loadSettings();
+  const activeConsumer = () => settings.consumers.find(c => c.id === settings.activeId) || null;
+
+  // ---------- API client ----------
+  class ApiError extends Error {
+    constructor(info) { super(info.message || `HTTP ${info.status}`); Object.assign(this, info); }
+  }
+
+  function buildUrl(base, path, query) {
+    const clean = String(base || '').trim().replace(/\/+$/, '');
+    let u;
+    try { u = new URL(clean + path); }
+    catch (e) { throw new ApiError({ kind: 'config', message: `"${clean || '(empty)'}" is not a full address. Enter the API base address in Settings, starting with https://.` }); }
+    const qs = Object.entries(query || {})
+      .filter(([, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v).replace(/%2C/gi, ',')}`)
+      .join('&');
+    return u.origin + u.pathname + (qs ? `?${qs}` : '');
+  }
+
+  const mask = s => !s ? '' : s.length <= 8 ? '••••••' : `${s.slice(0, 4)}••••${s.slice(-2)}`;
+
+  async function api(method, path, opts = {}) {
+    const consumer = opts.consumer || activeConsumer();
+    const baseUrl = opts.baseUrl ?? settings.baseUrl;
+    const authHeader = (opts.authHeader ?? settings.authHeader) || 'X-API-Key';
+    if (!String(baseUrl || '').trim()) throw new ApiError({ kind: 'config', message: 'Enter the API base address in Settings before loading data.' });
+    if (!consumer) throw new ApiError({ kind: 'config', message: 'Add a consumer with an API key in Settings before loading data.' });
+
+    const url = buildUrl(baseUrl, path, opts.query);
+    const headers = { Accept: 'application/json, application/problem+json' };
+    const corr = settings.sendCorrelationId ? uuid() : null;
+    if (corr) headers['X-Correlation-Id'] = corr;
+    const shown = { ...headers };
+    if (consumer.secret) {
+      if (consumer.authType === 'bearer') { headers.Authorization = `Bearer ${consumer.secret}`; shown.Authorization = `Bearer ${mask(consumer.secret)}`; }
+      else { headers[authHeader] = consumer.secret; shown[authHeader] = mask(consumer.secret); }
+    }
+
+    const entry = {
+      id: uid(), at: new Date(), consumer: consumer.name, method, url,
+      headers, shownHeaders: shown, status: null, ms: null,
+      corrSent: corr, corrReturned: null, etag: null, body: null, error: null
+    };
+    const ctrl = new AbortController();
+    const timeoutSec = settings.timeoutSec || 20;
+    const timer = setTimeout(() => ctrl.abort(), timeoutSec * 1000);
+    const t0 = performance.now();
+    let res, text;
+    try {
+      res = await fetch(url, { method, headers, signal: ctrl.signal, mode: 'cors', credentials: 'omit', cache: 'no-store' });
+      text = await res.text();
+    } catch (e) {
+      entry.ms = Math.round(performance.now() - t0);
+      const timedOut = e.name === 'AbortError';
+      entry.error = timedOut ? `No response after ${timeoutSec}s` : 'Network or CORS error';
+      addLog(entry);
+      throw new ApiError({
+        kind: 'network', status: 0,
+        message: timedOut
+          ? `No response from ${new URL(url).host} within ${timeoutSec} seconds.`
+          : `The browser could not reach ${new URL(url).host}. The address may be wrong, the service may be down, or it does not allow cross-origin calls from this page (CORS).`
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    entry.ms = Math.round(performance.now() - t0);
+    entry.status = res.status;
+    entry.corrReturned = res.headers.get('X-Correlation-Id');
+    entry.etag = res.headers.get('ETag');
+    let body = null;
+    if (text) { try { body = JSON.parse(text); } catch (e) { body = text; } }
+    entry.body = body;
+    addLog(entry);
+
+    if (!res.ok) {
+      const problem = body && typeof body === 'object' ? body : null;
+      throw new ApiError({
+        kind: 'http', status: res.status, problem,
+        raw: typeof body === 'string' ? body : null,
+        correlationId: problem?.correlationId || entry.corrReturned || corr,
+        retryAfter: res.headers.get('Retry-After'),
+        message: `HTTP ${res.status}`
+      });
+    }
+    return { body, etag: entry.etag, correlationId: entry.corrReturned || corr, status: res.status };
+  }
+
+  function errorHtml(err) {
+    if (err.kind === 'config') {
+      return `<div class="problem"><h3>Setup needed</h3><p>${esc(err.message)}</p><p><button type="button" class="linkbtn" data-goto="settings">Open settings</button></p></div>`;
+    }
+    if (err.kind === 'network') {
+      return `<div class="problem"><h3>Can't reach the API</h3><p>${esc(err.message)}</p><p class="hint">The browser console shows the exact reason. For CORS, the API must allow this page's origin and the headers it sends (${esc(settings.authHeader)}, X-Correlation-Id, Authorization).</p></div>`;
+    }
+    if (err.kind !== 'http') {
+      return `<div class="problem"><h3>Something went wrong</h3><p>${esc(err.message)}</p></div>`;
+    }
+    const p = err.problem || {};
+    const [defTitle, help] = STATUS_HELP[err.status] || [`Request failed`, ''];
+    const rows = [
+      ['Status', err.status],
+      p.errorCode && ['Error code', `<span class="id">${esc(p.errorCode)}</span>`],
+      err.correlationId && ['Correlation ID', `<span class="id">${esc(err.correlationId)}</span>`],
+      p.type && ['Problem type', `<span class="id">${esc(p.type)}</span>`],
+      p.instance && ['Instance', `<span class="id">${esc(p.instance)}</span>`],
+      err.retryAfter && ['Retry after', `${esc(err.retryAfter)} seconds`]
+    ].filter(Boolean);
+    const violations = Array.isArray(p.violations) && p.violations.length
+      ? `<ul>${p.violations.map(v => `<li><span class="id">${esc(v.field)}</span>: ${esc(v.message)}</li>`).join('')}</ul>` : '';
+    const raw = err.raw ? `<pre>${esc(err.raw.slice(0, 800))}</pre>` : '';
+    return `<div class="problem">
+      <h3>${esc(p.title || defTitle)}</h3>
+      ${p.detail ? `<p>${esc(p.detail)}</p>` : ''}
+      ${help ? `<p class="hint">${esc(help)}</p>` : ''}
+      ${violations}
+      <dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${typeof v === 'number' ? v : v}</dd>`).join('')}</dl>
+      ${raw}
+    </div>`;
+  }
+
+  // ---------- Activity log ----------
+  const log = [];
+  function addLog(entry) {
+    log.unshift(entry);
+    if (log.length > LOG_LIMIT) log.length = LOG_LIMIT;
+    $('#activityCount').textContent = String(log.length);
+    if (state.tab === 'activity') renderActivity();
+  }
+  function pathOf(url) {
+    try { const u = new URL(url); return u.pathname + u.search; } catch (e) { return url; }
+  }
+  function statusCell(e) {
+    if (e.status === null) return `<span class="code net">${esc(e.error || 'Failed')}</span>`;
+    return `<span class="code ${e.status < 400 ? 'ok' : 'bad'}">${e.status}</span>`;
+  }
+  function renderActivity() {
+    const el = $('#activityList');
+    if (!log.length) {
+      el.innerHTML = emptyHtml('No API calls yet.', ' Load purchase orders or shipments and each request shows up here.');
+      return;
+    }
+    el.innerHTML = `<div class="tablewrap"><table class="grid"><thead><tr>
+        <th>Time</th><th>Consumer</th><th>Request</th><th>Status</th><th class="num">ms</th>
+      </tr></thead><tbody>${log.map(e => `
+        <tr tabindex="0" data-log="${e.id}">
+          <td>${timeFmt.format(e.at)}</td>
+          <td>${esc(e.consumer)}</td>
+          <td><span class="method">${esc(e.method)}</span> <span class="id">${esc(pathOf(e.url))}</span></td>
+          <td>${statusCell(e)}</td>
+          <td class="num">${e.ms ?? ''}</td>
+        </tr>
+        <tr class="logdetail" data-for="${e.id}" hidden><td colspan="5"></td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  function toggleLog(id) {
+    const row = $(`tr.logdetail[data-for="${CSS.escape(id)}"]`);
+    const e = log.find(x => x.id === id);
+    if (!row || !e) return;
+    if (row.hidden && !row.dataset.filled) {
+      const body = e.body === null ? '(no body)' : typeof e.body === 'string' ? e.body : JSON.stringify(e.body, null, 2);
+      row.firstElementChild.innerHTML = `<div class="logbody">
+        <div><h4>URL</h4><pre>${esc(e.method)} ${esc(e.url)}</pre></div>
+        <div><h4>Request headers</h4><pre>${esc(JSON.stringify(e.shownHeaders, null, 2))}</pre></div>
+        <div class="hint">Correlation ID sent: <span class="id">${esc(e.corrSent || 'none')}</span><br>
+          Correlation ID returned: <span class="id">${esc(e.corrReturned || 'not readable (header missing or not exposed by CORS)')}</span>
+          ${e.etag ? `<br>ETag: <span class="id">${esc(e.etag)}</span>` : ''}</div>
+        <div><h4>Response body</h4><pre>${esc(body.length > 60000 ? body.slice(0, 60000) + '\n…truncated' : body)}</pre></div>
+        <div class="actions"><button type="button" data-curl="${e.id}">Copy as cURL (includes the key)</button></div>
+      </div>`;
+      row.dataset.filled = '1';
+    }
+    row.hidden = !row.hidden;
+  }
+  function curlFor(e) {
+    const q = s => `'${String(s).replace(/'/g, `'\\''`)}'`;
+    return ['curl -i', `-X ${e.method}`, q(e.url), ...Object.entries(e.headers).map(([k, v]) => `-H ${q(`${k}: ${v}`)}`)].join(' \\\n  ');
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (x) { ok = false; }
+      ta.remove(); return ok;
+    }
+  }
+
+  // ---------- Shared list state ----------
+  const state = { tab: 'orders' };
+  const orders = { query: null, tokens: [null], page: 0, next: null, loaded: false, selectedId: null, listSeq: 0, detailSeq: 0 };
+  const ships = { query: null, tokens: [null], page: 0, next: null, loaded: false, selectedId: null, listSeq: 0, detailSeq: 0 };
+
+  function renderChips(el, statuses, name) {
+    el.innerHTML = `<legend>Status</legend>` + statuses.map(s =>
+      `<label class="chip"><input type="checkbox" name="${name}" value="${s}"><span>${esc(label(s))}</span></label>`).join('');
+  }
+  function pagerHtml(kind, st, count) {
+    if (st.page === 0 && !st.next) return count ? `<span>${count} shown</span>` : '';
+    return `<button type="button" data-page="${kind}:prev" ${st.page === 0 ? 'disabled' : ''}>Previous page</button>
+      <span>Page ${st.page + 1}, ${count} shown</span>
+      <button type="button" data-page="${kind}:next" ${st.next ? '' : 'disabled'}>Next page</button>`;
+  }
+  function markSelected(listEl, attr, id) {
+    $$(`tr[${attr}]`, listEl).forEach(tr => tr.classList.toggle('selected', tr.getAttribute(attr) === id));
+  }
+
+  // ---------- Purchase orders ----------
+  function readPoQuery() {
+    const fd = new FormData($('#poFilters'));
+    const us = fd.get('updatedSince');
+    let updatedSince = '';
+    if (us) { const d = new Date(us); if (!isNaN(d)) updatedSince = d.toISOString().replace(/\.\d{3}Z$/, 'Z'); }
+    return {
+      supplierId: String(fd.get('supplierId') || '').trim(),
+      status: fd.getAll('poStatus').join(','),
+      updatedSince,
+      pageSize: fd.get('pageSize')
+    };
+  }
+
+  async function loadOrders({ reset = false } = {}) {
+    if (reset || !orders.query) { orders.query = readPoQuery(); orders.tokens = [null]; orders.page = 0; }
+    const seq = ++orders.listSeq;
+    $('#poList').innerHTML = loadingHtml('Loading purchase orders…');
+    $('#poPager').innerHTML = '';
+    try {
+      const { body } = await api('GET', '/purchase-orders', { query: { ...orders.query, pageToken: orders.tokens[orders.page] } });
+      if (seq !== orders.listSeq) return;
+      orders.loaded = true;
+      const items = Array.isArray(body?.items) ? body.items : [];
+      orders.next = body?.nextPageToken || null;
+      $('#poList').innerHTML = poTable(items);
+      $('#poPager').innerHTML = pagerHtml('po', orders, items.length);
+    } catch (e) {
+      if (seq !== orders.listSeq) return;
+      orders.loaded = true;
+      $('#poList').innerHTML = errorHtml(e);
+    }
+  }
+
+  function poTable(items) {
+    if (!items.length) return emptyHtml('No purchase orders match these filters for this consumer.', ' Clear the filters, or switch consumer at the top.');
+    return `<div class="tablewrap"><table class="grid"><thead><tr>
+        <th>Order</th><th>Supplier</th><th>Status</th><th>Requested delivery</th><th class="num">Lines</th><th class="num">Value</th>
+      </tr></thead><tbody>${items.map(po => `
+        <tr tabindex="0" data-po="${esc(po.purchaseOrderId)}" class="${po.purchaseOrderId === orders.selectedId ? 'selected' : ''}">
+          <td><span class="id">${esc(po.purchaseOrderId)}</span><div class="sub">${esc(po.buyingOrganization || '')}, ordered ${fmtDate(po.orderDate)}</div></td>
+          <td class="id">${esc(po.supplierId)}</td>
+          <td>${badge(po.status)}</td>
+          <td>${fmtDate(po.requestedDeliveryDate)}</td>
+          <td class="num">${Array.isArray(po.lines) ? po.lines.length : '—'}</td>
+          <td class="num">${fmtMoney(poValue(po), po.currency)}</td>
+        </tr>`).join('')}</tbody></table></div>`;
+  }
+
+  async function openPo(id) {
+    if (!id) return;
+    orders.selectedId = id;
+    markSelected($('#poList'), 'data-po', id);
+    const pane = $('#poDetail');
+    const seq = ++orders.detailSeq;
+    pane.innerHTML = loadingHtml(`Loading ${id}…`);
+    if (isNarrow()) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const res = await api('GET', `/purchase-orders/${encodeURIComponent(id)}`);
+      if (seq !== orders.detailSeq) return;
+      pane.innerHTML = res.body && typeof res.body === 'object' ? poDetail(res.body, res) : errorHtml({ kind: 'other', message: 'The API returned an empty or non-JSON body.' });
+    } catch (e) {
+      if (seq !== orders.detailSeq) return;
+      pane.innerHTML = errorHtml(e);
+    }
+  }
+
+  function poRail(status) {
+    const halted = status === 'CANCELLED';
+    const idx = PO_FLOW.indexOf(status);
+    return `<ol class="rail ${halted ? 'halted' : ''}" style="--n:${PO_FLOW.length}" aria-label="Order lifecycle">${PO_FLOW.map((s, i) => {
+      const cls = halted ? '' : i < idx ? 'done' : i === idx ? 'current' : '';
+      return `<li class="step ${cls}"${i === idx ? ' aria-current="step"' : ''}>${esc(label(s))}</li>`;
+    }).join('')}</ol>${halted ? '<p class="halt-note">This order was cancelled.</p>' : ''}`;
+  }
+
+  function poDetail(po, meta) {
+    const lines = Array.isArray(po.lines) ? po.lines : [];
+    return `<article class="detail">
+      <header class="dhead">
+        <div><h2>${esc(po.purchaseOrderId)}</h2><p class="sub">${esc(po.buyingOrganization || '')} to supplier <span class="id">${esc(po.supplierId)}</span></p></div>
+        ${badge(po.status)}
+      </header>
+      ${poRail(po.status)}
+      <dl class="facts">
+        ${fact('Order date', fmtDate(po.orderDate))}
+        ${fact('Requested delivery', fmtDate(po.requestedDeliveryDate))}
+        ${fact('Order value', fmtMoney(poValue(po), po.currency))}
+        ${fact('Last updated', fmtDateTime(po.lastUpdatedAt))}
+      </dl>
+      <h3>Ship to</h3>
+      ${addressHtml(po.shipTo)}
+      <h3>Lines</h3>
+      ${lines.length ? `<div class="tablewrap"><table class="grid"><thead><tr>
+          <th class="num">Line</th><th>Material</th><th class="num">Ordered</th><th class="num">Acknowledged</th><th class="num">Unit price</th>
+        </tr></thead><tbody>${lines.map(l => {
+          const ack = typeof l.acknowledgedQuantity === 'number' ? l.acknowledgedQuantity : 0;
+          const pct = l.orderedQuantity > 0 ? Math.min(100, Math.round(ack / l.orderedQuantity * 100)) : 0;
+          return `<tr>
+            <td class="num">${esc(l.lineNumber)}</td>
+            <td><span class="id">${esc(l.materialId)}</span><div class="sub">${esc(l.description)}</div></td>
+            <td class="num">${fmtNum(l.orderedQuantity)} ${esc(l.unitOfMeasure || '')}</td>
+            <td class="num">${fmtNum(ack)}<span class="meter" title="${pct}% acknowledged"><span style="width:${pct}%"></span></span></td>
+            <td class="num">${fmtMoney(l.unitPrice, po.currency)}</td>
+          </tr>`;
+        }).join('')}</tbody></table></div>` : '<p class="hint">No lines returned.</p>'}
+      <div class="dactions">
+        <button type="button" data-shipments-for="${esc(po.purchaseOrderId)}">Show shipments for this order</button>
+      </div>
+      ${rawJson(po, meta)}
+    </article>`;
+  }
+
+  // ---------- Shipments ----------
+  function readShpQuery() {
+    const fd = new FormData($('#shpFilters'));
+    return {
+      purchaseOrderId: String(fd.get('purchaseOrderId') || '').trim(),
+      supplierId: String(fd.get('supplierId') || '').trim(),
+      status: fd.getAll('shpStatus').join(','),
+      pageSize: fd.get('pageSize')
+    };
+  }
+
+  async function loadShipments({ reset = false } = {}) {
+    if (reset || !ships.query) { ships.query = readShpQuery(); ships.tokens = [null]; ships.page = 0; }
+    const seq = ++ships.listSeq;
+    $('#shpList').innerHTML = loadingHtml('Loading shipments…');
+    $('#shpPager').innerHTML = '';
+    try {
+      const { body } = await api('GET', '/shipments', { query: { ...ships.query, pageToken: ships.tokens[ships.page] } });
+      if (seq !== ships.listSeq) return;
+      ships.loaded = true;
+      const items = Array.isArray(body?.items) ? body.items : [];
+      ships.next = body?.nextPageToken || null;
+      $('#shpList').innerHTML = shpTable(items);
+      $('#shpPager').innerHTML = pagerHtml('shp', ships, items.length);
+    } catch (e) {
+      if (seq !== ships.listSeq) return;
+      ships.loaded = true;
+      $('#shpList').innerHTML = errorHtml(e);
+    }
+  }
+
+  function shpTable(items) {
+    if (!items.length) return emptyHtml('No shipments match these filters for this consumer.', ' Clear the filters, or switch consumer at the top.');
+    return `<div class="tablewrap"><table class="grid"><thead><tr>
+        <th>Shipment</th><th>Supplier</th><th>Status</th><th>Carrier</th><th>Expected arrival</th><th>Orders</th>
+      </tr></thead><tbody>${items.map(s => `
+        <tr tabindex="0" data-shp="${esc(s.shipmentId)}" class="${s.shipmentId === ships.selectedId ? 'selected' : ''}">
+          <td><span class="id">${esc(s.shipmentId)}</span><div class="sub">Notice ${esc(s.shipmentNoticeNumber || '—')}</div></td>
+          <td class="id">${esc(s.supplierId)}</td>
+          <td>${badge(s.status)}</td>
+          <td>${esc(s.carrierCode || '—')}${s.trackingNumber ? `<div class="sub id">${esc(s.trackingNumber)}</div>` : ''}</td>
+          <td>${fmtDateTime(s.expectedArrivalAt)}</td>
+          <td class="id">${esc((s.purchaseOrders || []).join(', ') || '—')}</td>
+        </tr>`).join('')}</tbody></table></div>`;
+  }
+
+  async function openShipment(id) {
+    if (!id) return;
+    ships.selectedId = id;
+    markSelected($('#shpList'), 'data-shp', id);
+    const pane = $('#shpDetail');
+    const seq = ++ships.detailSeq;
+    pane.innerHTML = loadingHtml(`Loading ${id}…`);
+    if (isNarrow()) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const res = await api('GET', `/shipments/${encodeURIComponent(id)}`);
+      if (seq !== ships.detailSeq) return;
+      if (!res.body || typeof res.body !== 'object') { pane.innerHTML = errorHtml({ kind: 'other', message: 'The API returned an empty or non-JSON body.' }); return; }
+      pane.innerHTML = shpDetail(res.body, res);
+      const track = $('.track', pane);
+      if (track) requestAnimationFrame(() => requestAnimationFrame(() => track.style.setProperty('--p', `${track.dataset.p}%`)));
+    } catch (e) {
+      if (seq !== ships.detailSeq) return;
+      pane.innerHTML = errorHtml(e);
+    }
+  }
+
+  function routeHtml(s) {
+    const p = SHIP_PROGRESS[s.status] ?? 0;
+    const cls = s.status === 'DELAYED' ? 'delayed' : s.status === 'CANCELLED' ? 'cancelled' : s.status === 'DELIVERED' ? 'arrived' : '';
+    const from = s.shipFrom || {}, to = s.shipTo || {};
+    return `<div class="route ${cls}">
+      <div class="end">
+        <span>From</span>
+        <strong>${esc(from.name || '—')}</strong>
+        <span>${esc(placeLine(from))}</span>
+        <span class="when">Ships ${fmtDateTime(s.plannedShipAt)}</span>
+      </div>
+      <div class="track" data-p="${p}" role="img" aria-label="Shipment ${esc(label(s.status))}">
+        <span class="fill"></span>${s.status === 'CANCELLED' ? '' : `<span class="truck">${TRUCK_SVG}</span>`}
+      </div>
+      <div class="end to">
+        <span>To</span>
+        <strong>${esc(to.name || '—')}</strong>
+        <span>${esc(placeLine(to))}</span>
+        <span class="when">${s.status === 'DELIVERED' ? 'Expected' : 'Arrives'} ${fmtDateTime(s.expectedArrivalAt)}</span>
+      </div>
+    </div>`;
+  }
+
+  function shpDetail(s, meta) {
+    const lines = Array.isArray(s.lines) ? s.lines : [];
+    const pkgs = Array.isArray(s.packages) ? s.packages : [];
+    const pos = Array.isArray(s.purchaseOrders) ? s.purchaseOrders : [...new Set(lines.map(l => l.purchaseOrderId).filter(Boolean))];
+    return `<article class="detail">
+      <header class="dhead">
+        <div><h2>${esc(s.shipmentId)}</h2><p class="sub">Notice ${esc(s.shipmentNoticeNumber || '—')} from supplier <span class="id">${esc(s.supplierId)}</span></p></div>
+        ${badge(s.status)}
+      </header>
+      ${routeHtml(s)}
+      <dl class="facts">
+        ${fact('Carrier', esc(s.carrierCode || '—'))}
+        ${fact('Tracking number', s.trackingNumber ? `<span class="id">${esc(s.trackingNumber)}</span>` : '—')}
+        ${fact('Created', fmtDateTime(s.createdAt))}
+        ${fact('Last updated', fmtDateTime(s.lastUpdatedAt))}
+        ${fact('Orders', pos.length ? `<span class="polinks">${pos.map(id => `<button type="button" class="linkbtn id" data-open-po="${esc(id)}">${esc(id)}</button>`).join('')}</span>` : '—')}
+      </dl>
+      <h3>Lines</h3>
+      ${lines.length ? `<div class="tablewrap"><table class="grid"><thead><tr>
+          <th>Order</th><th class="num">Line</th><th class="num">Shipped</th><th>Lot</th>
+        </tr></thead><tbody>${lines.map(l => `<tr>
+          <td class="id">${esc(l.purchaseOrderId)}</td>
+          <td class="num">${esc(l.lineNumber)}</td>
+          <td class="num">${fmtNum(l.shippedQuantity)} ${esc(l.unitOfMeasure || '')}</td>
+          <td class="id">${esc(l.lotNumber || '—')}</td>
+        </tr>`).join('')}</tbody></table></div>` : '<p class="hint">No lines returned.</p>'}
+      ${pkgs.length ? `<h3>Packages</h3><div class="tablewrap"><table class="grid"><thead><tr>
+          <th>Package</th><th>Type</th><th class="num">Gross weight</th>
+        </tr></thead><tbody>${pkgs.map(p => `<tr>
+          <td class="id">${esc(p.packageId)}</td>
+          <td>${esc(label(p.packageType))}</td>
+          <td class="num">${typeof p.grossWeight === 'number' ? `${fmtNum(p.grossWeight)} ${esc((p.weightUnit || '').toLowerCase())}` : '—'}</td>
+        </tr>`).join('')}</tbody></table></div>` : ''}
+      ${rawJson(s, meta)}
+    </article>`;
+  }
+
+  // ---------- Header, tabs ----------
+  function renderConsumerSelect() {
+    const sel = $('#consumerSelect');
+    if (!settings.consumers.length) { sel.innerHTML = '<option value="">No consumers yet</option>'; sel.disabled = true; return; }
+    sel.disabled = false;
+    sel.innerHTML = settings.consumers.map(c =>
+      `<option value="${esc(c.id)}"${c.id === settings.activeId ? ' selected' : ''}>${esc(c.name)}${c.secret ? '' : ' (no key)'}</option>`).join('');
+  }
+  function renderEnv() {
+    let text = 'API address not set';
+    try { if (settings.baseUrl) { const u = new URL(settings.baseUrl); text = u.host + u.pathname.replace(/\/+$/, ''); } } catch (e) { text = 'API address is not a valid URL'; }
+    $('#envLabel').textContent = text;
+  }
+  function showTab(name) {
+    if (!['orders', 'shipments', 'activity', 'settings'].includes(name)) name = 'orders';
+    state.tab = name;
+    $$('.tabs [role=tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    $$('.tab').forEach(s => { s.hidden = s.id !== `tab-${name}`; });
+    if (name === 'activity') renderActivity();
+    if (name === 'settings') renderSettings();
+    try { history.replaceState(null, '', `#${name}`); } catch (e) { /* file:// in some browsers */ }
+  }
+  function introStates() {
+    if (!orders.loaded) $('#poList').innerHTML = emptyHtml('Load purchase orders to begin.', ' Pick filters above, or leave them empty to see every order this consumer can access.');
+    if (!ships.loaded) $('#shpList').innerHTML = emptyHtml('Load shipments to begin.', ' Filter by order, supplier or status, or leave them empty.');
+    if (!orders.selectedId) $('#poDetail').innerHTML = emptyHtml('No order selected.', ' Select an order in the list to see its lifecycle, lines and ship-to site.');
+    if (!ships.selectedId) $('#shpDetail').innerHTML = emptyHtml('No shipment selected.', ' Select a shipment to see its route, lines and packages.');
+  }
+  function refreshForConsumer() {
+    if (orders.loaded) loadOrders();
+    if (orders.selectedId) openPo(orders.selectedId);
+    if (ships.loaded) loadShipments();
+    if (ships.selectedId) openShipment(ships.selectedId);
+  }
+
+  // ---------- Settings UI ----------
+  function consumerRow(c, isActive) {
+    const node = $('#consumerRowTpl').content.firstElementChild.cloneNode(true);
+    node.dataset.id = c.id;
+    node.classList.toggle('active', isActive);
+    $('input[type=radio]', node).checked = isActive;
+    $('[data-f=name]', node).value = c.name;
+    $('[data-f=authType]', node).value = c.authType;
+    $('[data-f=secret]', node).value = c.secret;
+    $('[data-f=note]', node).value = c.note;
+    return node;
+  }
+  function renderSettings(src = settings) {
+    const f = $('#settingsForm');
+    f.baseUrl.value = src.baseUrl;
+    f.authHeader.value = src.authHeader;
+    f.timeoutSec.value = src.timeoutSec;
+    f.sendCorrelationId.checked = src.sendCorrelationId;
+    const rows = $('#consumerRows');
+    rows.innerHTML = '';
+    src.consumers.forEach(c => rows.appendChild(consumerRow(c, c.id === src.activeId)));
+    $('#storageNote').textContent = storageBlocked
+      ? 'This browser is blocking local storage, so settings last only until you close or reload the page. Export them to keep a copy.'
+      : 'Settings, including API keys, are saved in this browser only. Exported files contain the keys in plain text.';
+  }
+  function readSettingsForm() {
+    const f = $('#settingsForm');
+    const consumers = $$('.crow', f).map(r => ({
+      id: r.dataset.id,
+      name: $('[data-f=name]', r).value,
+      authType: $('[data-f=authType]', r).value,
+      secret: $('[data-f=secret]', r).value,
+      note: $('[data-f=note]', r).value
+    }));
+    const activeRow = $$('.crow', f).find(r => $('input[type=radio]', r).checked);
+    return normalize({
+      baseUrl: f.baseUrl.value,
+      authHeader: f.authHeader.value,
+      timeoutSec: f.timeoutSec.value,
+      sendCorrelationId: f.sendCorrelationId.checked,
+      activeId: activeRow ? activeRow.dataset.id : consumers[0]?.id,
+      consumers
+    });
+  }
+  function applySettings(next, msg) {
+    const prevActive = settings.activeId;
+    settings = next;
+    const saved = persist();
+    renderConsumerSelect();
+    renderEnv();
+    renderSettings();
+    toast(saved ? msg : `${msg} for this session only. This browser blocks local storage.`);
+    if (prevActive !== settings.activeId) refreshForConsumer();
+  }
+
+  async function testRow(row) {
+    const out = $('.testresult', row);
+    const draft = readSettingsForm();
+    const c = draft.consumers.find(x => x.id === row.dataset.id);
+    out.className = 'testresult';
+    out.textContent = 'Testing…';
+    try {
+      const res = await api('GET', '/purchase-orders', { query: { pageSize: 1 }, consumer: c, baseUrl: draft.baseUrl, authHeader: draft.authHeader });
+      const n = Array.isArray(res.body?.items) ? res.body.items.length : 0;
+      out.className = 'testresult ok';
+      out.textContent = `Connected, HTTP ${res.status}. ${n ? 'Orders are visible to this consumer.' : 'No orders visible to this consumer.'}`;
+    } catch (e) {
+      out.className = 'testresult bad';
+      if (e.kind === 'http') {
+        const t = e.problem?.title || (STATUS_HELP[e.status] || [])[0] || 'Request failed';
+        out.textContent = `HTTP ${e.status}: ${t}${e.problem?.errorCode ? ` (${e.problem.errorCode})` : ''}`;
+      } else {
+        out.textContent = e.message;
+      }
+    }
+  }
+
+  // ---------- Events ----------
+  function bind() {
+    $$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+    $('#consumerSelect').addEventListener('change', e => {
+      settings.activeId = e.target.value;
+      persist();
+      const c = activeConsumer();
+      toast(`Calling as ${c ? c.name : 'nobody'}`);
+      if (state.tab === 'settings') renderSettings();
+      refreshForConsumer();
+    });
+
+    $('#poFilters').addEventListener('submit', e => { e.preventDefault(); loadOrders({ reset: true }); });
+    $('#shpFilters').addEventListener('submit', e => { e.preventDefault(); loadShipments({ reset: true }); });
+    $('#poLookup').addEventListener('submit', e => {
+      e.preventDefault();
+      const id = e.target.id.value.trim().toUpperCase();
+      if (id) openPo(id);
+    });
+    $('#shpLookup').addEventListener('submit', e => {
+      e.preventDefault();
+      const id = e.target.id.value.trim().toUpperCase();
+      if (id) openShipment(id);
+    });
+
+    $('#clearLog').addEventListener('click', () => { log.length = 0; $('#activityCount').textContent = '0'; renderActivity(); });
+
+    document.addEventListener('click', async e => {
+      const t = e.target.closest('[data-goto],[data-po],[data-shp],[data-page],[data-shipments-for],[data-open-po],[data-log],[data-curl]');
+      if (!t) return;
+      if (t.dataset.goto) return showTab(t.dataset.goto);
+      if (t.dataset.curl) {
+        const entry = log.find(x => x.id === t.dataset.curl);
+        if (entry) toast(await copyText(curlFor(entry)) ? 'cURL command copied' : 'Copy failed. Select the text manually.');
+        return;
+      }
+      if (t.dataset.log) return toggleLog(t.dataset.log);
+      if (t.dataset.po) return openPo(t.dataset.po);
+      if (t.dataset.shp) return openShipment(t.dataset.shp);
+      if (t.dataset.openPo) { showTab('orders'); return openPo(t.dataset.openPo); }
+      if (t.dataset.shipmentsFor) {
+        const f = $('#shpFilters');
+        f.purchaseOrderId.value = t.dataset.shipmentsFor;
+        f.supplierId.value = '';
+        $$('input[name=shpStatus]', f).forEach(i => { i.checked = false; });
+        showTab('shipments');
+        return loadShipments({ reset: true });
+      }
+      if (t.dataset.page) {
+        const [kind, dir] = t.dataset.page.split(':');
+        const st = kind === 'po' ? orders : ships;
+        if (dir === 'next' && st.next) { st.tokens[st.page + 1] = st.next; st.page += 1; }
+        else if (dir === 'prev' && st.page > 0) { st.page -= 1; }
+        else return;
+        return kind === 'po' ? loadOrders() : loadShipments();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[tabindex]')) { e.preventDefault(); e.target.click(); }
+    });
+
+    // Settings form
+    const sf = $('#settingsForm');
+    sf.addEventListener('submit', e => { e.preventDefault(); applySettings(readSettingsForm(), 'Settings saved'); });
+    $('#addConsumer').addEventListener('click', () => {
+      const rows = $('#consumerRows');
+      const c = { id: uid(), name: `Consumer ${rows.children.length + 1}`, authType: 'apiKey', secret: '', note: '' };
+      const row = consumerRow(c, rows.children.length === 0);
+      rows.appendChild(row);
+      $('[data-f=name]', row).select();
+    });
+    $('#consumerRows').addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      const row = btn.closest('.crow');
+      if (btn.dataset.act === 'reveal') {
+        const input = $('[data-f=secret]', row);
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+        btn.setAttribute('aria-label', show ? 'Hide key' : 'Show key');
+      } else if (btn.dataset.act === 'remove') {
+        const wasActive = $('input[type=radio]', row).checked;
+        row.remove();
+        const first = $('#consumerRows .crow');
+        if (wasActive && first) { $('input[type=radio]', first).checked = true; first.classList.add('active'); }
+      } else if (btn.dataset.act === 'test') {
+        testRow(row);
+      }
+    });
+    $('#consumerRows').addEventListener('change', e => {
+      if (e.target.type === 'radio') $$('#consumerRows .crow').forEach(r => r.classList.toggle('active', $('input[type=radio]', r).checked));
+    });
+
+    $('#exportSettings').addEventListener('click', () => {
+      const data = JSON.stringify(readSettingsForm(), null, 2);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+      a.download = 'supplier-order-console-settings.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      toast('Settings exported, including API keys');
+    });
+    $('#importSettings').addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try { applySettings(normalize(JSON.parse(String(reader.result))), 'Settings imported'); }
+        catch (err) { toast('That file is not a valid settings export.'); }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
+    $('.filebtn').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#importSettings').click(); }
+    });
+    $('#resetSettings').addEventListener('click', () => {
+      if (!confirm('Remove the API address and every saved consumer and key from this browser?')) return;
+      applySettings(defaultSettings(), 'Settings reset');
+    });
+  }
+
+  // ---------- Start ----------
+  renderChips($('#poStatus'), PO_STATUSES, 'poStatus');
+  renderChips($('#shpStatus'), SHIP_STATUSES, 'shpStatus');
+  renderConsumerSelect();
+  renderEnv();
+  introStates();
+  bind();
+  const hash = (location.hash || '').replace('#', '');
+  showTab(settings.baseUrl ? (hash || 'orders') : 'settings');
+})();
+</script>
+</body>
+</html>

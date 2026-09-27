@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.4.0
+
+The façade has its own folder, and a browser console for calling it.
+
+- **New `facade/` folder.** The façade spec moved from the repository root to
+  `facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml` (content unchanged by the move). Links in the README,
+  `docs/MAPPING.md` and `CLAUDE.md` point to the new path.
+- **Fusion-friendly status filters in the façade spec.** The `status` query parameters on `GET /purchase-orders`
+  and `GET /shipments` are now strings holding a comma-separated list, checked by a pattern of the allowed values,
+  with a description and an example, instead of arrays with `style: form, explode: false`. The wire format is the
+  same. `docs/MAPPING.md` describes the filter accordingly.
+- **New `facade/facade-console.html`.** A single-file web app for calling the façade in Fusion: a Settings tab
+  (base address, key header, one API key or bearer token per consumer, kept in localStorage, with export and
+  import), purchase-order and shipment lists and details, a *Calling as* consumer switcher, and an Activity log
+  with correlation IDs and *Copy as cURL*.
+- New `facade/README.md` (spec notes, opening the console, CORS the façade must allow, troubleshooting). README:
+  *Façade console* section, notes on the status filters and duplicate-proxy import errors in *Using the specs in
+  Amplify Fusion*, updated project structure. `CLAUDE.md`: `facade/` in *Where things are*.
+- No change to the backends, seed data, Postman collection or dashboard.
+
 ## 2.3.0
 
 Seed data no longer goes stale.
