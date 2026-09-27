@@ -19,7 +19,7 @@ function externalBaseUrl(req) {
 /**
  * Serves, under the service base path:
  *   GET /openapi.json   spec with `servers` rewritten to the caller-visible URL
- *   GET /openapi.yaml   same, as YAML (import this into the iPaaS)
+ *   GET /openapi.yaml   same, as YAML (import this into the façade layer)
  *   GET /api-docs       Swagger UI
  */
 function docsRouter({ specFile, basePath }) {

@@ -2,7 +2,7 @@
 
 /**
  * Internal error representation. Each backend renders it in its OWN wire
- * format (see services/<name>/errors.js) so the iPaaS has to normalise
+ * format (see services/<name>/errors.js) so the façade layer has to normalise
  * three different error dialects into RFC 7807 ProblemDetails.
  */
 class ApiError extends Error {

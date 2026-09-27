@@ -1,7 +1,7 @@
 {
   "name": "mock-purchase-order-backend",
-  "version": "2.4.0",
-  "description": "Three independent mock backends (ERP purchasing, SRM supplier master, TMS logistics) with Postgres persistence and OpenAPI specs, built to demonstrate orchestration, transformation and aggregation in an iPaaS (Axway Amplify Fusion) behind the Supplier Order Collaboration API.",
+  "version": "2.5.0",
+  "description": "Three independent mock backends (ERP purchasing, SRM supplier master, TMS logistics) with Postgres persistence and OpenAPI specs, built to demonstrate orchestration, transformation and aggregation in whatever implements the Supplier Order Collaboration API façade (an iPaaS, an API gateway or any API framework).",
   "main": "src/index.js",
   "license": "MIT",
   "private": true,

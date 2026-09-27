@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.5.0
+
+The façade is no longer tied to one product, and the lockfile is no longer committed.
+
+- **Framework-neutral façade docs.** The façade can be implemented with any integration platform, API gateway
+  or API framework, and the docs now say so. References to a specific product are gone from `README.md`,
+  `facade/README.md`, `facade/facade-console.html` (a Settings hint), `docs/MAPPING.md`, `CLAUDE.md` and the
+  `package.json` description. The README section *Using the specs in Amplify Fusion* is now *Implementing the
+  façade*, and its duplicate-import note is written generically. "The iPaaS" became "the façade layer" in the
+  backend spec descriptions (`openapi/*.yaml`), the ERP dashboard view, code comments and the Postman
+  *Scenarios* folder description (collection regenerated; that line is the only change).
+- **`package-lock.json` is ignored.** It is listed in `.gitignore` and removed from the repository.
+  `npm install` (Codespaces `postCreateCommand`, Dockerfile) resolves dependencies from `package.json` as before.
+- The façade spec itself, the backends, seed data and dashboard behaviour are unchanged.
+
 ## 2.4.0
 
 The façade has its own folder, and a browser console for calling it.

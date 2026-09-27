@@ -515,7 +515,7 @@ FACADE_ASN_RESPONSE = {
     "status": "SUBMITTED", "purchaseOrders": ["PO-4500123456", "PO-4500123467"], "createdAt": NOW_ISO, "lastUpdatedAt": NOW_ISO,
 }
 
-# Response mapping in JavaScript: TMS shipment -> façade Shipment. The same code an iPaaS mapping would express.
+# Response mapping in JavaScript: TMS shipment -> façade Shipment. The same mapping any façade implementation would express.
 FACADE_MAP_JS = [
     "// Build the façade 201 response from the TMS shipment saved in step 2.",
     "const s = JSON.parse(pm.collectionVariables.get('scShipmentJson'));",
@@ -683,7 +683,7 @@ top = [
     folder('ERP - Purchasing', erp_items, desc='SAP-flavoured purchasing system of record. snake_case, YYYYMMDD dates, decimals as strings, {data, pagination} envelope, page/limit paging.', auth=apikey('erpApiKey')),
     folder('SRM - Supplier master', srm_items, desc='Supplier master, consumer entitlements and the check endpoint (authorization plus supplier/vendor resolution). Nested camelCase, offset paging.', auth=apikey('srmApiKey')),
     folder('TMS - Logistics', tms_items, desc='Shipments, tracking events and carriers. Milestone codes, nested quantities, cursor paging.', auth=apikey('tmsApiKey')),
-    folder('Scenarios - façade walkthroughs', scenarios, desc='For each façade operation, the exact backend calls the iPaaS makes, in order. Each scenario can be run on its own.'),
+    folder('Scenarios - façade walkthroughs', scenarios, desc='For each façade operation, the exact backend calls the façade makes, in order. Each scenario can be run on its own.'),
 ]
 
 # ─── Post-processing: examples, descriptions, variable guards ─────────────

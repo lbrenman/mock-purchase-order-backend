@@ -1,12 +1,12 @@
 # Façade
 
-This folder holds the **front-end** side of the demo: the API that Amplify Fusion exposes to consumers, and a
-browser app for calling it. The three mock backends behind the façade live in the rest of the repository,
+This folder holds the **front-end** side of the demo: the API exposed to consumers, and a browser app for
+calling it. The façade can be implemented with any integration platform, API gateway or API framework. The three mock backends behind the façade live in the rest of the repository,
 with their own specs in [`../openapi/`](../openapi/).
 
 | File | What it is |
 |---|---|
-| [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) | The *Supplier Order Collaboration API* (OpenAPI 3.1). Import it into Fusion and implement it with the recipes in [`../docs/MAPPING.md`](../docs/MAPPING.md). |
+| [`Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](Supplier_Order_Collaboration_OpenAPI_3_1.yaml) | The *Supplier Order Collaboration API* (OpenAPI 3.1). Implement it with the recipes in [`../docs/MAPPING.md`](../docs/MAPPING.md). |
 | [`facade-console.html`](facade-console.html) | A single-file web app that calls the façade as one of several consumers and shows the results. |
 
 ---
@@ -16,7 +16,7 @@ with their own specs in [`../openapi/`](../openapi/).
 Six operations: list and get purchase orders, acknowledge a purchase order, create an advance shipment
 notice, and list and get shipments. Errors are RFC 7807 ProblemDetails.
 
-**Fusion-friendly status filters.** The `status` query parameter on `GET /purchase-orders` and
+**Status filters as comma-separated strings.** The `status` query parameter on `GET /purchase-orders` and
 `GET /shipments` is a plain string holding a comma-separated list, with a pattern that lists the allowed
 values, for example:
 
@@ -27,13 +27,13 @@ schema:
 example: OPEN,PARTIALLY_ACKNOWLEDGED
 ```
 
-Fusion handles array query parameters poorly, so keep new multi-value filters in this form: `type: string`,
+Some API platforms and code generators handle array query parameters poorly, so keep new multi-value
+filters in this form: `type: string`,
 a pattern built from the enum values, no spaces, and no `style` or `explode`. On the wire it is the same as
 an array with `style: form, explode: false`, so consumers see no difference.
 
-**Importing into Fusion.** If the import fails with *Failed to update API proxy: Cursor returned more than one
-result*, the tenant has more than one proxy matching the same API. Remove the duplicates, or change
-`info.title` or bump `info.version` in the spec before importing.
+**Importing the spec.** If your platform rejects the import because an API with the same title and version
+already exists, remove the duplicate, or change `info.title` or bump `info.version` in the spec.
 
 ---
 
@@ -46,7 +46,7 @@ install. It loads the Barlow fonts from Google Fonts and falls back to system fo
 
 - **Settings** tab
   - *API base address*: everything before `/purchase-orders`, for example
-    `https://<your-fusion-host>/supplier-collaboration/v1`.
+    `https://<your-facade-host>/supplier-collaboration/v1`.
   - *API key header*: the header that carries the key. Default `X-API-Key`, as in the spec.
   - *Timeout* and whether to send an `X-Correlation-Id` (a new UUID per request).
   - *Consumers*: one row per consumer, each with a name, a credential type (API key, or bearer token for
@@ -92,7 +92,7 @@ The first time, the console opens on **Settings**. Enter the base address and at
 
 ### What the façade must allow (CORS)
 
-The browser calls Fusion directly, so the façade proxy must answer CORS preflights for the origin the page is
+The browser calls the façade directly, so the façade must answer CORS preflights for the origin the page is
 served from (for example `http://localhost:8080` or the Codespace's forwarded URL):
 
 | Header | Value |
@@ -117,8 +117,8 @@ computer.
 
 | Symptom | Fix |
 |---|---|
-| *Can't reach the API* | The browser console shows the reason. Usually CORS: the façade must allow the page's origin and headers (above). Also check the base address and that the proxy is deployed. |
-| `401 Authentication required` for every consumer | Check the *API key header* name matches what Fusion expects, and that each key is saved. |
+| *Can't reach the API* | The browser console shows the reason. Usually CORS: the façade must allow the page's origin and headers (above). Also check the base address and that the façade is deployed. |
+| `401 Authentication required` for every consumer | Check the *API key header* name matches what the façade expects, and that each key is saved. |
 | `403` or `404` for one consumer only | Working as designed: that consumer isn't authorized for the supplier or record. |
 | `400` on a status filter | Values must be from the spec's list, comma-separated with no spaces. The chips always send a valid list. |
 | Activity shows *not readable* for the returned correlation ID | Add `X-Correlation-Id` to `Access-Control-Expose-Headers`. |

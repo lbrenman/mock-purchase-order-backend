@@ -6,7 +6,7 @@ const { ApiError } = require('./errors');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** Echo X-Correlation-Id (or generate one) so traces line up across iPaaS + backends. */
+/** Echo X-Correlation-Id (or generate one) so traces line up across the façade layer and the backends. */
 function correlation() {
   return (req, res, next) => {
     const incoming = req.get('x-correlation-id');
@@ -40,7 +40,7 @@ function apiKeyAuth({ mode, apiKey, header, formatError }) {
 }
 
 /**
- * Demo helpers for showing resilience patterns in the iPaaS:
+ * Demo helpers for showing resilience patterns in the façade layer:
  *  - <SVC>_LATENCY_MS    constant artificial latency (e.g. a "slow legacy ERP")
  *  - <SVC>_ERROR_RATE    fraction (0..1) of requests that randomly return 503
  *  - x-mock-delay-ms     per-request latency override (max 30000)

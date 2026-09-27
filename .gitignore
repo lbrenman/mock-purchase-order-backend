@@ -1,10 +1,12 @@
-package-lock.json
 node_modules/
 .env
 .pgdata/
 *.log
 .DS_Store
 coverage/
+
+# Lockfile is not committed; npm install resolves dependencies from package.json
+package-lock.json
 
 # Python helper scripts in tools/
 __pycache__/

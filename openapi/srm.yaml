@@ -13,7 +13,7 @@ info:
     read `supplier.erpVendorNumber` / `supplier.supplierCode` plus `allowedVendors` (the vendor numbers
     of every supplier the consumer may see) from the response. `/vendor-xref` remains for ad-hoc lookups.
 
-    Differences from the façade the iPaaS must handle:
+    Differences from the façade that the façade layer must handle:
     * Nested camelCase (`name.legal`, `classification.tier`, `address.postalCode`).
     * Offset pagination: `{ total, offset, limit, items }`.
     * Error dialect: `{ "errors": [ { "code", "message", "field?" } ], "traceId" }`.

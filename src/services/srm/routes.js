@@ -145,7 +145,7 @@ module.exports = function buildSrmRoutes({ pool, idem }) {
     })
   );
 
-  /** Update master data. Also the demo control to put a supplier on hold / block it (governance failures in the iPaaS). */
+  /** Update master data. Also the demo control to put a supplier on hold / block it (governance failures in the façade). */
   r.patch(
     '/suppliers/:supplierCode',
     asyncHandler(async (req, res) => {
@@ -320,7 +320,7 @@ module.exports = function buildSrmRoutes({ pool, idem }) {
    *
    * Identify the supplier with supplierCode (SUP-xxxxxx) or erpVendorNumber (10 digits), or with neither
    * for list operations. The response always carries allowedVendors (supplierCode <-> erpVendorNumber for
-   * every supplier the consumer may see; all suppliers for '*' consumers), so the iPaaS never needs a
+   * every supplier the consumer may see; all suppliers for '*' consumers), so the façade never needs a
    * separate cross-reference call.
    */
   const check = asyncHandler(async (req, res) => {

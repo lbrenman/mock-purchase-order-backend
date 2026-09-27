@@ -26,7 +26,7 @@ const poPage = {
       sys: 'erp',
       paging: 'page',
       presetFilters: ctx.query,
-      lede: 'System of record for purchase orders. Supplier names come from SRM through the vendor cross-reference, the same join the iPaaS has to make.',
+      lede: 'System of record for purchase orders. Supplier names come from SRM through the vendor cross-reference, the same join the façade has to make.',
       dialect: 'ERP: page/limit, {data, pagination}',
       filters: [
         { name: 'status', label: 'Status', type: 'select', options: Object.entries(STATUS).map(([v, l]) => ({ value: v, label: `${v} ${l}` })) },

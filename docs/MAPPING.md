@@ -1,7 +1,7 @@
 # Façade ↔ Backend Mapping Guide
 
-This is the answer key for implementing the **Supplier Order Collaboration API** façade in Amplify Fusion
-on top of the three mock backends. The façade spec is [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](../facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml);
+This is the answer key for implementing the **Supplier Order Collaboration API** façade on top of
+the three mock backends, with whatever integration platform, API gateway or API framework you choose. The façade spec is [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](../facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml);
 the backend specs are in [`openapi/`](../openapi/). Each façade operation needs **two or three backend
 calls**: always exactly one SRM call (authorization plus supplier resolution), and one or two calls to
 the ERP or TMS. The rest is transformation.
@@ -37,8 +37,8 @@ GET /srm/v1/entitlements/{consumerId}/check?scope=supplier-orders.read|write
         [&supplierCode=SUP-100245 | &erpVendorNumber=0000710245]
 ```
 
-`consumerId` comes from the façade credential (for example the Fusion or Engage application mapped to a
-consumer). The answer is always 200 (404 only for an unknown consumer) and contains everything the façade
+`consumerId` comes from the façade credential (for example the API key's client application or the OAuth
+client ID, mapped to a consumer). The answer is always 200 (404 only for an unknown consumer) and contains everything the façade
 needs from the SRM:
 
 ```json

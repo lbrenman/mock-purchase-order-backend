@@ -3,23 +3,24 @@
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lbrenman/mock-purchase-order-backend)
 
 Three **independent, deliberately different** mock systems of record — built with Node.js/Express and
-PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1) implemented in
-**Axway Amplify Fusion**.
+PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1). The façade layer
+can be built with any integration platform, API gateway or API framework; nothing here depends on a
+particular one.
 
 > **The front-end API:** [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml) is the spec of the
-> façade that Fusion exposes to consumers: purchase orders, acknowledgements and shipments. The specs in
+> façade exposed to consumers: purchase orders, acknowledgements and shipments. The specs in
 > [`openapi/`](openapi/) describe the three **backends** behind it. Consumers never call those directly.
 > [`facade/`](facade/) also holds a single-file [façade console](#façade-console) for calling the façade from a browser.
 
 The backends are *not* a proxy target for the façade. Each one owns a different slice of the data,
 speaks its own dialect (naming, identifiers, dates, status codes, pagination, error format), and none of
-them can answer a façade request on its own. That's the point: the iPaaS has to **orchestrate,
+them can answer a façade request on its own. That's the point: the façade layer has to **orchestrate,
 transform and aggregate** — visibly. The orchestration is kept deliberately compact: every façade
 operation is two or three backend calls, always one SRM call plus one or two ERP or TMS calls.
 
 ```mermaid
 flowchart LR
-    C[Supplier portal / internal app] -->|Supplier Order Collaboration API<br/>PO-4500123456 · SUP-100245 · ProblemDetails| F[Amplify Fusion<br/>integration]
+    C[Supplier portal / internal app] -->|Supplier Order Collaboration API<br/>PO-4500123456 · SUP-100245 · ProblemDetails| F[Façade layer<br/>any API framework]
     F -->|entitlement check: may this consumer act,<br/>and which ERP vendor is the supplier?| SRM[(SRM<br/>/srm/v1)]
     F -->|POs with items and ship-to · confirmations · inbound deliveries| ERP[(ERP<br/>/erp/v1)]
     F -->|ASNs · milestones · tracking| TMS[(TMS<br/>/tms/v1)]
@@ -58,7 +59,7 @@ the backend calls for each façade operation (including the ASN saga with compen
 - [API reference](#api-reference)
 - [Façade coverage](#façade-coverage)
 - [Demo controls (chaos, latency, state changes)](#demo-controls)
-- [Using the specs in Amplify Fusion](#using-the-specs-in-amplify-fusion)
+- [Implementing the façade](#implementing-the-façade)
 - [Façade console](#façade-console)
 - [Development tools](#development-tools)
 - [Project structure](#project-structure)
@@ -89,7 +90,7 @@ the backend calls for each façade operation (including the ASN saga with compen
   cross-system views of one record, and a live **wire log** of every backend call.
 - **Postman collection** covering all 74 operations: 164 requests, each with a description, tests and a saved
   example response, chained IDs with clear messages when a prerequisite is missing, plus one scenario folder
-  per façade operation with exactly the calls the iPaaS makes.
+  per façade operation with exactly the calls the façade makes.
 
 ---
 
@@ -104,7 +105,7 @@ the backend calls for each façade operation (including the ASN saga with compen
    ```
    On first start you'll see `[migrate] … schema ready` and `[seed] … seeded`.
 4. Open the **Ports** tab, right-click port **3000 → Port Visibility → Public**.
-   *(Required so Amplify Fusion can reach it; private ports redirect to a GitHub login page.)*
+   *(Required so the façade layer can reach it; private ports redirect to a GitHub login page.)*
 5. Your base URL is `https://<codespace-name>-3000.app.github.dev`. Try:
    - `https://<codespace-name>-3000.app.github.dev/` — landing page with links
    - `…/erp/api-docs`, `…/srm/api-docs`, `…/tms/api-docs` — Swagger UI
@@ -151,9 +152,9 @@ In a second terminal, expose it:
 ngrok http 3000
 ```
 
-Use the `https://<id>.ngrok-free.app` forwarding URL as the base URL in Fusion:
+Use the `https://<id>.ngrok-free.app` forwarding URL as the backend base URL in your façade implementation:
 
-| Backend | Base URL for Fusion | Swagger UI |
+| Backend | Base URL for the façade | Swagger UI |
 |---|---|---|
 | ERP | `https://<id>.ngrok-free.app/erp/v1` | `https://<id>.ngrok-free.app/erp/api-docs` |
 | SRM | `https://<id>.ngrok-free.app/srm/v1` | `https://<id>.ngrok-free.app/srm/api-docs` |
@@ -163,7 +164,7 @@ The dashboard is at `https://<id>.ngrok-free.app/dashboard/` and the Postman **T
 `baseUrl` set to the forwarding URL.
 
 Notes:
-- Free ngrok domains show a browser interstitial. API clients (Fusion, curl) are unaffected, but you can
+- Free ngrok domains show a browser interstitial. API clients (your façade layer, curl) are unaffected, but you can
   add the header `ngrok-skip-browser-warning: true` to be safe.
 - The OpenAPI `servers` URL follows `X-Forwarded-Host`, so specs downloaded through ngrok already point at
   the ngrok URL. Set `PUBLIC_BASE_URL` in `.env` to pin it (e.g. a reserved ngrok domain).
@@ -211,7 +212,7 @@ Each backend can also live in its own database to make the "separate systems" st
 Open **`/dashboard/`** on the same host (for example `http://localhost:3000/dashboard/` or
 `https://<codespace-name>-3000.app.github.dev/dashboard/`). It is plain HTML/JS served by the backend,
 with no build step, and it talks to the three backends through their public REST APIs exactly like any other
-consumer, so everything you do there shows up in the ERP/SRM/TMS data the iPaaS sees.
+consumer, so everything you do there shows up in the ERP/SRM/TMS data the façade sees.
 
 | Area | Pages | What you can do |
 |---|---|---|
@@ -382,7 +383,7 @@ All variables are documented in [`.env.example`](.env.example). Per-service vari
 
 ## Authentication
 
-Each backend has **its own key** so the Fusion connections look like three different systems:
+Each backend has **its own key** so the façade's backend connections look like three different systems:
 
 ```
 x-api-key: erp-demo-key    → /erp/v1/*
@@ -545,32 +546,36 @@ See [docs/MAPPING.md](docs/MAPPING.md) for the field mappings, recipes and seed-
 
 ---
 
-## Using the specs in Amplify Fusion
+## Implementing the façade
+
+The façade can be implemented with any tool that can call REST APIs and transform JSON: an iPaaS, an API
+gateway with scripting, or plain code (Express, Spring Boot, ASP.NET, FastAPI, …). The steps are the same.
 
 1. Download each spec from `https://<public-url>/<svc>/openapi.yaml` (or `.json`). The `servers` entry
    already contains the public base URL (e.g. `https://<id>.ngrok-free.app/erp`).
-2. Create one **HTTP/OpenAPI connection per backend** in Fusion with an API-key header `x-api-key` and the
-   matching key — three connections make the multi-system story obvious in the flows.
+2. Configure one **backend connection (or HTTP client) per backend** with an API-key header `x-api-key` and
+   the matching key — three connections make the multi-system story obvious.
 3. Implement the façade from [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml) using the recipes in
    [docs/MAPPING.md](docs/MAPPING.md): one SRM check → one or two ERP/TMS calls → transformations →
    ProblemDetails normalization. The Postman *Scenarios* folder shows each sequence with real responses.
 4. Propagate `X-Correlation-Id` to each backend so a single ID shows up in every backend log line and error.
 
-If your URL changes (new ngrok session / new Codespace), only the connection base URLs need updating.
+If your URL changes (new ngrok session / new Codespace), only the backend base URLs need updating.
 
 The façade spec's `status` query parameters (on `GET /purchase-orders` and `GET /shipments`) are plain strings
 holding a comma-separated list (`OPEN,PARTIALLY_ACKNOWLEDGED`, no spaces) validated by a pattern, rather than
-arrays, because Fusion handles array query parameters poorly.
+arrays, because some API platforms and code generators handle array query parameters poorly. On the wire it
+is the same as an array with `style: form, explode: false`.
 
-If Fusion reports *Failed to update API proxy: Cursor returned more than one result* on import, the tenant has
-more than one proxy matching the same API. Remove the duplicates, or change `info.title` or bump `info.version`.
+If your platform rejects an import because an API with the same title and version already exists, remove the
+duplicate, or change `info.title` or bump `info.version` in the spec.
 
 ---
 
 ## Façade console
 
 [`facade/facade-console.html`](facade/facade-console.html) is a single-file web app (HTML, CSS and JavaScript,
-no build, no dependencies) for calling the **façade** from a browser once it is running in Fusion. It is handy
+no build, no dependencies) for calling the **façade** from a browser once your façade implementation is running. It is handy
 for demos: switch between consumers and watch what each one is allowed to see.
 
 - **Settings:** the façade base address, the API key header name (default `X-API-Key`), and one entry per
@@ -623,7 +628,7 @@ and `CHANGELOG.md` records what changed in each version.
 mock-purchase-order-backend/
 ├── .devcontainer/devcontainer.json     Codespaces: Node 20 + docker-in-docker, auto-starts Postgres
 ├── facade/
-│   ├── Supplier_Order_Collaboration_OpenAPI_3_1.yaml   the façade (front-end) API Fusion exposes (OpenAPI 3.1)
+│   ├── Supplier_Order_Collaboration_OpenAPI_3_1.yaml   the façade (front-end) API (OpenAPI 3.1)
 │   ├── facade-console.html             single-file browser app for calling the façade
 │   └── README.md
 ├── openapi/                            backend specs: erp.yaml · srm.yaml · tms.yaml (OpenAPI 3.0.3)
@@ -666,8 +671,8 @@ mock-purchase-order-backend/
 | Symptom | Fix |
 |---|---|
 | `Database initialisation failed … ECONNREFUSED` | Postgres isn't running: `npm run db:start` (or `docker compose up -d`). `/health` reports `database: down` until it is. |
-| Fusion gets an HTML login page from Codespaces | Port 3000 visibility must be **Public**. |
-| Fusion/curl gets ngrok HTML | Add header `ngrok-skip-browser-warning: true`. |
+| The façade gets an HTML login page from Codespaces | Port 3000 visibility must be **Public**. |
+| The façade or curl gets ngrok HTML | Add header `ngrok-skip-browser-warning: true`. |
 | `401` everywhere | Each backend has its own key (`erp-demo-key`, `srm-demo-key`, `tms-demo-key`) or set `AUTH_MODE=none`. |
 | ERP `400 INVALID_PO_NUMBER` | Strip the façade `PO-` prefix — that's intentional. |
 | `409 CONFIRMATION_EXISTS` on a re-run | Acknowledgements are one-per-revision. `PATCH` the PO to bump the revision or `npm run seed:reset`. |

@@ -6,7 +6,8 @@ Guidance for AI assistants (Claude Code, Claude projects) and humans changing th
 
 Three deliberately different mock backends (ERP, SRM, TMS) behind the *Supplier Order Collaboration
 API* façade (spec: `facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`; `openapi/` holds only the three backend specs),
-which is implemented in Axway Amplify Fusion. The point is to make the iPaaS **orchestrate,
+which can be implemented with any integration platform, API gateway or API framework; keep the docs
+framework-neutral. The point is to make the façade layer **orchestrate,
 transform and aggregate** visibly. No backend may answer a façade request on its own, and the dialects must
 stay different. All data is fictitious.
 
@@ -48,9 +49,9 @@ normalisation to RFC 7807, seed cheat-sheet. The Postman *Scenarios* folder mirr
 - `public/dashboard/`: data dashboard (vanilla ES modules, no build). `js/api.js` client and wire log,
   `ui.js` DOM toolkit and forms, `list.js` list pages, `cache.js` lookups, `main.js` hash router,
   `views/{overview,erp,srm,tms,common}.js`.
-- `facade/`: the façade spec (OpenAPI 3.1, imported into Fusion) and `facade-console.html`, a single-file
+- `facade/`: the façade spec (OpenAPI 3.1) and `facade-console.html`, a single-file
   browser app that calls the façade (not the backends). Its `status` query params are comma-separated strings
-  with a pattern, not arrays, because Fusion handles array query params poorly; keep it that way. The console
+  with a pattern, not arrays, because some API platforms handle array query params poorly; keep it that way. The console
   is self-contained (inline CSS/JS) and has its own look; it is not part of the dashboard design rules.
 - `postman/`: **generated** by `tools/build-postman.py`. `tools/`: checks, generators, dashboard stub.
 

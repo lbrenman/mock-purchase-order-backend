@@ -14630,7 +14630,7 @@
           "description": "Decisions the façade turns into 403 responses."
         }
       ],
-      "description": "For each façade operation, the exact backend calls the iPaaS makes, in order. Each scenario can be run on its own."
+      "description": "For each façade operation, the exact backend calls the façade makes, in order. Each scenario can be run on its own."
     }
   ],
   "event": [

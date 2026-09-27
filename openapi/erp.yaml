@@ -5,7 +5,7 @@ info:
   description: |
     Mock **ERP purchasing system of record** (SAP-flavoured). One of three independent backends
     behind the *Supplier Order Collaboration API* façade. It deliberately does **not** match the
-    façade contract, so the iPaaS has real transformation work to do:
+    façade contract, so the façade layer has real transformation work to do:
 
     | Concern | ERP representation | Façade representation |
     |---|---|---|

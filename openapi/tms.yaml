@@ -5,10 +5,10 @@ info:
   description: |
     Mock **Transportation Management System**. Owns advance shipment notices (ASNs), carrier
     tendering, milestones and tracking events. It knows nothing about purchase-order quantities
-    (the ERP does) and nothing about supplier entitlements (the SRM does) — the iPaaS has to
+    (the ERP does) and nothing about supplier entitlements (the SRM does) — the façade layer has to
     orchestrate those checks around it.
 
-    Differences from the façade the iPaaS must handle:
+    Differences from the façade that the façade layer must handle:
     * Carriers are stored and returned by **SCAC** (`UPSN`, `FDEG`, `DHLE`, ...) next to the business
       `carrierCode` (`UPS`, `FEDEX`, ...). On create or change you may send either
       `carrier.carrierCode` (the façade value, passed straight through) or `carrier.scac`.
