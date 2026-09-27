@@ -118,6 +118,14 @@ the backend calls for each façade operation (including the ASN saga with compen
 > If the Codespace was stopped and restarted, Postgres is restarted by `postStartCommand`; if not, run
 > `npm run db:start`. Data persists in `.pgdata/` (gitignored).
 
+> **Demoing weeks or months later?** Run `npm run seed:reset` before the demo. The seed dates are moved
+> forward to the present as they are loaded ([Dates stay current](#dates-stay-current)), but a database that
+> was seeded long ago keeps the dates it was given then.
+
+**Updating an existing Codespace to a new version:** push the new files to the repository, then in the
+Codespace terminal stop the server (Ctrl+C), run `git pull`, `npm install` (only needed when `package.json`
+dependencies changed), `npm run seed:reset` if the changelog asks for it, and `npm run dev` again.
+
 ---
 
 ## Quick start — local machine + ngrok
@@ -319,6 +327,24 @@ The original demo records (POs 4500123456–4500123468, shipments 00088/00107/00
 the [seed cheat-sheet in docs/MAPPING.md](docs/MAPPING.md#5-seed-data-cheat-sheet) for which record to use
 for which demo.
 
+### Dates stay current
+
+The seed files are written around a fixed "today", 24 September 2026. When the data is loaded (on first start
+or with `npm run seed:reset`), every date and timestamp is moved forward by the time that has passed since
+then, in whole weeks so each date keeps its weekday. Open orders stay open, in-transit shipments are still on
+their way, and nothing is dated in the future. All three backends move by the same amount, so the records still
+line up across systems. The seed output says how far the dates moved, for example
+`[seed] erp seeded (dates moved forward 364 days from 2026-09-24)`.
+
+- Before a demo, run `npm run seed:reset` to reload the data with dates relative to today.
+- Identifiers that contain a date are **not** changed (`SHP-20260918-00121`, `ACK-20260924-…`), because
+  Postman, the specs and `docs/MAPPING.md` refer to them. Only the date fields move.
+- `SEED_SHIFT=off` loads the dates exactly as written. `SEED_TODAY=2027-03-15` shifts towards that day instead
+  of the current date (useful to rehearse a future demo).
+- The JSON files in `src/data/` never change; the shift happens in `src/data/date-shift.js` as rows are
+  inserted. `npm run dashboard:stub` applies the same shift; `tools/build-postman.py` does not, so Postman
+  example responses stay stable.
+
 ---
 
 ## Configuration
@@ -335,6 +361,8 @@ All variables are documented in [`.env.example`](.env.example). Per-service vari
 | `DATABASE_URL` | `postgresql://api_user:api_pass@localhost:5432/po_backends_db` | Shared database |
 | `ERP_DATABASE_URL` … | *(DATABASE_URL)* | Per-backend database |
 | `AUTO_MIGRATE` / `AUTO_SEED` | `true` / `true` | Create tables / seed empty backends on start |
+| `SEED_SHIFT` | `on` | Move seed dates forward to the present when loading them (`off` keeps them as written) |
+| `SEED_TODAY` | *(current date)* | Day to shift the seed dates towards, `YYYY-MM-DD` or ISO-8601 |
 | `AUTH_MODE` | `apikey` | `apikey` or `none` (global) |
 | `ERP_AUTH_MODE` … | *(AUTH_MODE)* | Per-backend override |
 | `ERP_API_KEY` / `SRM_API_KEY` / `TMS_API_KEY` | `erp-demo-key` / `srm-demo-key` / `tms-demo-key` | Keys |
@@ -508,8 +536,8 @@ See [docs/MAPPING.md](docs/MAPPING.md) for the field mappings, recipes and seed-
 | Scenario | Call |
 |---|---|
 | Supplier goes on hold → write denied | `PATCH /srm/v1/suppliers/SUP-100245 {"status":"ON_HOLD","statusReason":"Quality audit"}` |
-| Buyer changes the PO → new revision can be acknowledged again | `PATCH /erp/v1/purchase-orders/4500123456 {"delivery_date":"20261012"}` |
-| Shipment delayed | `POST /tms/v1/shipments/SHP-20260918-00121/events {"eventCode":"EXC","newEstimatedArrival":"2026-09-29T17:00:00Z"}` |
+| Buyer changes the PO → new revision can be acknowledged again | `PATCH /erp/v1/purchase-orders/4500123456 {"delivery_date":"<YYYYMMDD, a few weeks from today>"}` |
+| Shipment delayed | `POST /tms/v1/shipments/SHP-20260918-00121/events {"eventCode":"EXC","newEstimatedArrival":"<ISO-8601, a few days after the current ETA>"}` |
 | Shipment delivered | `POST /tms/v1/shipments/SHP-20260918-00121/events {"eventCode":"DLV"}` |
 | Start over | `npm run seed:reset` |
 
@@ -538,7 +566,7 @@ and the stub need Python 3 (preinstalled in the Codespaces image) and no extra p
 | Command | What it does |
 |---|---|
 | `npm run check` | Runs both checks below; do this before every commit |
-| `npm run validate:seed` | Cross-system consistency of `src/data/*.json` (shipped quantities vs. deliveries, PO status rule, ERP delivery ↔ TMS shipment contents, reversed ↔ cancelled, ID sequences, no future dates) |
+| `npm run validate:seed` | Cross-system consistency of `src/data/*.json` (shipped quantities vs. deliveries, PO status rule, ERP delivery ↔ TMS shipment contents, reversed ↔ cancelled, ID sequences, no future dates, every date field covered by the date shift) |
 | `npm run check:postman` | Every operation in `openapi/*.yaml` has at least one request in the Postman collection |
 | `npm run build:seed` | Regenerates `src/data/*.json` from the hand-curated records in `tools/seed/base/` (deterministic: an unchanged generator reproduces the committed files byte for byte) |
 | `npm run build:postman` | Regenerates the Postman collection and environments from `tools/build-postman.py` (edit the script, not the JSON) |
@@ -590,6 +618,7 @@ mock-purchase-order-backend/
 │   ├── db/migrate.js
 │   ├── data/{erp,srm,tms}.json         consistent seed data
 │   ├── data/seed.js
+│   ├── data/date-shift.js              moves seed dates forward to the present at load time
 │   └── services/{erp,srm,tms}/         routes + error dialect per backend
 ├── docker-compose.yml                  Postgres only
 ├── docker-compose.full.yml             Postgres + API
@@ -616,6 +645,7 @@ mock-purchase-order-backend/
 | Postman run fails on the chaos requests | Keep `CHAOS_ENABLED=true`, or skip the *Errors & security* folders. |
 | Postman: *"{{poNumber}} is empty. Send … first"* | The request uses an ID created earlier in its folder. Send the named request first, or run the whole folder. |
 | After updating to 2.2.3, Postman or the dashboard still shows old names or `JBUS` codes, or *Delete purchasing org in use* deletes instead of answering 409 | The database still holds the old seed rows (seeding never overwrites). Run `npm run seed:reset` once. |
+| Dates look old: overdue open orders, shipments "in transit" for months | The database was seeded a while ago. Run `npm run seed:reset` to reload the data with dates relative to today. |
 | Postman `409` on create after an interrupted run | Run the backend folder from its first request (it generates a new `runId`) or `npm run seed:reset`. |
 | TMS `409` on an ASN whose shipment was cancelled | You are on a database created before v2.2: restart the server once so the migration replaces the old unique constraint. |
 | Postgres container won't start after a crash | `docker rm -f po-backends-postgres && npm run db:start`; as a last resort delete `.pgdata/` (data is re-seeded). |

@@ -7,9 +7,13 @@ through but results are not real. Also imported by tools/build-postman.py for ex
     python3 tools/dashboard-stub.py [port]     # or: npm run dashboard:stub
     open http://127.0.0.1:8765/dashboard/
 
+Like the real seed, dates are moved forward to the present when the stub runs (SEED_SHIFT=off to keep them,
+SEED_TODAY=YYYY-MM-DD to pick the day). Not when imported by build-postman.py, so its examples stay stable.
+
 Not a substitute for the real server: validate business rules against Postgres before shipping.
 """
-import json, re, base64
+import json, re, base64, os
+from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
@@ -258,8 +262,46 @@ class H(BaseHTTPRequestHandler):
     def do_PATCH(self): self.handle_any('PATCH')
     def do_DELETE(self): self.handle_any('DELETE')
 
+# Mirror of src/data/date-shift.js; keep the two in step.
+SEED_AS_OF = '2026-09-24T12:00:00Z'
+SHIFT_FIELDS = {
+    'erp': {'purchase_orders': ['doc_date', 'delivery_date', 'created_at', 'changed_at', {'items': ['confirmed_date']}],
+            'confirmations': ['posted_at', {'items': ['confirmed_date']}],
+            'inbound_deliveries': ['posted_at', 'reversed_at']},
+    'srm': {'suppliers': ['onboarded_on']},
+    'tms': {'shipments': ['milestone_since', 'planned_ship_at', 'eta', 'created_at', 'updated_at', {'events': ['occurred_at']}]},
+}
+def _utc(s): return datetime.fromisoformat(s.replace('Z', '+00:00'))
+def shift_days(env=os.environ, now=None):
+    if str(env.get('SEED_SHIFT', '')).strip().lower() in ('0', 'false', 'no', 'off'): return 0
+    t = env.get('SEED_TODAY')
+    today = (_utc(t + 'T12:00:00Z') if re.fullmatch(r'\d{4}-\d{2}-\d{2}', t.strip()) else _utc(t.strip())) if t else (now or datetime.now(timezone.utc))
+    elapsed = (today - _utc(SEED_AS_OF)).days
+    return elapsed // 7 * 7 if elapsed > 0 else 0
+def shift_value(v, days):
+    if not days or not isinstance(v, str) or not v: return v
+    if re.fullmatch(r'\d{4}-\d{2}-\d{2}', v): return (datetime.strptime(v, '%Y-%m-%d') + timedelta(days)).strftime('%Y-%m-%d')
+    if re.fullmatch(r'\d{8}', v): return (datetime.strptime(v, '%Y%m%d') + timedelta(days)).strftime('%Y%m%d')
+    d = (_utc(v) + timedelta(days)).strftime('%Y-%m-%dT%H:%M:%S')
+    return d + ('.000Z' if '.' in v else 'Z')
+def _shift_rec(rec, spec, days):
+    for f in spec:
+        if isinstance(f, str):
+            if f in rec: rec[f] = shift_value(rec[f], days)
+        else:
+            for child, sub in f.items():
+                for row in rec.get(child) or []: _shift_rec(row, sub, days)
+def apply_shift(days):
+    for name, data in (('erp', erp), ('srm', srm), ('tms', tms)):
+        for col, spec in SHIFT_FIELDS[name].items():
+            for rec in data.get(col, []): _shift_rec(rec, spec, days)
+
 if __name__ == '__main__':
     import sys
+    days = shift_days()
+    if days:
+        apply_shift(days)
+        print(f'Seed dates moved forward {days} days from {SEED_AS_OF[:10]}')
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
     print(f'Dashboard stub on http://127.0.0.1:{port}/dashboard/')
     ThreadingHTTPServer(('127.0.0.1', port), H).serve_forever()

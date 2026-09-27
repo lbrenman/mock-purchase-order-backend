@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.3.0
+
+Seed data no longer goes stale.
+
+- **Dates follow the calendar.** New `src/data/date-shift.js`: when the seed is loaded, every date and
+  timestamp moves forward by the time since the seed's "today" (2026-09-24), in whole weeks so weekdays are kept.
+  Open orders stay open, in-transit shipments are still moving, nothing is dated in the future, and the three
+  backends stay consistent. The JSON files are unchanged; IDs that contain a date keep it.
+- New settings `SEED_SHIFT` (default `on`) and `SEED_TODAY` (shift towards a chosen day) in `.env.example`
+  and the README configuration table.
+- `src/data/seed.js` applies the shift and logs it; `tools/dashboard-stub.py` applies the same shift when it
+  runs (not when `build-postman.py` imports it).
+- `tools/validate-seed.js` fails if a date field is missing from the shift list, and checks that a copy
+  shifted a year ahead moves every date by the same whole number of weeks.
+- Postman: *List changed since (delta sync)* uses a new `{{changedSince}}` variable (ten days ago, set by the
+  collection pre-request script) instead of a fixed timestamp. Collection regenerated.
+- `scripts/smoke-test.js`: the ASN schedule is relative to now.
+- README: *Dates stay current* section, updating an existing Codespace, demo-control examples without fixed
+  dates, troubleshooting row. `docs/MAPPING.md` and `CLAUDE.md` notes.
+- **After updating, run `npm run seed:reset` once** so an existing database gets current dates.
+
 ## 2.2.3
 
 All references to the original customer are gone from the repository. "Acme" is the fictitious buying company.

@@ -66,6 +66,10 @@ normalisation to RFC 7807, seed cheat-sheet. The Postman *Scenarios* folder mirr
    - Anchor records must stay unchanged: POs 4500123456–4500123468 and shipments 00088, 00107, 00121, 00188.
    - Seeded IDs stay below the runtime sequences: confirmations < 7100000101, deliveries < 180000201,
      shipment suffix < 00200. The seed "today" is 2026-09-24T12:00Z.
+   - Dates are shifted forward to the present at load time by `src/data/date-shift.js` (mirrored in
+     `tools/dashboard-stub.py`). A new date field must be added to `FIELDS` in both; `npm run validate:seed`
+     fails on a date field that isn't listed. Keep the JSON anchored at 2026-09-24 and don't put dates in
+     request bodies or tests that assume that anchor (use relative dates, as Postman's `shipDate` does).
 3. **Run `npm run check`** (seed consistency plus Postman coverage) before committing.
 4. **Dashboard design:**
    - Colours: concrete ground `#e6ebe9`, ink `#16202a`, ERP `#34508f`, SRM `#18785a`, TMS `#b15e12`.

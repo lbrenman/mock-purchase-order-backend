@@ -6,19 +6,21 @@
  *
  *   node src/data/seed.js            migrate + insert missing seed rows
  *   node src/data/seed.js --reset    DROP schemas, re-create, re-seed (demo reset)
+ *
+ * Dates are moved forward to the present as they are loaded (see date-shift.js; SEED_SHIFT=off disables it).
  */
 const config = require('../config');
 const { getPool, withTransaction, closeAll } = require('../shared/db');
 const { migrateService, dropService } = require('../db/migrate');
+const { SEED_AS_OF, shiftDays, shiftSeed } = require('./date-shift');
 
-const data = {
+const rawData = {
   erp: require('./erp.json'),
   srm: require('./srm.json'),
   tms: require('./tms.json'),
 };
 
-async function seedErp(c) {
-  const d = data.erp;
+async function seedErp(c, d) {
   for (const o of d.purchasing_orgs) {
     await c.query(
       `INSERT INTO erp.purchasing_orgs (code, name, company_code) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
@@ -68,8 +70,7 @@ async function seedErp(c) {
   }
 }
 
-async function seedSrm(c) {
-  const d = data.srm;
+async function seedSrm(c, d) {
   for (const s of d.suppliers) {
     await c.query(
       `INSERT INTO srm.suppliers (supplier_code, erp_vendor_number, legal_name, trading_name, status, status_reason, tier,
@@ -103,8 +104,7 @@ async function seedSrm(c) {
   }
 }
 
-async function seedTms(c) {
-  const d = data.tms;
+async function seedTms(c, d) {
   for (const cr of d.carriers) {
     await c.query(
       `INSERT INTO tms.carriers (carrier_code, scac, name, mode, tracking_url_template) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,
@@ -140,8 +140,10 @@ const countSql = {
 
 async function seedService(name) {
   const pool = getPool(config.services[name].databaseUrl);
-  await withTransaction(pool, (client) => seeders[name](client));
-  console.log(`[seed] ${name} seeded`);
+  const days = shiftDays();
+  const d = shiftSeed(name, rawData[name], days);
+  await withTransaction(pool, (client) => seeders[name](client, d));
+  console.log(`[seed] ${name} seeded${days ? ` (dates moved forward ${days} days from ${SEED_AS_OF.slice(0, 10)})` : ''}`);
 }
 
 /** Used at server start (AUTO_SEED=true): seeds only services whose tables are empty. */

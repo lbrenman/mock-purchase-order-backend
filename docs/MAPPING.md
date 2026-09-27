@@ -381,3 +381,7 @@ SUP-100996 (no orders yet); POs in EUR, PLN and CNY; 12 carriers.
 
 Totals: 23 suppliers, 74 POs, 54 confirmations, 34 inbound deliveries, 40 shipments, 137 tracking events.
 Browse them in the dashboard at `/dashboard/`. Reset with `npm run seed:reset`.
+
+Dates in the tables and examples here are as written in the seed files (around 24 September 2026). A running
+backend moves them forward to the present in whole weeks (see the README, *Dates stay current*); IDs such as
+`SHP-20260918-00121` do not change.

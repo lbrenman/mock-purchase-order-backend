@@ -1429,7 +1429,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{erpUrl}}/v1/purchase-orders?changed_since=20260920000000",
+                  "raw": "{{erpUrl}}/v1/purchase-orders?changed_since={{changedSince}}",
                   "host": [
                     "{{erpUrl}}"
                   ],
@@ -1440,11 +1440,11 @@
                   "query": [
                     {
                       "key": "changed_since",
-                      "value": "20260920000000"
+                      "value": "{{changedSince}}"
                     }
                   ]
                 },
-                "description": "changed_since accepts YYYYMMDDhhmmss or ISO-8601; the façade maps its updatedSince here.\n\n**Expects:** `200 OK`"
+                "description": "changed_since accepts YYYYMMDDhhmmss or ISO-8601; the façade maps its updatedSince here. {{changedSince}} is ten days ago, set by the collection pre-request script, so the query keeps returning recent changes after the seed dates move forward.\n\n**Expects:** `200 OK`"
               },
               "event": [
                 {
@@ -1464,7 +1464,7 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{erpUrl}}/v1/purchase-orders?changed_since=20260920000000",
+                      "raw": "{{erpUrl}}/v1/purchase-orders?changed_since={{changedSince}}",
                       "host": [
                         "{{erpUrl}}"
                       ],
@@ -1475,7 +1475,7 @@
                       "query": [
                         {
                           "key": "changed_since",
-                          "value": "20260920000000"
+                          "value": "{{changedSince}}"
                         }
                       ]
                     }
@@ -14642,7 +14642,9 @@
           "if (!pm.collectionVariables.get('runId')) pm.collectionVariables.set('runId', String(Date.now()).slice(-6));",
           "// Ship and arrival dates relative to now, so shipment requests always have a valid schedule.",
           "const d = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 13) + ':00:00Z';",
-          "pm.collectionVariables.set('shipDate', d(2)); pm.collectionVariables.set('etaDate', d(6)); pm.collectionVariables.set('newEta', d(8));"
+          "pm.collectionVariables.set('shipDate', d(2)); pm.collectionVariables.set('etaDate', d(6)); pm.collectionVariables.set('newEta', d(8));",
+          "// ERP-style timestamp ten days ago for the delta-sync request (seed dates move forward with the calendar).",
+          "pm.collectionVariables.set('changedSince', d(-10).replace(/[-:TZ]/g, ''));"
         ]
       }
     }
@@ -14701,6 +14703,11 @@
     },
     {
       "key": "newEta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "changedSince",
       "value": "",
       "type": "string"
     },

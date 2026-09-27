@@ -16,6 +16,8 @@
  *  - nothing dated after the seed "today" (2026-09-24T12:00:00Z); events in chronological order
  *  - seeded IDs below the runtime sequences (confirmations < 7100000101, deliveries < 180000201,
  *    shipment suffix < 00200)
+ *  - date shifting (src/data/date-shift.js): every date field is listed in FIELDS, and a copy shifted a year
+ *    ahead moves each of them by the same whole number of weeks with nothing after the new "today"
  */
 const path = require('path');
 const dir = path.join(__dirname, '..', 'src', 'data');
@@ -23,7 +25,8 @@ const erp = require(path.join(dir, 'erp.json'));
 const srm = require(path.join(dir, 'srm.json'));
 const tms = require(path.join(dir, 'tms.json'));
 
-const TODAY = '2026-09-24T12:00:00Z';
+const { SEED_AS_OF, FIELDS, shiftDays, shiftSeed } = require(path.join(dir, 'date-shift.js'));
+const TODAY = SEED_AS_OF;
 const errors = [];
 const fail = (msg) => errors.push(msg);
 const dupes = (arr) => arr.filter((x, i) => arr.indexOf(x) !== i);
@@ -106,6 +109,46 @@ for (const e of srm.entitlements) {
   for (const c of e.supplier_codes) if (c !== '*' && !supplierCodes.has(c)) fail(`entitlement ${e.consumer_id}: unknown supplier ${c}`);
 }
 for (const x of [...srm.sites, ...srm.contacts]) if (!supplierCodes.has(x.supplier_code)) fail(`${x.site_code || x.contact_id}: unknown supplier ${x.supplier_code}`);
+
+// Date shifting: find every date-looking value, check it is covered by FIELDS and shifts correctly.
+const DATE_RE = /^(\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z)?|20\d{6})$/;
+const DATE_KEY_RE = /(_at|_on|_date|_since|^eta)$/;
+const listed = new Set();
+const listSpec = (prefix, spec) => spec.forEach((f) => (typeof f === 'string' ? listed.add(`${prefix}.${f}`)
+  : Object.entries(f).forEach(([k, sub]) => listSpec(`${prefix}.${k}[]`, sub))));
+for (const [file, cols] of Object.entries(FIELDS)) for (const [col, spec] of Object.entries(cols)) listSpec(`${file}.${col}[]`, spec);
+const dateFields = [];
+const walk = (v, p) => {
+  if (Array.isArray(v)) v.forEach((x) => walk(x, `${p}[]`));
+  else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => walk(x, `${p}.${k}`));
+  else if (typeof v === 'string' && DATE_RE.test(v) && DATE_KEY_RE.test(p.split('.').pop())) dateFields.push([p, v]);
+};
+const files = { erp, srm, tms };
+Object.entries(files).forEach(([n, d]) => walk(d, n));
+[...new Set(dateFields.map(([p]) => p))].filter((p) => !listed.has(p))
+  .forEach((p) => fail(`date field ${p} is not listed in src/data/date-shift.js FIELDS, so it would not be shifted`));
+
+const target = new Date(Date.parse(SEED_AS_OF) + 400 * 86400000);
+const days = shiftDays({ env: { SEED_TODAY: target.toISOString() } });
+if (days <= 0 || days % 7) fail(`date shift: expected a positive whole number of weeks, got ${days} days`);
+const asDate = (v) => new Date(/^\d{8}$/.test(v) ? `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6)}T00:00:00Z` : /T/.test(v) ? v : `${v}T00:00:00Z`);
+for (const [n, d] of Object.entries(files)) {
+  const before = []; const after = [];
+  const collect = (arr) => (v, p) => { if (typeof v === 'string' && listed.has(p)) arr.push(v); };
+  const walkInto = (v, p, fn) => {
+    if (Array.isArray(v)) v.forEach((x) => walkInto(x, `${p}[]`, fn));
+    else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => walkInto(x, `${p}.${k}`, fn));
+    else fn(v, p);
+  };
+  walkInto(d, n, collect(before));
+  walkInto(shiftSeed(n, d, days), n, collect(after));
+  before.forEach((b, i) => {
+    const moved = (asDate(after[i]) - asDate(b)) / 86400000;
+    if (moved !== days) fail(`date shift: ${n} value ${b} moved ${moved} days instead of ${days}`);
+    if (b.length !== after[i].length) fail(`date shift: ${n} value ${b} changed format (${after[i]})`);
+    if (after[i] > target.toISOString() && /T/.test(b) && b <= TODAY) fail(`date shift: ${n} value ${after[i]} is after the new today`);
+  });
+}
 
 const summary = `${srm.suppliers.length} suppliers, ${erp.purchase_orders.length} POs, ${erp.confirmations.length} confirmations, ` +
   `${erp.inbound_deliveries.length} deliveries, ${tms.shipments.length} shipments, ${tms.shipments.reduce((a, s) => a + s.events.length, 0)} events`;

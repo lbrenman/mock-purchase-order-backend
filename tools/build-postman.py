@@ -32,7 +32,7 @@ CORR = '5f754b61-2038-4978-a7cb-6d6a97afd501'
 NOW_SAP, NOW_ISO = '20260924120000', '2026-09-24T12:00:00.000Z'
 
 # Variables that are infrastructure, not chained IDs (never guarded).
-BASE_VARS = {'baseUrl', 'erpUrl', 'srmUrl', 'tmsUrl', 'erpApiKey', 'srmApiKey', 'tmsApiKey', 'runId', 'shipDate', 'etaDate', 'newEta'}
+BASE_VARS = {'baseUrl', 'erpUrl', 'srmUrl', 'tmsUrl', 'erpApiKey', 'srmApiKey', 'tmsApiKey', 'runId', 'shipDate', 'etaDate', 'newEta', 'changedSince'}
 
 STATUS_TEXT = {200: 'OK', 201: 'Created', 204: 'No Content', 304: 'Not Modified', 400: 'Bad Request', 401: 'Unauthorized', 404: 'Not Found',
                409: 'Conflict', 412: 'Precondition Failed', 422: 'Unprocessable Entity', 503: 'Service Unavailable'}
@@ -159,8 +159,8 @@ erp_items = [
         req('List by status and vendor', 'GET', 'erp', '/v1/purchase-orders', query={"status": "01,02,03", "vendor_id": "0000710245"},
             desc='What the façade sends for GET /purchase-orders?supplierId=SUP-100245&status=OPEN,PARTIALLY_ACKNOWLEDGED,ACKNOWLEDGED after mapping the supplier and statuses.'),
         req('List by plant', 'GET', 'erp', '/v1/purchase-orders', query={"plant": "1101", "limit": 5}),
-        req('List changed since (delta sync)', 'GET', 'erp', '/v1/purchase-orders', query={"changed_since": "20260920000000"},
-            desc='changed_since accepts YYYYMMDDhhmmss or ISO-8601; the façade maps its updatedSince here.'),
+        req('List changed since (delta sync)', 'GET', 'erp', '/v1/purchase-orders', query={"changed_since": "{{changedSince}}"},
+            desc='changed_since accepts YYYYMMDDhhmmss or ISO-8601; the façade maps its updatedSince here. {{changedSince}} is ten days ago, set by the collection pre-request script, so the query keeps returning recent changes after the seed dates move forward.'),
         req('Get purchase order (seed)', 'GET', 'erp', '/v1/purchase-orders/4500123458', desc='A seeded PO that is partly shipped (status 04).'),
         req('Create purchase order', 'POST', 'erp', '/v1/purchase-orders', expect=201, body=po_body,
             tests=[save('poNumber', 'pm.response.json().data.po_number'), "pm.test('Status 01 Open', () => pm.expect(pm.response.json().data.status_code).to.eql('01'));"],
@@ -712,7 +712,8 @@ for path, it in walk(top):
     for v in SET_RE.findall(script(it, 'prerequest') + '\n' + script(it, 'test')):
         setters.setdefault(v, ' / '.join(path + (it['name'],)))
 
-SAMPLE = {'runId': '123456', 'shipDate': '2026-09-26T12:00:00Z', 'etaDate': '2026-09-30T12:00:00Z', 'newEta': '2026-10-02T12:00:00Z'}
+SAMPLE = {'runId': '123456', 'shipDate': '2026-09-26T12:00:00Z', 'etaDate': '2026-09-30T12:00:00Z', 'newEta': '2026-10-02T12:00:00Z',
+          'changedSince': '20260920000000'}
 missing, variables_used = [], set()
 for path, it in walk(top):
     m = it.pop('_meta')
@@ -781,7 +782,7 @@ Requests on seed data (fixed IDs such as PO 4500123458) work on their own. A req
 Newman: `npm run postman`"""
 
 variables = [("baseUrl", "http://localhost:3000"), ("erpUrl", "{{baseUrl}}/erp"), ("srmUrl", "{{baseUrl}}/srm"), ("tmsUrl", "{{baseUrl}}/tms"),
-             ("erpApiKey", "erp-demo-key"), ("srmApiKey", "srm-demo-key"), ("tmsApiKey", "tms-demo-key"), ("runId", ""), ("shipDate", ""), ("etaDate", ""), ("newEta", "")]
+             ("erpApiKey", "erp-demo-key"), ("srmApiKey", "srm-demo-key"), ("tmsApiKey", "tms-demo-key"), ("runId", ""), ("shipDate", ""), ("etaDate", ""), ("newEta", ""), ("changedSince", "")]
 variables += [(v, "") for v in sorted((variables_used | set(setters)) - {k for k, _ in variables})]
 var_desc = {v: f"Set by {setters[v]}" for v in setters}
 coll = {
@@ -792,7 +793,9 @@ coll = {
         "if (!pm.collectionVariables.get('runId')) pm.collectionVariables.set('runId', String(Date.now()).slice(-6));",
         "// Ship and arrival dates relative to now, so shipment requests always have a valid schedule.",
         "const d = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 13) + ':00:00Z';",
-        "pm.collectionVariables.set('shipDate', d(2)); pm.collectionVariables.set('etaDate', d(6)); pm.collectionVariables.set('newEta', d(8));"]}}],
+        "pm.collectionVariables.set('shipDate', d(2)); pm.collectionVariables.set('etaDate', d(6)); pm.collectionVariables.set('newEta', d(8));",
+        "// ERP-style timestamp ten days ago for the delta-sync request (seed dates move forward with the calendar).",
+        "pm.collectionVariables.set('changedSince', d(-10).replace(/[-:TZ]/g, ''));"]}}],
     "variable": [{"key": k, "value": v, "type": "string", **({"description": var_desc[k]} if k in var_desc else {})} for k, v in variables],
 }
 OUT.mkdir(exist_ok=True)

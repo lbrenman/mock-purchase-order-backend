@@ -118,6 +118,8 @@ async function main() {
     const w = await call('srm', 'GET', '/v1/entitlements/apex-supplier-portal/check?scope=supplier-orders.write&supplierCode=SUP-100245');
     check(`1. SRM write check -> allowed=${w.body && w.body.allowed}, asnEnabled=${w.body && w.body.supplier && w.body.supplier.asnEnabled}`, w.body && w.body.allowed === true, w.body);
 
+    // Schedule relative to now, so the smoke test keeps matching the (date-shifted) seed data.
+    const inDays = (days) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 13) + ':00:00Z';
     const shipmentBody = (asnNumber) => ({
       asnNumber,
       supplierCode: 'SUP-100245',
@@ -126,7 +128,7 @@ async function main() {
         origin: { locationCode: 'SUP-ATL-01', name: 'Supplier Distribution Center', city: 'Atlanta', state: 'GA', zip: '30301', country: 'US' },
         destination: { locationCode: 'US-AUBURN-HILLS', name: 'Manufacturing Site', city: 'Auburn Hills', state: 'MI', zip: '48326', country: 'US' },
       },
-      schedule: { plannedShipDate: '2026-10-03T12:00:00Z', estimatedArrival: '2026-10-07T15:00:00Z' },
+      schedule: { plannedShipDate: inDays(2), estimatedArrival: inDays(6) },
       contents: [{ poNumber: '4500123456', poLine: 10, quantity: { value: 5, uom: 'EA' }, lotNumber: 'LOT-SMOKE' }],
       handlingUnits: [{ huId: 'CTN-SMOKE-1', type: 'CTN', weight: { value: 12, unit: 'kg' } }],
     });
