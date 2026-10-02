@@ -2,6 +2,53 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/lbrenman/mock-purchase-order-backend)
 
+## The scenario
+
+**Acme** is a global manufacturer of electronic and industrial products, with plants in North America, Europe
+and Asia (the demo data's US, MX, DE, HU, PL, SG, MY, CN and VN sites). Those plants build products from
+components bought from other companies: controller assemblies, circuit boards, housings, cable harnesses and so on.
+Those companies are Acme's **suppliers**. The ERP calls them **vendors**: same companies, different system's
+vocabulary, and different identifiers (supplier `SUP-100245` is ERP vendor `0000710245`).
+
+The process being demonstrated:
+
+1. Acme sends a supplier a **purchase order**.
+2. The supplier **acknowledges** it: accepts, accepts with changes (quantity or date), or rejects.
+3. The supplier ships the goods and sends an **advance shipment notice (ASN)** so the plant knows what is arriving
+   and when.
+4. Both sides **track the shipment** until delivery.
+
+Suppliers do this through their own portals or integration applications; Acme's procurement and plant teams use
+internal applications to follow the same orders and shipments.
+
+## The systems behind it
+
+Like most manufacturers, Acme spreads this process across separate systems, each owning one part of the data.
+This repo provides mock versions of three of them:
+
+| Mock backend | Plays the role of | Owns |
+|---|---|---|
+| **ERP** | SAP S/4HANA purchasing | Purchase orders, order lines and supplier confirmations, with ERP-style status codes, vendor numbers and dates |
+| **SRM** (supplier relationship management) | SAP Ariba, Coupa | The supplier master: supplier codes, whether a supplier is active, on hold or blocked, and which applications may act for it |
+| **TMS** (transportation management) | SAP TM, Blue Yonder, MercuryGate | Shipments and ASNs, carriers, tracking numbers and shipment milestones |
+
+## Why a façade API
+
+Suppliers and internal applications shouldn't have to know which system holds what, or speak each system's
+dialect. The **Supplier Order Collaboration API** (`facade/`) is a single partner-facing API in front of all three.
+It gives consumers:
+
+- **One contract.** Consumers work with purchase orders and shipments, not ERP tables, codes and vendor numbers.
+- **Security and entitlement in one place.** Every call is checked against the SRM, so a supplier sees and acts on
+  only its own orders.
+- **Translation.** Codes, identifiers, dates and errors from three systems come back in one consistent format.
+- **Orchestration.** One call can span several systems. Creating an ASN, for example, records the shipment in the
+  TMS and the inbound delivery in the ERP, and cancels the TMS shipment if the ERP rejects it.
+- **Insulation.** Backends can be upgraded or replaced without breaking supplier integrations.
+- **Governance.** Rate limits, idempotency, tracing and usage metering are applied at a single point.
+
+## What this repo provides
+
 Three **independent, deliberately different** mock systems of record — built with Node.js/Express and
 PostgreSQL — that sit behind a **Supplier Order Collaboration API** façade (OpenAPI 3.1). The façade layer
 can be built with any integration platform, API gateway or API framework; nothing here depends on a
@@ -26,11 +73,11 @@ flowchart LR
     F -->|ASNs · milestones · tracking| TMS[(TMS<br/>/tms/v1)]
 ```
 
-| Backend | Path | Plays the role of | Dialect highlights |
-|---|---|---|---|
-| **ERP** | `/erp` | SAP-style purchasing system | `po_number` 10 digits (no `PO-`), `vendor_id` `0000710245`, `item_no` `"00010"`, status `01…09`, dates `YYYYMMDD`, decimals as strings, `{data, pagination}` page/limit; every PO embeds its items, `ship_to` address and `purch_org_name` |
-| **SRM** | `/srm` | Supplier master / supplier relationship mgmt | nested camelCase, owns `SUP-xxxxxx` and the ERP vendor numbers, supplier sites, **consumer entitlements**; one **check** call answers "may this consumer act?" and "which ERP vendor is this supplier?", offset paging |
-| **TMS** | `/tms` | Transportation management system | carriers stored by **SCAC** (`UPSN`) but accepted by business code (`UPS`), milestones `PLN/TND/ITR/DLV/EXC/CXL`, nested quantities/weights, **cursor** paging, SOAP-fault-style errors |
+| Backend | Path | Dialect highlights |
+|---|---|---|
+| **ERP** | `/erp` | `po_number` 10 digits (no `PO-`), `vendor_id` `0000710245`, `item_no` `"00010"`, status `01…09`, dates `YYYYMMDD`, decimals as strings, `{data, pagination}` page/limit; every PO embeds its items, `ship_to` address and `purch_org_name` |
+| **SRM** | `/srm` | nested camelCase, owns `SUP-xxxxxx` and the ERP vendor numbers, supplier sites, **consumer entitlements**; one **check** call answers "may this consumer act?" and "which ERP vendor is this supplier?", offset paging |
+| **TMS** | `/tms` | carriers stored by **SCAC** (`UPSN`) but accepted by business code (`UPS`), milestones `PLN/TND/ITR/DLV/EXC/CXL`, nested quantities/weights, **cursor** paging, SOAP-fault-style errors |
 
 ➡️ **[docs/MAPPING.md](docs/MAPPING.md)** is the answer key: every field, code and status mapping plus
 the backend calls for each façade operation (including the ASN saga with compensation):
