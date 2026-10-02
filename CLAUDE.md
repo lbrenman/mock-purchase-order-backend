@@ -50,7 +50,8 @@ normalisation to RFC 7807, seed cheat-sheet. The Postman *Scenarios* folder mirr
   `ui.js` DOM toolkit and forms, `list.js` list pages, `cache.js` lookups, `main.js` hash router,
   `views/{overview,erp,srm,tms,common}.js`.
 - `facade/`: the façade spec (OpenAPI 3.1) and `facade-console.html`, a single-file
-  browser app that calls the façade (not the backends). Its `status` query params are comma-separated strings
+  browser app that calls the façade (not the backends) and covers all six operations, including forms for the
+  two POSTs. Its `status` query params are comma-separated strings
   with a pattern, not arrays, because some API platforms handle array query params poorly; keep it that way. The console
   is self-contained (inline CSS/JS) and has its own look; it is not part of the dashboard design rules.
 - `postman/`: **generated** by `tools/build-postman.py`. `tools/`: checks, generators, dashboard stub.

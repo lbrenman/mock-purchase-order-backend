@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.6.0
+
+The façade console covers all six façade operations.
+
+- **Acknowledge order** on the order detail (`POST /purchase-orders/{purchaseOrderId}/acknowledgements`):
+  response type, supplier reference, comment, and one row per line (quantity, confirmed date, rejection
+  reason, or leave the line out). The order and list reload after a 201.
+- **New shipment notice** on the Shipments tab and **Ship this order** on the order detail
+  (`POST /shipments`): notice number, carrier, tracking, planned and expected dates (relative to today),
+  ship-from and ship-to, lines and packages. *Ship this order* prefills the supplier, ship-to and lines; the
+  ship-from address is remembered per supplier (`soc-console.shipFrom.v1`).
+- Both forms show an editable `Idempotency-Key` (resend with the same key to demo a retry, *New key* for a
+  separate request), a preview of the request, the 201 result with `Location`, and the façade's `violations`
+  marked on the matching fields.
+- The Activity log shows request bodies and `Location`, and *Copy as cURL* includes the body.
+- `facade/README.md` and the README describe the forms; the CORS table adds `Location` to the exposed headers
+  (`Content-Type` and `Idempotency-Key` were already listed as allowed); new troubleshooting rows.
+  `CLAUDE.md`: the console's scope.
+- No change to the façade spec, the backends, seed data, Postman collection or dashboard.
+
 ## 2.5.0
 
 The façade is no longer tied to one product, and the lockfile is no longer committed.

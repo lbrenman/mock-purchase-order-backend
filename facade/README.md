@@ -59,18 +59,35 @@ install. It loads the Barlow fonts from Google Fonts and falls back to system fo
   since, and page size; page with `nextPageToken`; or open an order by ID. The detail shows the order
   lifecycle, dates, value, ship-to site, lines with acknowledged quantities, and the raw JSON with the
   correlation ID and ETag. *Show shipments for this order* opens the Shipments tab filtered to it.
+  - *Acknowledge order* (`POST /purchase-orders/{purchaseOrderId}/acknowledgements`): the response (accept as
+    ordered, accept with changes, reject), supplier reference, comment, and one row per line with the
+    acknowledged quantity, confirmed delivery date and rejection reason. Quantities start at the ordered
+    quantity; untick a line to leave it out. After a 201 the order and the list reload.
+  - *Ship this order* opens a shipment notice prefilled from the order (see below).
 - **Shipments** tab: filter by purchase order, supplier, status and page size, or open a shipment by ID.
+  *New shipment notice* (`POST /shipments`) starts from the supplier and order in the filters: notice number
+  (a random `ASN-` number), carrier, tracking number, planned ship and expected arrival (tomorrow and four
+  days out, in local time, sent as UTC), ship-from and ship-to addresses, lines and optional packages. The
+  ship-from address is remembered per supplier after a 201. *Open shipment* shows the new shipment.
   The detail shows the route from the ship-from to the ship-to site, with the truck placed by status (amber
   when delayed, green when delivered), carrier and tracking number, lines, packages, and links to the orders.
 - **Calling as** (in the header): switch consumer. Lists and details already loaded are fetched again with
   the other key, so the same order can return 200 for one consumer and 403 or 404 for another.
 - **Activity** tab: every request, newest first, with consumer, status, timing, request headers (keys
-  masked), correlation ID sent and returned, ETag and body. *Copy as cURL* copies the request with the real
-  key.
+  masked), request body, correlation ID sent and returned, ETag, `Location` and response body. *Copy as cURL*
+  copies the request, including the body, with the real key.
 
 Errors show the ProblemDetails fields: title, detail, `errorCode`, correlation ID, type, instance,
-`Retry-After` and `violations`. The console doesn't validate IDs or filters itself, so the façade's own 400
-responses show up as they would for any consumer.
+`Retry-After` and `violations`. In the two forms, each violation is also marked on its field
+(`lines[0].acknowledgedQuantity`, `shipFrom.siteCode`, `Idempotency-Key`). The console doesn't validate IDs,
+filters or form values itself, so the façade's own 400 and 422 responses show up as they would for any
+consumer.
+
+**Idempotency in the forms.** Each form opens with a new `Idempotency-Key` (`console-ack-…` or
+`console-asn-…`), shown and editable. After a 201, *Back to the form* and send again with the same key: a
+correct façade returns the original result. *New key* makes a separate request, which for an order that is
+already acknowledged returns 409. *Request* at the bottom of each form shows the exact call before it is
+sent.
 
 ### Opening it
 
@@ -100,15 +117,18 @@ served from (for example `http://localhost:8080` or the Codespace's forwarded UR
 | `Access-Control-Allow-Origin` | the console's origin (or `*` for a demo) |
 | `Access-Control-Allow-Methods` | `GET, POST, OPTIONS` |
 | `Access-Control-Allow-Headers` | `X-API-Key` (or your key header), `X-Correlation-Id`, `Authorization`, `Content-Type`, `Idempotency-Key` |
-| `Access-Control-Expose-Headers` | `ETag`, `X-Correlation-Id`, `Retry-After` |
+| `Access-Control-Expose-Headers` | `ETag`, `X-Correlation-Id`, `Retry-After`, `Location` |
 
-Without `Access-Control-Expose-Headers` everything still works, but the Activity tab can't show the
-correlation ID the façade returned, the ETag or `Retry-After`.
+Without `Access-Control-Expose-Headers` everything still works, but the Activity tab and the form results
+can't show the correlation ID the façade returned, the ETag, `Retry-After` or `Location`. Without
+`Content-Type` and `Idempotency-Key` in `Access-Control-Allow-Headers`, the reads work but both forms fail
+with *Can't reach the API*.
 
 ### Where settings are kept
 
 Settings, including keys, live in localStorage under `soc-console.settings.v1`, in plain text, for the
-origin the page was loaded from. `http://localhost:8080` and a Codespace's forwarded URL are separate
+origin the page was loaded from. The last ship-from address per supplier is kept under
+`soc-console.shipFrom.v1` (not part of export and import). `http://localhost:8080` and a Codespace's forwarded URL are separate
 origins, each with its own settings: use *Export settings* and *Import settings* to copy them across.
 Private windows and clearing site data remove them. Use demo keys, and don't save real keys on a shared
 computer.
@@ -121,5 +141,9 @@ computer.
 | `401 Authentication required` for every consumer | Check the *API key header* name matches what the façade expects, and that each key is saved. |
 | `403` or `404` for one consumer only | Working as designed: that consumer isn't authorized for the supplier or record. |
 | `400` on a status filter | Values must be from the spec's list, comma-separated with no spaces. The chips always send a valid list. |
+| Reads work, but *Send acknowledgement* or *Create shipment notice* says *Can't reach the API* | CORS: add `Content-Type` and `Idempotency-Key` to `Access-Control-Allow-Headers`, and `POST` to the allowed methods. |
+| `409` on an acknowledgement | The order revision is already acknowledged. Run `npm run seed:reset`, or change the order (`PATCH /erp/v1/purchase-orders/{po}` with any field) to create a new revision. |
+| The result says *No Location header was readable* | Add `Location` to `Access-Control-Expose-Headers`, or the façade doesn't send it. |
+| The order's lifecycle track stays empty, or the status badge shows `05` or `Closed` | The façade returns a `status` outside the spec's values. Map ERP `status_code` through the lookup in `docs/MAPPING.md`, not `status_text`. |
 | Activity shows *not readable* for the returned correlation ID | Add `X-Correlation-Id` to `Access-Control-Expose-Headers`. |
 | Settings are gone after a reload | You opened the page from a different address, in a private window, or storage is blocked (a note under *Save settings* says so). Serve it over HTTP and import an exported settings file. |

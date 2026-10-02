@@ -12,11 +12,16 @@
   Single-file SPA for the façade API (facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml).
   See facade/README.md for serving it, CORS requirements and troubleshooting.
   - Settings tab: API base address, API key header name, one API key (or bearer token) per consumer.
-  - Purchase orders:  GET /purchase-orders, GET /purchase-orders/{purchaseOrderId}
-  - Shipments:        GET /shipments,       GET /shipments/{shipmentId}
-  - Activity:         every request with status, timing, correlation ID, headers and body; copy as cURL.
-  Settings (including API keys) are stored in this browser's localStorage only.
-  The façade must allow CORS from wherever this page is served.
+  - Purchase orders:  GET /purchase-orders, GET /purchase-orders/{purchaseOrderId},
+                      POST /purchase-orders/{purchaseOrderId}/acknowledgements (Acknowledge order)
+  - Shipments:        GET /shipments, GET /shipments/{shipmentId},
+                      POST /shipments (New shipment notice, or Ship this order from an order)
+  - Activity:         every request with status, timing, correlation ID, headers and bodies; copy as cURL.
+  Settings (including API keys) are stored in this browser's localStorage only. The last ship-from address
+  used per supplier is kept under soc-console.shipFrom.v1 to prefill the next shipment notice.
+  The façade must allow CORS from wherever this page is served: request headers X-API-Key (or your key
+  header), Authorization, X-Correlation-Id, Content-Type and Idempotency-Key; exposed response headers
+  ETag, X-Correlation-Id, Retry-After and Location.
 -->
 <style>
 :root {
@@ -217,6 +222,9 @@ table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
 .s-delayed { color: var(--warn); }
 .s-cancelled, .s-draft { color: var(--idle); }
 .s-cancelled { text-decoration: line-through; }
+.s-recorded { color: var(--go); }
+.s-pending_review { color: var(--warn); }
+.s-rejected { color: var(--stop); }
 
 .empty { padding: 36px 22px; color: var(--muted); }
 .empty strong { display: block; color: var(--text); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
@@ -356,6 +364,63 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
+/* Write dialog (acknowledge, shipment notice) */
+dialog.sheet {
+  width: min(1040px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--signal);
+  border-radius: var(--radius-m);
+  background: var(--panel);
+  color: var(--text);
+}
+dialog.sheet::backdrop { background: rgba(13, 27, 41, .55); }
+dialog.sheet form { display: flex; flex-direction: column; max-height: calc(100vh - 30px); }
+.dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 22px 12px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { margin: 0; font: 600 24px/1.15 var(--font-head); }
+.dlg-head p { margin: 4px 0 0; }
+.dlg-body { padding: 16px 22px 20px; overflow: auto; flex: 1 1 auto; }
+.dlg-body h3 { font: 600 18px/1.2 var(--font-head); margin: 22px 0 6px; }
+.dlg-body .problem { margin: 0 0 16px; }
+.dlg-body .problem h3 { margin: 0 0 4px; font-size: 19px; }
+.dlg-body .hint { margin: 0 0 8px; }
+.dlg-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 12px 22px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+}
+.dlg-foot .who { margin-right: auto; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 4px; }
+.keyrow label { flex: 1 1 260px; }
+.keyrow input { font-family: var(--font-id); font-size: 14px; }
+.formtable td { padding: 6px 8px; vertical-align: middle; }
+.formtable th { padding: 9px 8px 7px; }
+.formtable input, .formtable select { width: 100%; min-width: 9ch; }
+.formtable input[type=date] { min-width: 15ch; }
+.formtable input[type=checkbox] { width: 18px; height: 18px; min-width: 0; min-height: 0; }
+.formtable tr.off td:not(:first-child) { opacity: .45; }
+.grid td.tight { width: 1%; white-space: nowrap; }
+.addrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 22px; }
+fieldset.addrset {
+  margin: 0; padding: 8px 14px 14px;
+  border: 1px solid var(--line); border-radius: var(--radius-s);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+}
+fieldset.addrset legend { font: 600 16px/1.2 var(--font-head); color: var(--text); padding: 0 4px; }
+fieldset.addrset .wide { grid-column: 1 / -1; }
+[aria-invalid="true"] { border-color: var(--stop) !important; box-shadow: 0 0 0 1px var(--stop); }
+.fielderr { display: block; color: var(--stop); font-size: 13px; font-weight: 500; }
+.okbox {
+  padding: 14px 16px; margin-bottom: 4px;
+  border-left: 4px solid var(--go);
+  background: color-mix(in srgb, var(--go) 8%, var(--panel));
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+}
+.okbox h3 { margin: 0 0 2px; font: 600 20px/1.2 var(--font-head); }
+.okbox p { margin: 0; }
+.lookup-actions { display: flex; gap: 8px; align-items: end; margin-left: auto; }
+
 #toast {
   position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
@@ -435,6 +500,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     <form class="filters" id="shpLookup">
       <label class="grow">Open a shipment by ID <input name="id" placeholder="SHP-20260923-00192" autocomplete="off" spellcheck="false"></label>
       <button type="submit">Open shipment</button>
+      <span class="lookup-actions"><button type="button" class="primary" data-w-newship="1">New shipment notice</button></span>
     </form>
     <div class="split">
       <div class="pane">
@@ -494,6 +560,17 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 
 <div id="toast" role="status" aria-live="polite"></div>
 
+<dialog id="writeDlg" class="sheet" aria-labelledby="dlgTitle">
+  <form id="writeForm" novalidate autocomplete="off">
+    <header class="dlg-head">
+      <div><h2 id="dlgTitle"></h2><p class="sub" id="dlgSub"></p></div>
+      <button type="button" data-w="close">Close</button>
+    </header>
+    <div class="dlg-body" id="dlgBody"></div>
+    <footer class="dlg-foot" id="dlgFoot"></footer>
+  </form>
+</dialog>
+
 <template id="consumerRowTpl">
   <div class="crow">
     <label class="activepick" title="Use this consumer"><input type="radio" name="activeConsumer" aria-label="Use this consumer"></label>
@@ -531,12 +608,12 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   const PO_FLOW = ['OPEN', 'PARTIALLY_ACKNOWLEDGED', 'ACKNOWLEDGED', 'IN_FULFILLMENT', 'CLOSED'];
   const SHIP_PROGRESS = { DRAFT: 0, SUBMITTED: 10, IN_TRANSIT: 55, DELAYED: 55, DELIVERED: 100, CANCELLED: 0 };
   const STATUS_HELP = {
-    400: ['Invalid request', 'The API rejected one of the filters or IDs. The details below say which.'],
+    400: ['Invalid request', 'The API rejected part of the request. The details below say which.'],
     401: ['Authentication required', 'Check the key for this consumer in Settings, and that the key header name matches the API.'],
     403: ['Access denied', 'This consumer is not authorized for that supplier, record or operation.'],
     404: ['Not found', 'The record does not exist, or this consumer is not allowed to see it.'],
-    409: ['State conflict', ''],
-    422: ['Business rule violation', ''],
+    409: ['State conflict', 'The request conflicts with the record as it is now, or repeats an earlier request.'],
+    422: ['Business rule violation', 'The request is well formed but breaks a business rule. The details below say which.'],
     429: ['Rate limit exceeded', 'Wait before trying again.'],
     500: ['Internal server error', 'Give the correlation ID to support.'],
     502: ['Bad gateway', 'The API gateway could not get a valid response from a backend.'],
@@ -699,8 +776,11 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 
     const url = buildUrl(baseUrl, path, opts.query);
     const headers = { Accept: 'application/json, application/problem+json' };
+    const reqBody = opts.body !== undefined ? JSON.stringify(opts.body) : null;
+    if (reqBody !== null) headers['Content-Type'] = 'application/json';
     const corr = settings.sendCorrelationId ? uuid() : null;
     if (corr) headers['X-Correlation-Id'] = corr;
+    if (opts.headers) Object.assign(headers, opts.headers);
     const shown = { ...headers };
     if (consumer.secret) {
       if (consumer.authType === 'bearer') { headers.Authorization = `Bearer ${consumer.secret}`; shown.Authorization = `Bearer ${mask(consumer.secret)}`; }
@@ -709,8 +789,8 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 
     const entry = {
       id: uid(), at: new Date(), consumer: consumer.name, method, url,
-      headers, shownHeaders: shown, status: null, ms: null,
-      corrSent: corr, corrReturned: null, etag: null, body: null, error: null
+      headers, shownHeaders: shown, reqBody, status: null, ms: null,
+      corrSent: corr, corrReturned: null, etag: null, location: null, body: null, error: null
     };
     const ctrl = new AbortController();
     const timeoutSec = settings.timeoutSec || 20;
@@ -718,7 +798,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     const t0 = performance.now();
     let res, text;
     try {
-      res = await fetch(url, { method, headers, signal: ctrl.signal, mode: 'cors', credentials: 'omit', cache: 'no-store' });
+      res = await fetch(url, { method, headers, body: reqBody ?? undefined, signal: ctrl.signal, mode: 'cors', credentials: 'omit', cache: 'no-store' });
       text = await res.text();
     } catch (e) {
       entry.ms = Math.round(performance.now() - t0);
@@ -739,6 +819,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     entry.status = res.status;
     entry.corrReturned = res.headers.get('X-Correlation-Id');
     entry.etag = res.headers.get('ETag');
+    entry.location = res.headers.get('Location');
     let body = null;
     if (text) { try { body = JSON.parse(text); } catch (e) { body = text; } }
     entry.body = body;
@@ -754,7 +835,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
         message: `HTTP ${res.status}`
       });
     }
-    return { body, etag: entry.etag, correlationId: entry.corrReturned || corr, status: res.status };
+    return { body, etag: entry.etag, location: entry.location, correlationId: entry.corrReturned || corr, status: res.status };
   }
 
   function errorHtml(err) {
@@ -762,7 +843,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
       return `<div class="problem"><h3>Setup needed</h3><p>${esc(err.message)}</p><p><button type="button" class="linkbtn" data-goto="settings">Open settings</button></p></div>`;
     }
     if (err.kind === 'network') {
-      return `<div class="problem"><h3>Can't reach the API</h3><p>${esc(err.message)}</p><p class="hint">The browser console shows the exact reason. For CORS, the API must allow this page's origin and the headers it sends (${esc(settings.authHeader)}, X-Correlation-Id, Authorization).</p></div>`;
+      return `<div class="problem"><h3>Can't reach the API</h3><p>${esc(err.message)}</p><p class="hint">The browser console shows the exact reason. For CORS, the API must allow this page's origin and the headers it sends (${esc(settings.authHeader)}, X-Correlation-Id, Authorization, and for acknowledgements and shipment notices Content-Type and Idempotency-Key).</p></div>`;
     }
     if (err.kind !== 'http') {
       return `<div class="problem"><h3>Something went wrong</h3><p>${esc(err.message)}</p></div>`;
@@ -798,6 +879,9 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     $('#activityCount').textContent = String(log.length);
     if (state.tab === 'activity') renderActivity();
   }
+  function prettyJson(text) {
+    try { return JSON.stringify(JSON.parse(text), null, 2); } catch (e) { return String(text); }
+  }
   function pathOf(url) {
     try { const u = new URL(url); return u.pathname + u.search; } catch (e) { return url; }
   }
@@ -808,7 +892,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   function renderActivity() {
     const el = $('#activityList');
     if (!log.length) {
-      el.innerHTML = emptyHtml('No API calls yet.', ' Load purchase orders or shipments and each request shows up here.');
+      el.innerHTML = emptyHtml('No API calls yet.', ' Load orders or shipments, or send an acknowledgement or shipment notice, and each request shows up here.');
       return;
     }
     el.innerHTML = `<div class="tablewrap"><table class="grid"><thead><tr>
@@ -833,9 +917,11 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
       row.firstElementChild.innerHTML = `<div class="logbody">
         <div><h4>URL</h4><pre>${esc(e.method)} ${esc(e.url)}</pre></div>
         <div><h4>Request headers</h4><pre>${esc(JSON.stringify(e.shownHeaders, null, 2))}</pre></div>
+        ${e.reqBody !== null && e.reqBody !== undefined ? `<div><h4>Request body</h4><pre>${esc(prettyJson(e.reqBody))}</pre></div>` : ''}
         <div class="hint">Correlation ID sent: <span class="id">${esc(e.corrSent || 'none')}</span><br>
           Correlation ID returned: <span class="id">${esc(e.corrReturned || 'not readable (header missing or not exposed by CORS)')}</span>
-          ${e.etag ? `<br>ETag: <span class="id">${esc(e.etag)}</span>` : ''}</div>
+          ${e.etag ? `<br>ETag: <span class="id">${esc(e.etag)}</span>` : ''}
+          ${e.location ? `<br>Location: <span class="id">${esc(e.location)}</span>` : ''}</div>
         <div><h4>Response body</h4><pre>${esc(body.length > 60000 ? body.slice(0, 60000) + '\n…truncated' : body)}</pre></div>
         <div class="actions"><button type="button" data-curl="${e.id}">Copy as cURL (includes the key)</button></div>
       </div>`;
@@ -845,7 +931,9 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   }
   function curlFor(e) {
     const q = s => `'${String(s).replace(/'/g, `'\\''`)}'`;
-    return ['curl -i', `-X ${e.method}`, q(e.url), ...Object.entries(e.headers).map(([k, v]) => `-H ${q(`${k}: ${v}`)}`)].join(' \\\n  ');
+    const parts = ['curl -i', `-X ${e.method}`, q(e.url), ...Object.entries(e.headers).map(([k, v]) => `-H ${q(`${k}: ${v}`)}`)];
+    if (e.reqBody !== null && e.reqBody !== undefined) parts.push(`--data-raw ${q(e.reqBody)}`);
+    return parts.join(' \\\n  ');
   }
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); return true; }
@@ -860,7 +948,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 
   // ---------- Shared list state ----------
   const state = { tab: 'orders' };
-  const orders = { query: null, tokens: [null], page: 0, next: null, loaded: false, selectedId: null, listSeq: 0, detailSeq: 0 };
+  const orders = { query: null, tokens: [null], page: 0, next: null, loaded: false, selectedId: null, current: null, listSeq: 0, detailSeq: 0 };
   const ships = { query: null, tokens: [null], page: 0, next: null, loaded: false, selectedId: null, listSeq: 0, detailSeq: 0 };
 
   function renderChips(el, statuses, name) {
@@ -937,7 +1025,8 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     try {
       const res = await api('GET', `/purchase-orders/${encodeURIComponent(id)}`);
       if (seq !== orders.detailSeq) return;
-      pane.innerHTML = res.body && typeof res.body === 'object' ? poDetail(res.body, res) : errorHtml({ kind: 'other', message: 'The API returned an empty or non-JSON body.' });
+      orders.current = res.body && typeof res.body === 'object' ? res.body : null;
+      pane.innerHTML = orders.current ? poDetail(res.body, res) : errorHtml({ kind: 'other', message: 'The API returned an empty or non-JSON body.' });
     } catch (e) {
       if (seq !== orders.detailSeq) return;
       pane.innerHTML = errorHtml(e);
@@ -984,6 +1073,8 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
           </tr>`;
         }).join('')}</tbody></table></div>` : '<p class="hint">No lines returned.</p>'}
       <div class="dactions">
+        <button type="button" class="primary" data-w-ack="${esc(po.purchaseOrderId)}">Acknowledge order</button>
+        <button type="button" data-w-ship="${esc(po.purchaseOrderId)}">Ship this order</button>
         <button type="button" data-shipments-for="${esc(po.purchaseOrderId)}">Show shipments for this order</button>
       </div>
       ${rawJson(po, meta)}
@@ -1117,6 +1208,407 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     </article>`;
   }
 
+  // ---------- Write operations: acknowledge an order, create a shipment notice ----------
+  const SHIPFROM_KEY = 'soc-console.shipFrom.v1';
+  const ACK_TYPES = [['ACCEPT', 'Accept as ordered'], ['ACCEPT_WITH_CHANGES', 'Accept with changes'], ['REJECT', 'Reject']];
+  const PKG_TYPES = ['PALLET', 'CARTON', 'CRATE', 'OTHER'];
+  const ADDR_FIELDS = [
+    ['siteCode', 'Site code', ''], ['countryCode', 'Country code', ''], ['name', 'Name', 'wide'],
+    ['addressLine1', 'Street', 'wide'], ['city', 'City', ''], ['region', 'Region', ''], ['postalCode', 'Postal code', '']
+  ];
+  const LINE_FIELDS = ['purchaseOrderId', 'lineNumber', 'shippedQuantity', 'unitOfMeasure', 'lotNumber'];
+  const PKG_FIELDS = ['packageId', 'packageType', 'grossWeight', 'weightUnit'];
+  const write = { kind: null, po: null, shipmentId: null, submitLabel: '', seq: 0 };
+
+  const dlg = () => $('#writeDlg');
+  const wform = () => $('#writeForm');
+  const newKey = kind => `console-${kind}-${uuid().slice(0, 8)}`;
+  const fieldVal = (root, name) => { const el = root.querySelector(`[name="${name}"]`); return el ? String(el.value).trim() : ''; };
+  // Numbers go out as numbers; anything the browser can't parse goes out as typed, so the API's own validation shows.
+  const numOrRaw = v => v === '' ? undefined : (isFinite(Number(v)) ? Number(v) : v);
+  const isoFromLocal = v => { if (!v) return undefined; const d = new Date(v); return isNaN(d) ? v : d.toISOString().replace(/\.\d{3}Z$/, 'Z'); };
+  function compact(o) { const out = {}; for (const [k, v] of Object.entries(o)) if (v !== undefined && v !== '') out[k] = v; return out; }
+  function localInput(d) {
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  function daysFromNow(days, hour) { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(hour, 0, 0, 0); return d; }
+
+  function loadShipFrom(supplierId) {
+    if (!supplierId) return null;
+    try { return (JSON.parse(localStorage.getItem(SHIPFROM_KEY) || '{}') || {})[supplierId] || null; } catch (e) { return null; }
+  }
+  function saveShipFrom(supplierId, addr) {
+    if (!supplierId || !addr) return;
+    try {
+      const all = JSON.parse(localStorage.getItem(SHIPFROM_KEY) || '{}') || {};
+      all[supplierId] = addr;
+      localStorage.setItem(SHIPFROM_KEY, JSON.stringify(all));
+    } catch (e) { /* storage blocked: nothing to remember */ }
+  }
+
+  function updateWho() {
+    const el = $('#dlgFoot .who');
+    if (!el) return;
+    const c = activeConsumer();
+    el.textContent = `Sends as ${c ? c.name : 'no consumer'}`;
+  }
+  function formFoot() {
+    $('#dlgFoot').innerHTML = `<span class="sub who"></span>
+      <button type="button" data-w="close">Cancel</button>
+      <button type="submit" class="primary" id="dlgSubmit">${esc(write.submitLabel)}</button>`;
+    updateWho();
+  }
+  function keyRowHtml(key) {
+    return `<div class="keyrow">
+        <label>Idempotency key <input name="idemKey" data-field="Idempotency-Key" value="${esc(key)}" spellcheck="false"></label>
+        <button type="button" data-w="newkey">New key</button>
+      </div>
+      <p class="hint">Sending again with the same key is a retry: the API should return the original result rather than record it twice. Use New key for a separate request.</p>`;
+  }
+  function previewHtml() {
+    return `<details class="raw"><summary>Request</summary><pre id="reqPreview"></pre></details>`;
+  }
+  function showDialog(title, subHtml) {
+    $('#dlgTitle').textContent = title;
+    $('#dlgSub').innerHTML = subHtml;
+    const d = dlg();
+    if (!d.open) d.showModal();
+    $('#dlgBody').scrollTop = 0;
+    const first = $('#dlgForm input:not([name=idemKey]), #dlgForm textarea');
+    if (first) first.focus();
+  }
+
+  // Acknowledge
+  function openAckForm(po) {
+    write.kind = 'ack'; write.po = po; write.shipmentId = null; write.seq++;
+    write.submitLabel = 'Send acknowledgement';
+    $('#dlgBody').innerHTML = `<div id="dlgForm">${ackFormHtml(po, newKey('ack'))}</div><div id="dlgResult" hidden></div>`;
+    formFoot();
+    showDialog('Acknowledge order', `<span class="id">${esc(po.purchaseOrderId)}</span> for supplier <span class="id">${esc(po.supplierId)}</span>, currently ${esc(label(po.status).toLowerCase())}`);
+    updatePreview();
+  }
+  function ackFormHtml(po, key) {
+    const lines = Array.isArray(po.lines) ? po.lines : [];
+    return `<div id="dlgProblem"></div>
+      ${keyRowHtml(key)}
+      <div class="formgrid">
+        <fieldset class="chips wide" data-field="acknowledgementType"><legend>Response</legend>${ACK_TYPES.map(([v, t], i) =>
+          `<label class="chip"><input type="radio" name="ackType" value="${v}"${i === 0 ? ' checked' : ''}><span>${esc(t)}</span></label>`).join('')}</fieldset>
+        <label>Supplier reference <input name="supplierReference" data-field="supplierReference" placeholder="SUP-ACK-88419" spellcheck="false"></label>
+        <label class="wide">Comment <textarea name="comment" data-field="comment" rows="2" placeholder="Confirmed as ordered."></textarea></label>
+      </div>
+      <h3>Lines</h3>
+      <p class="hint">Quantities start at the ordered quantity. Leave the confirmed date empty to confirm the requested delivery date. Untick a line to leave it out.</p>
+      ${lines.length ? `<div class="tablewrap"><table class="grid formtable"><thead><tr>
+          <th>Send</th><th class="num">Line</th><th>Material</th><th class="num">Ordered</th><th>Acknowledged quantity</th><th>Confirmed delivery</th><th>Rejection reason</th>
+        </tr></thead><tbody>${lines.map(l => `<tr data-line="${esc(l.lineNumber)}" data-ordered="${esc(l.orderedQuantity ?? '')}">
+          <td class="tight"><input type="checkbox" name="include" checked aria-label="Send line ${esc(l.lineNumber)}"></td>
+          <td class="num">${esc(l.lineNumber)}</td>
+          <td><span class="id">${esc(l.materialId)}</span><div class="sub">${esc(l.description)}</div></td>
+          <td class="num">${fmtNum(l.orderedQuantity)} ${esc(l.unitOfMeasure || '')}</td>
+          <td><input type="number" name="qty" min="0" step="any" value="${esc(l.orderedQuantity ?? '')}" aria-label="Acknowledged quantity, line ${esc(l.lineNumber)}"></td>
+          <td><input type="date" name="date" aria-label="Confirmed delivery date, line ${esc(l.lineNumber)}"></td>
+          <td><input name="reason" placeholder="CAPACITY" spellcheck="false" aria-label="Rejection reason, line ${esc(l.lineNumber)}"></td>
+        </tr>`).join('')}</tbody></table></div>` : '<p class="hint">This order returned no lines, so the request will have none either.</p>'}
+      ${previewHtml()}`;
+  }
+  function applyAckType(type) {
+    $$('#dlgForm tr[data-line]').forEach(tr => {
+      const q = $('[name=qty]', tr);
+      if (type === 'ACCEPT') q.value = tr.dataset.ordered;
+      if (type === 'REJECT') q.value = '0';
+    });
+  }
+  function buildAck(form) {
+    const lines = [];
+    $$('tr[data-line]', form).forEach(tr => {
+      const f = { acknowledgedQuantity: $('[name=qty]', tr), confirmedDeliveryDate: $('[name=date]', tr), rejectionReasonCode: $('[name=reason]', tr) };
+      Object.values(f).forEach(el => el.removeAttribute('data-field'));
+      if (!$('[name=include]', tr).checked) return;
+      const i = lines.length;
+      Object.entries(f).forEach(([k, el]) => { el.dataset.field = `lines[${i}].${k}`; });
+      lines.push(compact({
+        lineNumber: numOrRaw(tr.dataset.line),
+        acknowledgedQuantity: numOrRaw(f.acknowledgedQuantity.value.trim()),
+        confirmedDeliveryDate: f.confirmedDeliveryDate.value || undefined,
+        rejectionReasonCode: f.rejectionReasonCode.value.trim() || undefined
+      }));
+    });
+    return compact({
+      acknowledgementType: $('input[name=ackType]:checked', form)?.value,
+      supplierReference: fieldVal(form, 'supplierReference'),
+      comment: fieldVal(form, 'comment'),
+      lines
+    });
+  }
+
+  // Shipment notice
+  function shipPrefillFromPo(po) {
+    const lines = (Array.isArray(po.lines) ? po.lines : []).map(l => ({
+      purchaseOrderId: po.purchaseOrderId,
+      lineNumber: l.lineNumber,
+      shippedQuantity: l.acknowledgedQuantity > 0 ? l.acknowledgedQuantity : l.orderedQuantity,
+      unitOfMeasure: l.unitOfMeasure
+    }));
+    return { fromPo: po.purchaseOrderId, supplierId: po.supplierId, shipTo: po.shipTo, shipFrom: loadShipFrom(po.supplierId), lines };
+  }
+  function shipPrefillFromFilters() {
+    const f = $('#shpFilters');
+    const supplierId = f.supplierId.value.trim().toUpperCase();
+    const poId = f.purchaseOrderId.value.trim().toUpperCase();
+    return { supplierId, shipFrom: loadShipFrom(supplierId), lines: poId ? [{ purchaseOrderId: poId }] : [] };
+  }
+  function openShipForm(pre) {
+    write.kind = 'shp'; write.po = null; write.shipmentId = null; write.seq++;
+    write.submitLabel = 'Create shipment notice';
+    $('#dlgBody').innerHTML = `<div id="dlgForm">${shpFormHtml(pre, newKey('asn'))}</div><div id="dlgResult" hidden></div>`;
+    formFoot();
+    showDialog('New shipment notice', pre.fromPo
+      ? `Ships <span class="id">${esc(pre.fromPo)}</span> for supplier <span class="id">${esc(pre.supplierId)}</span>`
+      : 'An advance shipment notice for one or more order lines');
+    updatePreview();
+  }
+  function addrSetHtml(prefix, legend, a) {
+    a = a || {};
+    return `<fieldset class="addrset" data-field="${prefix}"><legend>${esc(legend)}</legend>${ADDR_FIELDS.map(([k, t, cls]) =>
+      `<label class="${cls}">${esc(t)} <input name="${prefix}.${k}" data-field="${prefix}.${k}" value="${esc(a[k] ?? '')}" spellcheck="false"></label>`).join('')}</fieldset>`;
+  }
+  function shpLineRow(l = {}) {
+    return `<tr>
+      <td><input name="purchaseOrderId" value="${esc(l.purchaseOrderId ?? '')}" placeholder="PO-4500123456" spellcheck="false" aria-label="Purchase order"></td>
+      <td><input name="lineNumber" type="number" min="1" step="1" value="${esc(l.lineNumber ?? '')}" aria-label="Line"></td>
+      <td><input name="shippedQuantity" type="number" min="0" step="any" value="${esc(l.shippedQuantity ?? '')}" aria-label="Shipped quantity"></td>
+      <td><input name="unitOfMeasure" value="${esc(l.unitOfMeasure ?? '')}" placeholder="EA" spellcheck="false" aria-label="Unit"></td>
+      <td><input name="lotNumber" value="${esc(l.lotNumber ?? '')}" spellcheck="false" aria-label="Lot"></td>
+      <td class="tight"><button type="button" class="danger" data-w="remove-row">Remove</button></td>
+    </tr>`;
+  }
+  function pkgRow(p = {}) {
+    const type = p.packageType || 'PALLET';
+    return `<tr>
+      <td><input name="packageId" value="${esc(p.packageId ?? '')}" placeholder="PALLET-1001" spellcheck="false" aria-label="Package ID"></td>
+      <td><select name="packageType" aria-label="Package type">${PKG_TYPES.map(t => `<option value="${t}"${t === type ? ' selected' : ''}>${esc(label(t))}</option>`).join('')}</select></td>
+      <td><input name="grossWeight" type="number" min="0" step="any" value="${esc(p.grossWeight ?? '')}" aria-label="Gross weight"></td>
+      <td><select name="weightUnit" aria-label="Weight unit"><option value="KG">kg</option><option value="LB">lb</option></select></td>
+      <td class="tight"><button type="button" class="danger" data-w="remove-row">Remove</button></td>
+    </tr>`;
+  }
+  function shpFormHtml(pre, key) {
+    const notice = `ASN-${100000 + Math.floor(Math.random() * 900000)}`;
+    const lines = pre.lines && pre.lines.length ? pre.lines : [{}];
+    return `<div id="dlgProblem"></div>
+      ${keyRowHtml(key)}
+      <div class="formgrid">
+        <label>Supplier ID <input name="supplierId" data-field="supplierId" value="${esc(pre.supplierId || '')}" placeholder="SUP-100245" spellcheck="false"></label>
+        <label>Shipment notice number <input name="shipmentNoticeNumber" data-field="shipmentNoticeNumber" value="${esc(notice)}" spellcheck="false"></label>
+        <label>Carrier code <input name="carrierCode" data-field="carrierCode" value="UPS" spellcheck="false"></label>
+        <label>Tracking number <input name="trackingNumber" data-field="trackingNumber" placeholder="1Z999AA10123456784" spellcheck="false"></label>
+        <label>Planned ship (local time) <input type="datetime-local" name="plannedShipAt" data-field="plannedShipAt" value="${localInput(daysFromNow(1, 12))}"></label>
+        <label>Expected arrival (local time) <input type="datetime-local" name="expectedArrivalAt" data-field="expectedArrivalAt" value="${localInput(daysFromNow(4, 15))}"></label>
+      </div>
+      <h3>Route</h3>
+      <p class="hint">Ship-from is remembered per supplier after a successful notice.</p>
+      <div class="addrs">${addrSetHtml('shipFrom', 'Ship from', pre.shipFrom)}${addrSetHtml('shipTo', 'Ship to', pre.shipTo)}</div>
+      <h3>Lines</h3>
+      <p class="hint">${pre.fromPo ? 'Quantities start at the acknowledged quantity, or the ordered quantity when nothing is acknowledged yet. ' : ''}Empty rows are left out.</p>
+      <div class="tablewrap"><table class="grid formtable"><thead><tr>
+          <th>Purchase order</th><th>Line</th><th>Quantity</th><th>Unit</th><th>Lot</th><th></th>
+        </tr></thead><tbody id="shpLines">${lines.map(shpLineRow).join('')}</tbody></table></div>
+      <p><button type="button" data-w="add-line">Add line</button></p>
+      <h3>Packages</h3>
+      <div class="tablewrap" id="pkgWrap" hidden><table class="grid formtable"><thead><tr>
+          <th>Package ID</th><th>Type</th><th>Gross weight</th><th>Unit</th><th></th>
+        </tr></thead><tbody id="shpPkgs"></tbody></table></div>
+      <p class="hint" id="noPkgs">Optional. None are sent unless you add one.</p>
+      <p><button type="button" data-w="add-pkg">Add package</button></p>
+      ${previewHtml()}`;
+  }
+  function syncPkgs() {
+    const any = $('#shpPkgs') && $('#shpPkgs').children.length > 0;
+    $('#pkgWrap').hidden = !any;
+    $('#noPkgs').hidden = any;
+  }
+  function buildShipment(form) {
+    const addr = prefix => {
+      const a = compact(Object.fromEntries(ADDR_FIELDS.map(([k]) => [k, fieldVal(form, `${prefix}.${k}`)])));
+      return Object.keys(a).length ? a : undefined;
+    };
+    const rows = (tbodySel, names, isEmpty, make, arr) => {
+      $$(`${tbodySel} tr`, form).forEach(tr => {
+        const el = n => $(`[name=${n}]`, tr);
+        names.forEach(n => el(n).removeAttribute('data-field'));
+        const raw = Object.fromEntries(names.map(n => [n, String(el(n).value).trim()]));
+        if (isEmpty(raw)) return;
+        const i = arr.length;
+        names.forEach(n => { el(n).dataset.field = `${arr.prefix}[${i}].${n}`; });
+        arr.push(make(raw));
+      });
+      return arr;
+    };
+    const lines = Object.assign([], { prefix: 'lines' });
+    rows('#shpLines', LINE_FIELDS, r => !Object.values(r).some(Boolean), r => compact({
+      purchaseOrderId: r.purchaseOrderId, lineNumber: numOrRaw(r.lineNumber), shippedQuantity: numOrRaw(r.shippedQuantity),
+      unitOfMeasure: r.unitOfMeasure, lotNumber: r.lotNumber
+    }), lines);
+    const packages = Object.assign([], { prefix: 'packages' });
+    rows('#shpPkgs', PKG_FIELDS, r => !r.packageId && !r.grossWeight, r => compact({
+      packageId: r.packageId, packageType: r.packageType, grossWeight: numOrRaw(r.grossWeight),
+      weightUnit: r.grossWeight ? r.weightUnit : undefined
+    }), packages);
+    return compact({
+      supplierId: fieldVal(form, 'supplierId'),
+      shipmentNoticeNumber: fieldVal(form, 'shipmentNoticeNumber'),
+      carrierCode: fieldVal(form, 'carrierCode'),
+      trackingNumber: fieldVal(form, 'trackingNumber'),
+      shipFrom: addr('shipFrom'),
+      shipTo: addr('shipTo'),
+      plannedShipAt: isoFromLocal(fieldVal(form, 'plannedShipAt')),
+      expectedArrivalAt: isoFromLocal(fieldVal(form, 'expectedArrivalAt')),
+      lines: [...lines],
+      packages: packages.length ? [...packages] : undefined
+    });
+  }
+  function fillShipFromIfEmpty(form) {
+    const empty = ADDR_FIELDS.every(([k]) => !fieldVal(form, `shipFrom.${k}`));
+    const saved = empty ? loadShipFrom(fieldVal(form, 'supplierId').toUpperCase()) : null;
+    if (!saved) return;
+    ADDR_FIELDS.forEach(([k]) => { form.querySelector(`[name="shipFrom.${k}"]`).value = saved[k] ?? ''; });
+  }
+
+  // Shared: preview, send, result, field errors
+  function currentRequest() {
+    const form = wform();
+    const body = write.kind === 'ack' ? buildAck(form) : buildShipment(form);
+    const path = write.kind === 'ack' ? `/purchase-orders/${encodeURIComponent(write.po.purchaseOrderId)}/acknowledgements` : '/shipments';
+    return { path, body, key: fieldVal(form, 'idemKey') };
+  }
+  function updatePreview() {
+    const pre = $('#reqPreview');
+    if (!pre || !write.kind) return;
+    const { path, body, key } = currentRequest();
+    pre.textContent = `POST ${path}\n${key ? `Idempotency-Key: ${key}` : '(no Idempotency-Key)'}\n\n${JSON.stringify(body, null, 2)}`;
+  }
+  function clearMarks(form) {
+    $$('[aria-invalid="true"]', form).forEach(el => el.removeAttribute('aria-invalid'));
+    $$('.fielderr', form).forEach(el => el.remove());
+  }
+  function markViolations(form, problem) {
+    const vs = Array.isArray(problem?.violations) ? problem.violations : [];
+    let first = null;
+    for (const v of vs) {
+      if (!v || !v.field) continue;
+      const el = form.querySelector(`[data-field="${CSS.escape(String(v.field))}"]`);
+      if (!el) continue;
+      el.setAttribute('aria-invalid', 'true');
+      const host = el.matches('fieldset') ? el : (el.closest('label, td') || el.parentElement);
+      const msg = document.createElement('span');
+      msg.className = 'fielderr';
+      msg.textContent = v.message || 'Invalid value';
+      host.appendChild(msg);
+      first = first || el;
+    }
+    return first;
+  }
+  async function submitWrite() {
+    if (!write.kind) return;
+    const form = wform();
+    const btn = $('#dlgSubmit');
+    const { path, body, key } = currentRequest();
+    const seq = ++write.seq;
+    clearMarks(form);
+    $('#dlgProblem').innerHTML = '';
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const res = await api('POST', path, { body, headers: key ? { 'Idempotency-Key': key } : undefined });
+      if (seq !== write.seq) return;
+      showResult(res, body, key);
+    } catch (e) {
+      if (seq !== write.seq) return;
+      $('#dlgProblem').innerHTML = errorHtml(e);
+      $('#dlgBody').scrollTop = 0;
+      if (e.kind === 'http') markViolations(form, e.problem);
+    } finally {
+      if (seq === write.seq && $('#dlgSubmit')) { $('#dlgSubmit').disabled = false; $('#dlgSubmit').textContent = write.submitLabel; }
+    }
+  }
+  function locationHtml(res) {
+    return res.location
+      ? `<p class="hint">Location <span class="id">${esc(res.location)}</span></p>`
+      : '<p class="hint">No Location header was readable. The API may not send it, or its CORS settings may not expose it.</p>';
+  }
+  function showResult(res, sent, key) {
+    const b = res.body && typeof res.body === 'object' ? res.body : {};
+    const meta = { correlationId: res.correlationId };
+    const keyNote = `<p class="hint">Sent with idempotency key <span class="id">${esc(key || 'none')}</span>. Back to the form and send again to see the retry behaviour.</p>`;
+    let html, foot;
+    if (write.kind === 'ack') {
+      const id = write.po.purchaseOrderId;
+      const head = { RECORDED: 'Acknowledgement recorded', PENDING_REVIEW: 'Sent to the buyer for review', REJECTED: 'Rejection recorded' }[b.status] || 'Acknowledgement sent';
+      html = `<div class="okbox"><h3>${esc(head)}</h3><p>HTTP ${res.status} for <span class="id">${esc(id)}</span>.</p></div>
+        <dl class="facts">
+          ${fact('Acknowledgement ID', b.acknowledgementId ? `<span class="id">${esc(b.acknowledgementId)}</span>` : '—')}
+          ${fact('Status', badge(b.status))}
+          ${fact('Response', esc(label(b.acknowledgementType || sent.acknowledgementType)))}
+          ${fact('Recorded', fmtDateTime(b.recordedAt))}
+          ${fact('Supplier reference', esc(b.supplierReference || '—'))}
+        </dl>
+        ${locationHtml(res)}${keyNote}${rawJson(b, meta)}`;
+      foot = `<button type="button" data-w="back">Back to the form</button><button type="button" class="primary" data-w="view-po">View order</button>`;
+      if (orders.selectedId === id) openPo(id);
+      if (orders.loaded) loadOrders();
+    } else {
+      write.shipmentId = b.shipmentId || null;
+      const pos = Array.isArray(b.purchaseOrders) ? b.purchaseOrders : [];
+      html = `<div class="okbox"><h3>Shipment notice created</h3><p>HTTP ${res.status}${b.shipmentId ? `, shipment <span class="id">${esc(b.shipmentId)}</span>` : ''}.</p></div>
+        <dl class="facts">
+          ${fact('Shipment ID', b.shipmentId ? `<span class="id">${esc(b.shipmentId)}</span>` : '—')}
+          ${fact('Status', badge(b.status))}
+          ${fact('Notice number', esc(b.shipmentNoticeNumber || sent.shipmentNoticeNumber || '—'))}
+          ${fact('Carrier', esc(b.carrierCode || '—'))}
+          ${fact('Expected arrival', fmtDateTime(b.expectedArrivalAt))}
+          ${fact('Orders', pos.length ? `<span class="id">${esc(pos.join(', '))}</span>` : '—')}
+        </dl>
+        ${locationHtml(res)}${keyNote}${rawJson(b, meta)}`;
+      foot = `<button type="button" data-w="back">Back to the form</button>${write.shipmentId ? '<button type="button" class="primary" data-w="open-shp">Open shipment</button>' : ''}`;
+      saveShipFrom(sent.supplierId, sent.shipFrom);
+      if (ships.loaded) loadShipments();
+    }
+    $('#dlgForm').hidden = true;
+    const r = $('#dlgResult');
+    r.innerHTML = html;
+    r.hidden = false;
+    $('#dlgFoot').innerHTML = foot;
+    $('#dlgBody').scrollTop = 0;
+  }
+
+  function bindWrites() {
+    const form = wform();
+    form.addEventListener('submit', e => { e.preventDefault(); submitWrite(); });
+    form.addEventListener('input', updatePreview);
+    form.addEventListener('change', e => {
+      if (e.target.name === 'ackType') applyAckType(e.target.value);
+      if (e.target.name === 'include') e.target.closest('tr').classList.toggle('off', !e.target.checked);
+      if (e.target.name === 'supplierId') fillShipFromIfEmpty(form);
+      updatePreview();
+    });
+    form.addEventListener('click', e => {
+      const b = e.target.closest('[data-w]');
+      if (!b) return;
+      switch (b.dataset.w) {
+        case 'close': dlg().close(); break;
+        case 'newkey': form.idemKey.value = newKey(write.kind === 'ack' ? 'ack' : 'asn'); updatePreview(); break;
+        case 'add-line': $('#shpLines').insertAdjacentHTML('beforeend', shpLineRow()); $('#shpLines tr:last-child input').focus(); updatePreview(); break;
+        case 'add-pkg': $('#shpPkgs').insertAdjacentHTML('beforeend', pkgRow()); syncPkgs(); $('#shpPkgs tr:last-child input').focus(); updatePreview(); break;
+        case 'remove-row': b.closest('tr').remove(); if ($('#shpPkgs')) syncPkgs(); updatePreview(); break;
+        case 'back': $('#dlgResult').hidden = true; $('#dlgForm').hidden = false; formFoot(); break;
+        case 'view-po': { const id = write.po.purchaseOrderId; dlg().close(); showTab('orders'); openPo(id); break; }
+        case 'open-shp': { const id = write.shipmentId; dlg().close(); showTab('shipments'); if (id) openShipment(id); break; }
+      }
+    });
+  }
+
   // ---------- Header, tabs ----------
   function renderConsumerSelect() {
     const sel = $('#consumerSelect');
@@ -1142,7 +1634,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   function introStates() {
     if (!orders.loaded) $('#poList').innerHTML = emptyHtml('Load purchase orders to begin.', ' Pick filters above, or leave them empty to see every order this consumer can access.');
     if (!ships.loaded) $('#shpList').innerHTML = emptyHtml('Load shipments to begin.', ' Filter by order, supplier or status, or leave them empty.');
-    if (!orders.selectedId) $('#poDetail').innerHTML = emptyHtml('No order selected.', ' Select an order in the list to see its lifecycle, lines and ship-to site.');
+    if (!orders.selectedId) $('#poDetail').innerHTML = emptyHtml('No order selected.', ' Select an order in the list to see its lifecycle, lines and ship-to site, and to acknowledge or ship it.');
     if (!ships.selectedId) $('#shpDetail').innerHTML = emptyHtml('No shipment selected.', ' Select a shipment to see its route, lines and packages.');
   }
   function refreshForConsumer() {
@@ -1238,6 +1730,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
       persist();
       const c = activeConsumer();
       toast(`Calling as ${c ? c.name : 'nobody'}`);
+      updateWho();
       if (state.tab === 'settings') renderSettings();
       refreshForConsumer();
     });
@@ -1258,9 +1751,16 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
     $('#clearLog').addEventListener('click', () => { log.length = 0; $('#activityCount').textContent = '0'; renderActivity(); });
 
     document.addEventListener('click', async e => {
-      const t = e.target.closest('[data-goto],[data-po],[data-shp],[data-page],[data-shipments-for],[data-open-po],[data-log],[data-curl]');
+      const t = e.target.closest('[data-goto],[data-po],[data-shp],[data-page],[data-shipments-for],[data-open-po],[data-log],[data-curl],[data-w-ack],[data-w-ship],[data-w-newship]');
       if (!t) return;
-      if (t.dataset.goto) return showTab(t.dataset.goto);
+      if (t.dataset.goto) { if (dlg().open) dlg().close(); return showTab(t.dataset.goto); }
+      if (t.dataset.wAck || t.dataset.wShip) {
+        const id = t.dataset.wAck || t.dataset.wShip;
+        const po = orders.current && orders.current.purchaseOrderId === id ? orders.current : null;
+        if (!po) return toast('Open the order again, then try once more.');
+        return t.dataset.wAck ? openAckForm(po) : openShipForm(shipPrefillFromPo(po));
+      }
+      if (t.dataset.wNewship) return openShipForm(shipPrefillFromFilters());
       if (t.dataset.curl) {
         const entry = log.find(x => x.id === t.dataset.curl);
         if (entry) toast(await copyText(curlFor(entry)) ? 'cURL command copied' : 'Copy failed. Select the text manually.');
@@ -1361,6 +1861,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   renderEnv();
   introStates();
   bind();
+  bindWrites();
   const hash = (location.hash || '').replace('#', '');
   showTab(settings.baseUrl ? (hash || 'orders') : 'settings');
 })();

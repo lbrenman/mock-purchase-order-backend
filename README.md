@@ -581,14 +581,18 @@ for demos: switch between consumers and watch what each one is allowed to see.
 - **Settings:** the façade base address, the API key header name (default `X-API-Key`), and one entry per
   consumer with its API key or bearer token. Each consumer has *Test connection*. Settings are kept in the
   browser's localStorage and can be exported and imported as JSON (the file contains the keys).
-- **Purchase orders and Shipments:** the four read operations, with filters, paging (`nextPageToken`), open
-  by ID, a lifecycle track for orders, a route view for shipments, and links between the two.
+- **Purchase orders and Shipments:** all six façade operations. The four reads have filters, paging
+  (`nextPageToken`), open by ID, a lifecycle track for orders, a route view for shipments, and links between
+  the two. *Acknowledge order* and *Ship this order* on an order, and *New shipment notice* on the Shipments
+  tab, open forms for the two POSTs, with an editable `Idempotency-Key` (resend with the same key to show a
+  retry), a preview of the request, and the façade's `violations` marked on the fields.
 - **Calling as:** the consumer switcher in the header re-runs the loaded lists and details with the other key.
-- **Activity:** every request with status, timing, masked headers, correlation IDs, ETag and body, plus
-  *Copy as cURL*. Errors show the ProblemDetails fields.
+- **Activity:** every request with status, timing, masked headers, request and response bodies, correlation
+  IDs, ETag and `Location`, plus *Copy as cURL*. Errors show the ProblemDetails fields.
 
 The façade must allow CORS from wherever the page is served, including the headers `X-API-Key`,
-`X-Correlation-Id` and `Authorization`, and should expose `ETag` and `X-Correlation-Id`. See
+`X-Correlation-Id`, `Authorization`, `Content-Type` and `Idempotency-Key`, and should expose `ETag`,
+`X-Correlation-Id`, `Retry-After` and `Location`. See
 [`facade/README.md`](facade/README.md) for how to open it and troubleshoot.
 
 ---
