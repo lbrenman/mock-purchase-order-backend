@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#15283c">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1b29">
 <title>Supplier Order Collaboration console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,6 +48,15 @@
   --font: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-head: "Barlow Condensed", "Arial Narrow", "Barlow", system-ui, sans-serif;
   --font-id: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* Motion: one set of curves for the whole page */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --press: 160ms;
+  /* Side gutters that also clear a landscape notch */
+  --pad-x: clamp(12px, 3vw, 32px);
+  --pad-l: max(var(--pad-x), env(safe-area-inset-left, 0px));
+  --pad-r: max(var(--pad-x), env(safe-area-inset-right, 0px));
   color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -65,7 +77,13 @@
   }
 }
 * { box-sizing: border-box; }
-html { height: 100%; }
+html {
+  height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none; /* pull-to-refresh would wipe the activity log and loaded lists */
+}
+html:has(dialog[open]) { overflow: hidden; }
 body {
   margin: 0;
   min-height: 100%;
@@ -86,8 +104,7 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 10px 20px;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) clamp(12px, 3vw, 32px) 12px;
-  border-bottom: 4px solid var(--signal);
+  padding: calc(10px + env(safe-area-inset-top, 0px)) var(--pad-r) 0 var(--pad-l);
 }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .mark {
@@ -96,40 +113,105 @@ body {
   background: var(--signal);
   clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
 }
-.brand strong { display: block; font: 600 22px/1.1 var(--font-head); letter-spacing: .01em; }
-.brand #envLabel { display: block; font-size: 13.5px; color: #b9c8d6; overflow-wrap: anywhere; }
-.consumer { display: flex; align-items: center; gap: 8px; color: #d5e0ea; font-size: 14px; font-weight: 500; }
-.consumer select { min-width: 200px; background: #fff; color: #15283c; border-color: transparent; }
+.brand strong { display: block; font: 600 19px/1.1 var(--font-head); letter-spacing: .01em; color: #d5e0ea; }
+.brand #envLabel { display: block; font-size: 13.5px; color: #93a7ba; overflow-wrap: anywhere; }
+
+/* Consumer lens: the identity every call is made with. Its colour band changes with the consumer. */
+.lens {
+  --lens: var(--signal);
+  background: var(--bar); color: #fff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "who stats" "switch switch";
+  gap: 18px 32px; align-items: end;
+  padding: 20px var(--pad-r) 18px var(--pad-l);
+  border-bottom: 8px solid var(--signal);
+  transition: border-color 240ms ease;
+}
+.lens-id { grid-area: who; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.avatar {
+  flex: none; width: 64px; height: 64px; border-radius: 12px;
+  display: grid; place-items: center;
+  font: 600 28px/1 var(--font-head); color: #15283c; background: var(--signal);
+  transition: background-color 240ms ease;
+}
+.lens-who { min-width: 0; }
+.lens-who .eyebrow { display: block; font-size: 14px; color: #93a7ba; font-weight: 500; }
+.lens-who h1 {
+  margin: 0; font: 600 clamp(30px, 4.4vw, 46px)/1 var(--font-head); letter-spacing: -.005em;
+  overflow-wrap: anywhere;
+}
+.lens-meta { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; font-size: 14.5px; color: #c6d3df; }
+.lens-meta .warn { color: #ffcf5a; font-weight: 600; }
+.lens-stats { grid-area: stats; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(104px, auto); gap: 0; margin: 0; }
+.lens-stats > div { padding: 0 20px; border-left: 1px solid rgba(255, 255, 255, .14); }
+.lens-stats > div:first-child { border-left: 0; padding-left: 0; }
+.lens-stats dt { font-size: 13.5px; color: #93a7ba; font-weight: 500; white-space: nowrap; }
+.lens-stats dd { margin: 2px 0 0; }
+.lens-stats .big { display: block; font: 600 38px/1 var(--font-head); font-variant-numeric: tabular-nums; }
+.lens-stats .big.ok { color: #6fdca5; }
+.lens-stats .big.bad { color: #ff8f84; }
+.lens-stats .small { display: block; margin-top: 4px; font-size: 13px; color: #b9c8d6; max-width: 22ch; overflow-wrap: anywhere; }
+.lens-switch { grid-area: switch; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-width: 0; }
+.lens-switch > span { font-size: 14px; color: #93a7ba; font-weight: 500; }
+.pills { display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-snap-type: x proximity; padding: 2px; }
+.pill {
+  flex: none; scroll-snap-align: start;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 38px; padding: 6px 14px 6px 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, .07); color: #e3eaf0; border: 1px solid rgba(255, 255, 255, .18);
+  font-weight: 600;
+}
+.pill .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--dot); flex: none; }
+.pill[aria-checked="true"] { background: var(--dot); border-color: var(--dot); color: #15283c; }
+.pill[aria-checked="true"] .dot { background: #15283c; }
+.lens-switch .linkbtn { color: #d5e0ea; }
+.lens-select { display: flex; align-items: center; gap: 8px; color: #93a7ba; }
+.lens-select select { min-width: 220px; background: #fff; color: #15283c; border-color: transparent; }
+.lens-body { transition: opacity 220ms ease, filter 220ms ease; }
+@media (max-width: 760px) {
+  .lens { grid-template-columns: minmax(0, 1fr); grid-template-areas: "who" "stats" "switch"; gap: 16px; padding-top: 14px; }
+  .avatar { width: 52px; height: 52px; font-size: 23px; }
+  .lens-stats { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-columns: auto; }
+  .lens-stats > div { padding: 0 12px; }
+  .lens-stats .big { font-size: 30px; }
+  .lens-stats dt { white-space: normal; line-height: 1.2; min-height: 2.4em; }
+  .pills { margin: 0 calc(-1 * var(--pad-r)) 0 calc(-1 * var(--pad-l)); padding: 2px var(--pad-r) 2px var(--pad-l); width: calc(100% + var(--pad-l) + var(--pad-r)); }
+  .lens-switch > span { display: none; }
+}
 
 /* Tabs */
 .tabs {
   display: flex;
   gap: 2px;
-  padding: 0 clamp(12px, 3vw, 32px);
+  padding: 0 var(--pad-r) 0 var(--pad-l);
   background: var(--panel);
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
 }
 .tabs button {
   border: 0;
-  border-bottom: 3px solid transparent;
+  border-bottom: 4px solid transparent;
   border-radius: 0;
   background: none;
   color: var(--muted);
-  padding: 12px 14px 10px;
-  font-weight: 600;
+  padding: 14px 18px 11px;
+  font: 600 19px/1.1 var(--font-head);
+  letter-spacing: .01em;
   white-space: nowrap;
   min-height: 0;
 }
-.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--signal); }
-.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
 .count {
-  display: inline-block; min-width: 1.6em; padding: 0 6px; margin-left: 4px;
-  border-radius: 999px; background: var(--paper); color: var(--muted);
-  font-size: 12.5px; text-align: center;
+  display: inline-block; min-width: 1.7em; padding: 2px 7px; margin-left: 6px;
+  border-radius: 999px; background: var(--text); color: var(--panel);
+  font: 600 13px/1.2 var(--font); text-align: center; vertical-align: 2px;
 }
+.tabs button[aria-selected="false"] .count { background: var(--line); color: var(--text); }
 
-main { max-width: 1440px; margin: 0 auto; padding: 20px clamp(12px, 3vw, 32px) 48px; }
+main { max-width: 1440px; margin: 0 auto; padding: 20px var(--pad-r) 48px var(--pad-l); }
 
 /* Controls */
 label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); font-weight: 500; }
@@ -152,13 +234,32 @@ button, .filebtn {
   padding: 7px 14px;
   min-height: 38px;
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform var(--press) var(--ease-out), border-color 150ms ease, filter 150ms ease, background-color 150ms ease;
 }
-button:hover, .filebtn:hover { border-color: var(--accent); }
+button:active:not(:disabled), .filebtn:active { transform: scale(0.97); }
+.tabs button:active, button.linkbtn:active { transform: none; }
 button.primary { background: var(--action); color: var(--action-text); border-color: var(--action); }
-button.primary:hover { filter: brightness(1.12); }
 button.danger { color: var(--stop); }
 button.linkbtn { border: 0; padding: 0; min-height: 0; background: none; text-decoration: underline; text-underline-offset: 3px; }
 button:disabled { opacity: .45; cursor: default; }
+@media (hover: hover) and (pointer: fine) {
+  button:hover, .filebtn:hover { border-color: var(--accent); }
+  button.primary:hover { filter: brightness(1.12); }
+  .tabs button:hover { color: var(--text); }
+  .chip:hover span { border-color: var(--accent); color: var(--text); }
+  .chip:hover input:checked + span { color: var(--panel); }
+  .grid tr[tabindex]:hover td { background: color-mix(in srgb, var(--info) 6%, transparent); }
+  details.raw summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
+/* iOS zooms into any input under 16px and never zooms back out */
+@media (pointer: coarse) {
+  input, select, textarea, .keyrow input { font-size: 16px; }
+  button, .filebtn { min-height: 44px; }
+  .tabs button { min-height: 44px; }
+}
 .filebtn { display: inline-flex; align-items: center; }
 
 .filters {
@@ -173,8 +274,11 @@ fieldset.chips legend { font-size: 14px; color: var(--muted); font-weight: 500; 
 .chip span {
   display: inline-block; padding: 5px 11px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--panel); color: var(--muted);
-  font-size: 14px; cursor: pointer; user-select: none;
+  font-size: 14px; cursor: pointer; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform var(--press) var(--ease-out), background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
+.chip:active span { transform: scale(0.97); }
 .chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--panel); }
 .chip input:focus-visible + span { outline: 3px solid var(--info); outline-offset: 2px; }
 
@@ -183,56 +287,55 @@ fieldset.chips legend { font-size: 14px; color: var(--muted); font-weight: 500; 
 /* List + detail */
 .split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); }
-.detailPane { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; padding: 20px 22px; }
+.detailPane { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow: auto; overscroll-behavior: contain; padding: 20px 22px; }
 @media (max-width: 980px) {
-  .split { grid-template-columns: 1fr; }
+  .split { grid-template-columns: minmax(0, 1fr); } /* plain 1fr let the table widen the page */
   .detailPane { position: static; max-height: none; }
 }
-.tablewrap { overflow-x: auto; }
+.tablewrap { overflow-x: auto; overscroll-behavior-x: contain; }
 table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
 .grid th {
-  text-align: left; font: 600 15px/1.2 var(--font-head); color: var(--muted);
-  padding: 11px 12px 9px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  text-align: left; font: 600 16px/1.2 var(--font-head); color: var(--text); letter-spacing: .01em;
+  padding: 12px 12px 10px; border-bottom: 2px solid var(--text); white-space: nowrap;
 }
 .grid td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .grid tbody tr:last-child td { border-bottom: 0; }
-.grid tr[tabindex] { cursor: pointer; }
-.grid tr[tabindex]:hover td { background: color-mix(in srgb, var(--info) 6%, transparent); }
-.grid tr.selected td { background: color-mix(in srgb, var(--signal) 16%, transparent); }
-.grid tr.selected td:first-child { box-shadow: inset 4px 0 0 var(--signal); }
+.grid tr[tabindex] { cursor: pointer; touch-action: manipulation; }
+.grid tr[tabindex]:active td { background: color-mix(in srgb, var(--info) 10%, transparent); }
+.grid tr.selected td { background: color-mix(in srgb, var(--signal) 24%, transparent); }
+.grid tr.selected td:first-child { box-shadow: inset 6px 0 0 var(--signal); }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
 .grid th.num { text-align: right; }
 .id { font-family: var(--font-id); font-size: .9em; overflow-wrap: anywhere; }
 .grid .id { white-space: nowrap; overflow-wrap: normal; }
+.grid td:first-child > .id { font-weight: 600; }
 .grid td .sub { min-width: 12ch; }
 .sub { color: var(--muted); font-size: 13.5px; }
 .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
 .pager:empty { display: none; }
 
 .badge {
+  --tone: var(--info);
   display: inline-block; white-space: nowrap;
-  font-size: 13px; font-weight: 600; line-height: 1;
-  padding: 5px 9px; border-radius: 999px;
-  color: var(--info);
-  border: 1px solid currentColor;
-  background: color-mix(in srgb, currentColor 9%, transparent);
+  font-size: 13.5px; font-weight: 600; line-height: 1;
+  padding: 6px 10px; border-radius: 999px;
+  color: var(--panel); background: var(--tone);
+  border: 1.5px solid var(--tone);
 }
-.s-acknowledged, .s-partially_acknowledged { color: var(--accent); }
-.s-closed, .s-delivered { color: var(--go); }
-.s-delayed { color: var(--warn); }
-.s-cancelled, .s-draft { color: var(--idle); }
+.s-acknowledged, .s-partially_acknowledged { --tone: var(--accent); }
+.s-closed, .s-delivered, .s-recorded { --tone: var(--go); }
+.s-delayed, .s-pending_review { --tone: var(--warn); }
+.s-rejected { --tone: var(--stop); }
+.s-cancelled, .s-draft { --tone: var(--idle); background: transparent; color: var(--idle); }
 .s-cancelled { text-decoration: line-through; }
-.s-recorded { color: var(--go); }
-.s-pending_review { color: var(--warn); }
-.s-rejected { color: var(--stop); }
 
 .empty { padding: 36px 22px; color: var(--muted); }
-.empty strong { display: block; color: var(--text); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.empty strong { display: block; color: var(--text); font: 600 22px/1.15 var(--font-head); margin-bottom: 6px; }
 .loading { padding: 28px 22px; color: var(--muted); }
 .loading::before {
   content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 10px; vertical-align: -1px;
   border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%;
-  animation: spin .8s linear infinite;
+  animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -243,7 +346,7 @@ table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
   border-radius: 0 var(--radius-s) var(--radius-s) 0;
 }
 .detailPane .problem { margin: 0; }
-.problem h3 { margin: 0 0 4px; font: 600 19px/1.2 var(--font-head); }
+.problem h3 { margin: 0 0 4px; font: 600 22px/1.15 var(--font-head); }
 .problem p { margin: 4px 0; max-width: 70ch; }
 .problem dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 10px 0 0; font-size: 14px; }
 .problem dt { color: var(--muted); }
@@ -252,13 +355,14 @@ table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
 .hint { color: var(--muted); font-size: 14px; max-width: 72ch; }
 
 /* Detail */
-.dhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.dhead h2 { margin: 0; font: 600 25px/1.15 var(--font-id); letter-spacing: -.01em; }
+.dhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 14px; border-bottom: 2px solid var(--text); }
+.dhead h2 { margin: 0; font: 700 30px/1.1 var(--font-id); letter-spacing: -.02em; overflow-wrap: anywhere; }
+.dhead .badge { font-size: 15px; padding: 8px 13px; }
 .dhead p { margin: 4px 0 0; }
-.detail h3 { font: 600 18px/1.2 var(--font-head); margin: 24px 0 8px; }
+.detail h3 { font: 600 21px/1.2 var(--font-head); margin: 28px 0 10px; }
 .facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 18px; margin: 18px 0 0; }
 .facts dt { font-size: 13px; color: var(--muted); }
-.facts dd { margin: 2px 0 0; font-weight: 500; overflow-wrap: anywhere; }
+.facts dd { margin: 2px 0 0; font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
 .addr { font-style: normal; line-height: 1.5; }
 .dactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .meter { display: inline-block; width: 46px; height: 5px; margin-left: 6px; vertical-align: middle; background: var(--line); border-radius: 3px; overflow: hidden; }
@@ -266,54 +370,66 @@ table.grid { width: 100%; border-collapse: collapse; font-size: 15px; }
 .polinks { display: flex; flex-wrap: wrap; gap: 4px 10px; }
 
 details.raw { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 12px; }
-details.raw summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.raw summary { cursor: pointer; font-weight: 600; color: var(--accent); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 pre {
   margin: 10px 0 0; padding: 12px 14px; max-height: 420px; overflow: auto;
   background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-s);
   font: 13px/1.5 var(--font-id); white-space: pre;
+  overscroll-behavior: contain;
 }
 
 /* Order lifecycle rail */
-.rail { list-style: none; padding: 0; margin: 22px 0 4px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
-.step { position: relative; padding: 20px 6px 0 0; font-size: 13px; line-height: 1.25; color: var(--muted); }
-.step::before { content: ""; position: absolute; top: 6px; left: 0; right: 0; height: 4px; background: var(--line); }
+.rail { list-style: none; padding: 0; margin: 24px 0 4px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); counter-reset: step; }
+.step { counter-increment: step; position: relative; padding: 36px 8px 0 0; font-size: 14px; line-height: 1.25; color: var(--muted); font-weight: 500; }
+.step::before { content: ""; position: absolute; top: 12px; left: 0; right: 0; height: 6px; background: var(--line); }
 .step::after {
-  content: ""; position: absolute; top: 0; left: 0;
-  width: 16px; height: 16px; border-radius: 50%;
-  background: var(--panel); border: 3px solid var(--line);
+  content: counter(step); position: absolute; top: 0; left: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 600 15px/1 var(--font-head);
+  background: var(--panel); color: var(--muted); border: 3px solid var(--line);
 }
 .step.done::before, .step.current::before { background: var(--accent); }
-.step.current::before { background: linear-gradient(90deg, var(--accent) 0 16px, var(--line) 16px); }
-.step.done::after { background: var(--accent); border-color: var(--accent); }
-.step.current { color: var(--text); font-weight: 600; }
-.step.current::after { background: var(--signal); border-color: var(--accent); }
-.step:last-child::before { right: calc(100% - 16px); }
+.step.current::before { background: linear-gradient(90deg, var(--accent) 0 30px, var(--line) 30px); }
+.step.done::after { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.step.current { color: var(--text); font-weight: 700; }
+.step.current::after { background: var(--signal); border-color: var(--text); color: #15283c; }
+.step:last-child::before { right: calc(100% - 30px); }
 .rail.halted .step::before { background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); }
 .halt-note { margin: 8px 0 0; color: var(--idle); font-weight: 600; font-size: 14px; }
 
 /* Shipment route */
 .route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: center; margin: 22px 0 4px; }
 .end { display: grid; gap: 1px; font-size: 14px; color: var(--muted); }
-.end strong { color: var(--text); font-size: 16px; font-weight: 600; }
+.end strong { color: var(--text); font: 600 19px/1.15 var(--font-head); overflow-wrap: anywhere; hyphens: auto; }
 .end.to { text-align: right; }
 .end .when { color: var(--text); font-weight: 500; margin-top: 4px; }
-.track { --p: 0%; position: relative; height: 6px; border-radius: 3px; background: var(--line); }
-.track .fill { position: absolute; inset: 0 auto 0 0; width: var(--p); border-radius: 3px; background: var(--accent); transition: width .9s cubic-bezier(.2, .7, .2, 1); }
+.track { position: relative; height: 10px; border-radius: 5px; background: var(--line); }
+/* Progress is set from script as transforms (scaleX on the fill, translateX on the lane), so the
+   move runs on the compositor. 520ms is past the UI budget on purpose: it is the one explanatory
+   moment on the page, showing how far the shipment has come. */
+.track .fill {
+  position: absolute; inset: 0; border-radius: 5px; background: var(--accent);
+  transform-origin: left center; transform: scaleX(0);
+  transition: transform 520ms var(--ease-in-out);
+}
+.track .lane { position: absolute; inset: 0; transform: translateX(0); transition: transform 520ms var(--ease-in-out); }
 .track .truck {
-  position: absolute; top: 50%; left: var(--p);
+  position: absolute; top: 50%; left: 0;
   transform: translate(-50%, -50%);
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--signal); color: #15283c;
-  border: 3px solid var(--panel);
-  transition: left .9s cubic-bezier(.2, .7, .2, 1);
+  border: 4px solid var(--panel);
 }
 .route.delayed .fill { background: var(--warn); }
 .route.delayed .truck { background: var(--warn); color: #fff; }
 .route.arrived .fill { background: var(--go); }
 .route.arrived .truck { background: var(--go); color: #fff; }
 .route.cancelled .track { background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 14px); }
-@media (max-width: 560px) {
+.detailPane { container-type: inline-size; }
+@container (max-width: 470px) {
+  .dhead h2 { font-size: 23px; }
   .route { grid-template-columns: 1fr; }
   .end.to { text-align: left; }
   .track { margin: 14px 16px; }
@@ -335,9 +451,9 @@ tr.logdetail td { background: var(--paper); }
 /* Settings */
 .settings { display: grid; gap: 18px; max-width: 1100px; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 18px 20px 20px; }
-.card h2 { margin: 0 0 4px; font: 600 22px/1.2 var(--font-head); }
+.card h2 { margin: 0 0 4px; font: 600 27px/1.15 var(--font-head); }
 .card > .hint { margin: 0 0 14px; }
-.formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 18px; }
+.formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px 18px; }
 .formgrid .wide { grid-column: 1 / -1; }
 label.check { display: flex; align-items: center; gap: 8px; color: var(--text); }
 label.check input { min-height: 0; width: 18px; height: 18px; }
@@ -346,9 +462,9 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
   display: grid;
   grid-template-columns: auto minmax(140px, 1fr) 150px minmax(200px, 1.5fr) minmax(140px, 1fr);
   gap: 10px 12px; align-items: end;
-  padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-s);
+  padding: 14px; border: 1px solid var(--line); border-left: 8px solid var(--swatch, var(--line)); border-radius: var(--radius-s);
 }
-.crow.active { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--signal); }
+.crow.active { border-color: var(--text); border-left-color: var(--swatch, var(--signal)); background: color-mix(in srgb, var(--swatch, var(--signal)) 9%, var(--panel)); }
 .crow .activepick { align-self: center; }
 .crow .activepick input { width: 18px; height: 18px; min-height: 0; }
 .secret { display: flex; gap: 6px; }
@@ -359,7 +475,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 .testresult.ok { color: var(--go); font-weight: 600; }
 .testresult.bad { color: var(--stop); font-weight: 600; }
 @media (max-width: 860px) {
-  .crow { grid-template-columns: 1fr; }
+  .crow { grid-template-columns: minmax(0, 1fr); }
   .crow .rowactions { grid-column: 1; }
 }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -367,7 +483,7 @@ label.check input { min-height: 0; width: 18px; height: 18px; }
 /* Write dialog (acknowledge, shipment notice) */
 dialog.sheet {
   width: min(1040px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   padding: 0;
   border: 1px solid var(--line);
   border-top: 4px solid var(--signal);
@@ -376,11 +492,38 @@ dialog.sheet {
   color: var(--text);
 }
 dialog.sheet::backdrop { background: rgba(13, 27, 41, .55); }
-dialog.sheet form { display: flex; flex-direction: column; max-height: calc(100vh - 30px); }
+dialog.sheet form { display: flex; flex-direction: column; max-height: calc(100dvh - 30px); }
+/* Enter: scale up from .96 out of the centre (modals are not anchored to a trigger). Exit is faster. */
+dialog.sheet {
+  opacity: 1; transform: scale(1);
+  transition: opacity 240ms var(--ease-out), transform 240ms var(--ease-out);
+}
+dialog.sheet::backdrop { opacity: 1; transition: opacity 240ms var(--ease-out); }
+@starting-style {
+  dialog.sheet[open] { opacity: 0; transform: scale(0.96); }
+  dialog.sheet[open]::backdrop { opacity: 0; }
+}
+dialog.sheet.closing { opacity: 0; transform: scale(0.98); transition-duration: 150ms; }
+dialog.sheet.closing::backdrop { opacity: 0; transition-duration: 150ms; }
+/* Phones: a bottom sheet that rises from the edge it leaves through */
+@media (max-width: 640px) {
+  dialog.sheet {
+    width: 100%; max-width: 100%; margin: auto 0 0;
+    max-height: calc(100dvh - 12px - env(safe-area-inset-top, 0px));
+    border-radius: 14px 14px 0 0; border-left: 0; border-right: 0; border-bottom: 0;
+    transform: translateY(0);
+    transition: transform 420ms var(--ease-drawer);
+  }
+  dialog.sheet form { max-height: inherit; }
+  @starting-style { dialog.sheet[open] { opacity: 1; transform: translateY(100%); } }
+  dialog.sheet.closing { opacity: 1; transform: translateY(100%); transition: transform 220ms var(--ease-out); }
+  .dlg-head, .dlg-body { padding-left: 16px; padding-right: 16px; }
+  .dlg-foot { padding-left: 16px; padding-right: 16px; }
+}
 .dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 22px 12px; border-bottom: 1px solid var(--line); }
-.dlg-head h2 { margin: 0; font: 600 24px/1.15 var(--font-head); }
+.dlg-head h2 { margin: 0; font: 600 29px/1.1 var(--font-head); }
 .dlg-head p { margin: 4px 0 0; }
-.dlg-body { padding: 16px 22px 20px; overflow: auto; flex: 1 1 auto; }
+.dlg-body { padding: 16px 22px 20px; overflow: auto; overscroll-behavior: contain; flex: 1 1 auto; }
 .dlg-body h3 { font: 600 18px/1.2 var(--font-head); margin: 22px 0 6px; }
 .dlg-body .problem { margin: 0 0 16px; }
 .dlg-body .problem h3 { margin: 0 0 4px; font-size: 19px; }
@@ -390,7 +533,8 @@ dialog.sheet form { display: flex; flex-direction: column; max-height: calc(100v
   padding: 12px 22px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
 }
-.dlg-foot .who { margin-right: auto; }
+.dlg-foot .who { margin-right: auto; display: inline-flex; align-items: center; gap: 8px; }
+.dlg-foot .who i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
 .keyrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 4px; }
 .keyrow label { flex: 1 1 260px; }
 .keyrow input { font-family: var(--font-id); font-size: 14px; }
@@ -401,7 +545,7 @@ dialog.sheet form { display: flex; flex-direction: column; max-height: calc(100v
 .formtable input[type=checkbox] { width: 18px; height: 18px; min-width: 0; min-height: 0; }
 .formtable tr.off td:not(:first-child) { opacity: .45; }
 .grid td.tight { width: 1%; white-space: nowrap; }
-.addrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px 22px; }
+.addrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px 22px; }
 fieldset.addrset {
   margin: 0; padding: 8px 14px 14px;
   border: 1px solid var(--line); border-radius: var(--radius-s);
@@ -417,21 +561,36 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   background: color-mix(in srgb, var(--go) 8%, var(--panel));
   border-radius: 0 var(--radius-s) var(--radius-s) 0;
 }
+.okbox { transition: opacity 240ms var(--ease-out), transform 240ms var(--ease-out); }
+@starting-style { .okbox { opacity: 0; transform: translateY(8px); } }
 .okbox h3 { margin: 0 0 2px; font: 600 20px/1.2 var(--font-head); }
 .okbox p { margin: 0; }
 .lookup-actions { display: flex; gap: 8px; align-items: end; margin-left: auto; }
 
+/* Toast: enters from below the screen edge and leaves the same way; swipe down to dismiss.
+   The timer pauses while hovered, while dragged and while the tab is hidden. */
 #toast {
-  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 10;
+  transform: translate(-50%, calc(100% + 28px + env(safe-area-inset-bottom, 0px))); opacity: 0; pointer-events: none;
   background: var(--bar); color: #fff; padding: 10px 16px; border-radius: var(--radius-s);
   border-left: 4px solid var(--signal); font-size: 15px; max-width: min(560px, 92vw);
-  transition: opacity .2s, transform .2s;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .22);
+  user-select: none; -webkit-user-select: none; touch-action: none; cursor: default;
+  transition: opacity 400ms ease, transform 400ms ease;
 }
-#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+#toast.dragging { transition: none; }
 
+/* Reduced motion: keep the fades that explain a change, drop the movement */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; animation: none !important; }
+  button:active:not(:disabled), .filebtn:active, .chip:active span { transform: none; }
+  .track .fill, .track .lane { transition: none; }
+  dialog.sheet, dialog.sheet.closing { transform: none !important; transition: opacity 160ms ease; }
+  @starting-style { dialog.sheet[open] { opacity: 0; transform: none; } }
+  .okbox { transition: opacity 160ms ease; transform: none; }
+  .lens-body { transition: opacity 160ms ease; }
+  #toast, #toast.show { transform: translate(-50%, 0); transition: opacity 200ms ease; }
+  .loading::before { animation-duration: 1.4s; }
 }
 </style>
 </head>
@@ -445,10 +604,22 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       <span id="envLabel"></span>
     </div>
   </div>
-  <label class="consumer">Calling as
-    <select id="consumerSelect" aria-label="Consumer used for API calls"></select>
-  </label>
 </header>
+
+<section class="lens" id="lens" aria-label="Consumer used for API calls">
+  <div class="lens-id lens-body">
+    <span class="avatar" id="lensAvatar" aria-hidden="true"></span>
+    <div class="lens-who" id="lensWho"></div>
+  </div>
+  <dl class="lens-stats lens-body" id="lensStats"></dl>
+  <div class="lens-switch">
+    <span id="switchLabel">Switch to</span>
+    <div class="pills" id="consumerPills" role="radiogroup" aria-labelledby="switchLabel"></div>
+    <label class="lens-select" id="consumerSelectWrap" hidden>Switch to
+      <select id="consumerSelect" aria-label="Consumer used for API calls"></select>
+    </label>
+  </div>
+</section>
 
 <nav class="tabs" role="tablist" aria-label="Sections">
   <button role="tab" data-tab="orders" aria-selected="true">Purchase orders</button>
@@ -461,7 +632,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   <!-- Purchase orders -->
   <section id="tab-orders" class="tab" role="tabpanel" aria-label="Purchase orders">
     <form class="filters" id="poFilters">
-      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" spellcheck="false"></label>
+      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search"></label>
       <fieldset class="chips" id="poStatus"></fieldset>
       <label>Updated since (local time) <input type="datetime-local" name="updatedSince"></label>
       <label>Page size
@@ -472,7 +643,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       <button class="primary" type="submit">Load orders</button>
     </form>
     <form class="filters" id="poLookup">
-      <label class="grow">Open an order by ID <input name="id" placeholder="PO-4500123456" autocomplete="off" spellcheck="false"></label>
+      <label class="grow">Open an order by ID <input name="id" placeholder="PO-4500123456" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>
       <button type="submit">Open order</button>
     </form>
     <div class="split">
@@ -487,8 +658,8 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   <!-- Shipments -->
   <section id="tab-shipments" class="tab" role="tabpanel" aria-label="Shipments" hidden>
     <form class="filters" id="shpFilters">
-      <label>Purchase order <input name="purchaseOrderId" placeholder="PO-4500123456" autocomplete="off" spellcheck="false"></label>
-      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" spellcheck="false"></label>
+      <label>Purchase order <input name="purchaseOrderId" placeholder="PO-4500123456" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search"></label>
+      <label>Supplier ID <input name="supplierId" placeholder="SUP-100245" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search"></label>
       <fieldset class="chips" id="shpStatus"></fieldset>
       <label>Page size
         <select name="pageSize">
@@ -498,7 +669,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       <button class="primary" type="submit">Load shipments</button>
     </form>
     <form class="filters" id="shpLookup">
-      <label class="grow">Open a shipment by ID <input name="id" placeholder="SHP-20260923-00192" autocomplete="off" spellcheck="false"></label>
+      <label class="grow">Open a shipment by ID <input name="id" placeholder="SHP-20260923-00192" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>
       <button type="submit">Open shipment</button>
       <span class="lookup-actions"><button type="button" class="primary" data-w-newship="1">New shipment notice</button></span>
     </form>
@@ -528,13 +699,13 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
         <p class="hint">The base address is everything before <span class="id">/purchase-orders</span>, for example your façade URL ending in <span class="id">/supplier-collaboration/v1</span>.</p>
         <div class="formgrid">
           <label class="wide">API base address
-            <input name="baseUrl" type="url" placeholder="https://your-tenant.example.com/supplier-collaboration/v1" spellcheck="false">
+            <input name="baseUrl" type="url" inputmode="url" autocapitalize="none" autocorrect="off" placeholder="https://your-tenant.example.com/supplier-collaboration/v1" spellcheck="false">
           </label>
           <label>API key header
-            <input name="authHeader" placeholder="X-API-Key" spellcheck="false">
+            <input name="authHeader" placeholder="X-API-Key" autocapitalize="none" autocorrect="off" spellcheck="false">
           </label>
           <label>Timeout in seconds
-            <input name="timeoutSec" type="number" min="1" max="120" step="1">
+            <input name="timeoutSec" type="number" inputmode="numeric" min="1" max="120" step="1">
           </label>
           <label class="check wide"><input type="checkbox" name="sendCorrelationId"> Send an X-Correlation-Id header with every request</label>
         </div>
@@ -583,7 +754,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     </label>
     <label>Key or token
       <span class="secret">
-        <input data-f="secret" type="password" placeholder="Paste the key" spellcheck="false" autocomplete="off">
+        <input data-f="secret" type="password" placeholder="Paste the key" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off">
         <button type="button" data-act="reveal" aria-label="Show key">Show</button>
       </span>
     </label>
@@ -687,14 +858,89 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     return `<details class="raw"><summary>Response JSON</summary>${bits.length ? `<p class="hint">${bits.join('<br>')}</p>` : ''}<pre>${esc(JSON.stringify(obj, null, 2))}</pre></details>`;
   }
   const isNarrow = () => window.matchMedia('(max-width: 980px)').matches;
+  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const scrollBehavior = () => (reduceMotion() ? 'auto' : 'smooth');
 
-  let toastTimer;
+  /** Resolves once the element's running CSS transitions finish (or after `ms`, whichever is first). */
+  function afterTransitions(el, ms) {
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; resolve(); } };
+      setTimeout(finish, ms);
+      try {
+        const running = el.getAnimations({ subtree: true }).filter(a => typeof CSSTransition !== 'undefined' && a instanceof CSSTransition);
+        if (!running.length) return finish();
+        Promise.all(running.map(a => a.finished)).then(finish, finish);
+      } catch (e) { finish(); }
+    });
+  }
+
+  // ---------- Toast ----------
+  // Built on Sonner's principles (the curated pick is React-only and this page has no build step):
+  // enter and exit through the same edge, pause on hover and while the tab is hidden, swipe to dismiss.
+  const toastEl = () => $('#toast');
+  const tst = { timer: null, remaining: 0, started: 0, hovered: false, drag: null };
+  function toastStart(ms) {
+    clearTimeout(tst.timer);
+    tst.remaining = ms; tst.started = Date.now();
+    tst.timer = setTimeout(hideToast, ms);
+  }
+  function toastPause() {
+    if (!tst.timer) return;
+    clearTimeout(tst.timer); tst.timer = null;
+    tst.remaining = Math.max(0, tst.remaining - (Date.now() - tst.started));
+  }
+  function toastResume() {
+    if (tst.timer || tst.hovered || tst.drag || document.hidden || !toastEl().classList.contains('show')) return;
+    toastStart(Math.max(tst.remaining, 1200));
+  }
+  function hideToast() {
+    clearTimeout(tst.timer); tst.timer = null;
+    const t = toastEl();
+    t.style.transform = '';
+    t.classList.remove('show', 'dragging');
+  }
   function toast(msg) {
-    const t = $('#toast');
+    const t = toastEl();
     t.textContent = msg;
+    t.style.transform = '';
     t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+    toastStart(Math.max(3200, Math.min(7000, msg.length * 60)));
+    if (tst.hovered || document.hidden) toastPause();
+  }
+  function bindToast() {
+    const t = toastEl();
+    // Hover only means something with a precise pointer; on touch it would stick after a tap.
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    t.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && fine.matches) { tst.hovered = true; toastPause(); } });
+    t.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { tst.hovered = false; toastResume(); } });
+    document.addEventListener('visibilitychange', () => (document.hidden ? toastPause() : toastResume()));
+    t.addEventListener('pointerdown', e => {
+      if (tst.drag || !t.classList.contains('show')) return; // one pointer at a time
+      tst.drag = { id: e.pointerId, y0: e.clientY, t0: Date.now(), dy: 0 };
+      t.setPointerCapture(e.pointerId);
+      t.classList.add('dragging');
+      toastPause();
+    });
+    t.addEventListener('pointermove', e => {
+      const d = tst.drag;
+      if (!d || e.pointerId !== d.id) return;
+      const raw = e.clientY - d.y0;
+      d.dy = raw > 0 ? raw : raw * 0.15; // free downwards, heavy friction upwards
+      t.style.transform = `translate(-50%, ${d.dy}px)`;
+    });
+    const end = e => {
+      const d = tst.drag;
+      if (!d || e.pointerId !== d.id) return;
+      tst.drag = null;
+      t.classList.remove('dragging');
+      const velocity = Math.abs(d.dy) / Math.max(1, Date.now() - d.t0);
+      if (d.dy > 40 || (d.dy > 4 && velocity > 0.11)) return hideToast(); // a flick is enough
+      t.style.transform = ''; // springs back through the normal transition
+      toastResume();
+    };
+    t.addEventListener('pointerup', end);
+    t.addEventListener('pointercancel', end);
   }
 
   // ---------- Settings ----------
@@ -747,6 +993,10 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
 
   let settings = loadSettings();
   const activeConsumer = () => settings.consumers.find(c => c.id === settings.activeId) || null;
+
+  // What each consumer saw on its last calls, shown in the lens. Kept in memory only.
+  const seen = {};
+  const seenFor = id => (seen[id] = seen[id] || { orders: null, shipments: null, last: null });
 
   // ---------- API client ----------
   class ApiError extends Error {
@@ -805,6 +1055,8 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       const timedOut = e.name === 'AbortError';
       entry.error = timedOut ? `No response after ${timeoutSec}s` : 'Network or CORS error';
       addLog(entry);
+      seenFor(consumer.id).last = { status: 0, note: timedOut ? 'Timed out' : 'Network or CORS error', ms: entry.ms };
+      renderLens();
       throw new ApiError({
         kind: 'network', status: 0,
         message: timedOut
@@ -824,6 +1076,11 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     if (text) { try { body = JSON.parse(text); } catch (e) { body = text; } }
     entry.body = body;
     addLog(entry);
+    seenFor(consumer.id).last = {
+      status: res.status, ms: entry.ms,
+      note: (body && typeof body === 'object' && body.errorCode) || (res.ok ? (res.status === 201 ? 'Created' : 'OK') : (STATUS_HELP[res.status] || ['Failed'])[0])
+    };
+    renderLens();
 
     if (!res.ok) {
       const problem = body && typeof body === 'object' ? body : null;
@@ -982,6 +1239,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   async function loadOrders({ reset = false } = {}) {
     if (reset || !orders.query) { orders.query = readPoQuery(); orders.tokens = [null]; orders.page = 0; }
     const seq = ++orders.listSeq;
+    const who = settings.activeId;
     $('#poList').innerHTML = loadingHtml('Loading purchase orders…');
     $('#poPager').innerHTML = '';
     try {
@@ -990,11 +1248,16 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       orders.loaded = true;
       const items = Array.isArray(body?.items) ? body.items : [];
       orders.next = body?.nextPageToken || null;
+      const q = orders.query;
+      seenFor(who).orders = { n: items.length, more: !!orders.next || orders.page > 0, filtered: !!(q.supplierId || q.status || q.updatedSince) };
+      renderLens();
       $('#poList').innerHTML = poTable(items);
       $('#poPager').innerHTML = pagerHtml('po', orders, items.length);
     } catch (e) {
       if (seq !== orders.listSeq) return;
       orders.loaded = true;
+      seenFor(who).orders = { error: e.status || 0 };
+      renderLens();
       $('#poList').innerHTML = errorHtml(e);
     }
   }
@@ -1021,7 +1284,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     const pane = $('#poDetail');
     const seq = ++orders.detailSeq;
     pane.innerHTML = loadingHtml(`Loading ${id}…`);
-    if (isNarrow()) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (isNarrow()) pane.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     try {
       const res = await api('GET', `/purchase-orders/${encodeURIComponent(id)}`);
       if (seq !== orders.detailSeq) return;
@@ -1095,6 +1358,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   async function loadShipments({ reset = false } = {}) {
     if (reset || !ships.query) { ships.query = readShpQuery(); ships.tokens = [null]; ships.page = 0; }
     const seq = ++ships.listSeq;
+    const who = settings.activeId;
     $('#shpList').innerHTML = loadingHtml('Loading shipments…');
     $('#shpPager').innerHTML = '';
     try {
@@ -1103,11 +1367,16 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       ships.loaded = true;
       const items = Array.isArray(body?.items) ? body.items : [];
       ships.next = body?.nextPageToken || null;
+      const q = ships.query;
+      seenFor(who).shipments = { n: items.length, more: !!ships.next || ships.page > 0, filtered: !!(q.purchaseOrderId || q.supplierId || q.status) };
+      renderLens();
       $('#shpList').innerHTML = shpTable(items);
       $('#shpPager').innerHTML = pagerHtml('shp', ships, items.length);
     } catch (e) {
       if (seq !== ships.listSeq) return;
       ships.loaded = true;
+      seenFor(who).shipments = { error: e.status || 0 };
+      renderLens();
       $('#shpList').innerHTML = errorHtml(e);
     }
   }
@@ -1134,14 +1403,22 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     const pane = $('#shpDetail');
     const seq = ++ships.detailSeq;
     pane.innerHTML = loadingHtml(`Loading ${id}…`);
-    if (isNarrow()) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (isNarrow()) pane.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     try {
       const res = await api('GET', `/shipments/${encodeURIComponent(id)}`);
       if (seq !== ships.detailSeq) return;
       if (!res.body || typeof res.body !== 'object') { pane.innerHTML = errorHtml({ kind: 'other', message: 'The API returned an empty or non-JSON body.' }); return; }
       pane.innerHTML = shpDetail(res.body, res);
       const track = $('.track', pane);
-      if (track) requestAnimationFrame(() => requestAnimationFrame(() => track.style.setProperty('--p', `${track.dataset.p}%`)));
+      if (track) {
+        // Transforms are set on the moving elements themselves, not through a variable on the parent.
+        const p = Number(track.dataset.p) || 0;
+        const fill = $('.fill', track), lane = $('.lane', track);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          fill.style.transform = `scaleX(${p / 100})`;
+          if (lane) lane.style.transform = `translateX(${p}%)`;
+        }));
+      }
     } catch (e) {
       if (seq !== ships.detailSeq) return;
       pane.innerHTML = errorHtml(e);
@@ -1160,7 +1437,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
         <span class="when">Ships ${fmtDateTime(s.plannedShipAt)}</span>
       </div>
       <div class="track" data-p="${p}" role="img" aria-label="Shipment ${esc(label(s.status))}">
-        <span class="fill"></span>${s.status === 'CANCELLED' ? '' : `<span class="truck">${TRUCK_SVG}</span>`}
+        <span class="fill"></span>${s.status === 'CANCELLED' ? '' : `<span class="lane"><span class="truck">${TRUCK_SVG}</span></span>`}
       </div>
       <div class="end to">
         <span>To</span>
@@ -1251,7 +1528,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     const el = $('#dlgFoot .who');
     if (!el) return;
     const c = activeConsumer();
-    el.textContent = `Sends as ${c ? c.name : 'no consumer'}`;
+    el.innerHTML = c ? `<i style="background:${consumerColor(c)}" aria-hidden="true"></i>Sends as ${esc(c.name)}` : 'Sends as no consumer';
   }
   function formFoot() {
     $('#dlgFoot').innerHTML = `<span class="sub who"></span>
@@ -1261,7 +1538,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   }
   function keyRowHtml(key) {
     return `<div class="keyrow">
-        <label>Idempotency key <input name="idemKey" data-field="Idempotency-Key" value="${esc(key)}" spellcheck="false"></label>
+        <label>Idempotency key <input name="idemKey" data-field="Idempotency-Key" value="${esc(key)}" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
         <button type="button" data-w="newkey">New key</button>
       </div>
       <p class="hint">Sending again with the same key is a retry: the API should return the original result rather than record it twice. Use New key for a separate request.</p>`;
@@ -1269,10 +1546,24 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   function previewHtml() {
     return `<details class="raw"><summary>Request</summary><pre id="reqPreview"></pre></details>`;
   }
+  // Closing plays the exit transition first, then closes; native <dialog> then returns focus to the opener.
+  let closeTicket = 0;
+  function closeDialog() {
+    const d = dlg();
+    if (!d.open || d.classList.contains('closing')) return;
+    const my = ++closeTicket;
+    d.classList.add('closing');
+    afterTransitions(d, 300).then(() => {
+      if (my !== closeTicket) return; // reopened meanwhile
+      d.classList.remove('closing');
+      d.close();
+    });
+  }
   function showDialog(title, subHtml) {
     $('#dlgTitle').textContent = title;
     $('#dlgSub').innerHTML = subHtml;
     const d = dlg();
+    if (d.classList.contains('closing')) { closeTicket++; d.classList.remove('closing'); }
     if (!d.open) d.showModal();
     $('#dlgBody').scrollTop = 0;
     const first = $('#dlgForm input:not([name=idemKey]), #dlgForm textarea');
@@ -1307,7 +1598,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
           <td class="num">${esc(l.lineNumber)}</td>
           <td><span class="id">${esc(l.materialId)}</span><div class="sub">${esc(l.description)}</div></td>
           <td class="num">${fmtNum(l.orderedQuantity)} ${esc(l.unitOfMeasure || '')}</td>
-          <td><input type="number" name="qty" min="0" step="any" value="${esc(l.orderedQuantity ?? '')}" aria-label="Acknowledged quantity, line ${esc(l.lineNumber)}"></td>
+          <td><input type="number" inputmode="decimal" name="qty" min="0" step="any" value="${esc(l.orderedQuantity ?? '')}" aria-label="Acknowledged quantity, line ${esc(l.lineNumber)}"></td>
           <td><input type="date" name="date" aria-label="Confirmed delivery date, line ${esc(l.lineNumber)}"></td>
           <td><input name="reason" placeholder="CAPACITY" spellcheck="false" aria-label="Rejection reason, line ${esc(l.lineNumber)}"></td>
         </tr>`).join('')}</tbody></table></div>` : '<p class="hint">This order returned no lines, so the request will have none either.</p>'}
@@ -1376,9 +1667,9 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   }
   function shpLineRow(l = {}) {
     return `<tr>
-      <td><input name="purchaseOrderId" value="${esc(l.purchaseOrderId ?? '')}" placeholder="PO-4500123456" spellcheck="false" aria-label="Purchase order"></td>
-      <td><input name="lineNumber" type="number" min="1" step="1" value="${esc(l.lineNumber ?? '')}" aria-label="Line"></td>
-      <td><input name="shippedQuantity" type="number" min="0" step="any" value="${esc(l.shippedQuantity ?? '')}" aria-label="Shipped quantity"></td>
+      <td><input name="purchaseOrderId" value="${esc(l.purchaseOrderId ?? '')}" placeholder="PO-4500123456" autocapitalize="characters" autocorrect="off" spellcheck="false" aria-label="Purchase order"></td>
+      <td><input name="lineNumber" type="number" inputmode="numeric" min="1" step="1" value="${esc(l.lineNumber ?? '')}" aria-label="Line"></td>
+      <td><input name="shippedQuantity" type="number" inputmode="decimal" min="0" step="any" value="${esc(l.shippedQuantity ?? '')}" aria-label="Shipped quantity"></td>
       <td><input name="unitOfMeasure" value="${esc(l.unitOfMeasure ?? '')}" placeholder="EA" spellcheck="false" aria-label="Unit"></td>
       <td><input name="lotNumber" value="${esc(l.lotNumber ?? '')}" spellcheck="false" aria-label="Lot"></td>
       <td class="tight"><button type="button" class="danger" data-w="remove-row">Remove</button></td>
@@ -1389,7 +1680,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     return `<tr>
       <td><input name="packageId" value="${esc(p.packageId ?? '')}" placeholder="PALLET-1001" spellcheck="false" aria-label="Package ID"></td>
       <td><select name="packageType" aria-label="Package type">${PKG_TYPES.map(t => `<option value="${t}"${t === type ? ' selected' : ''}>${esc(label(t))}</option>`).join('')}</select></td>
-      <td><input name="grossWeight" type="number" min="0" step="any" value="${esc(p.grossWeight ?? '')}" aria-label="Gross weight"></td>
+      <td><input name="grossWeight" type="number" inputmode="decimal" min="0" step="any" value="${esc(p.grossWeight ?? '')}" aria-label="Gross weight"></td>
       <td><select name="weightUnit" aria-label="Weight unit"><option value="KG">kg</option><option value="LB">lb</option></select></td>
       <td class="tight"><button type="button" class="danger" data-w="remove-row">Remove</button></td>
     </tr>`;
@@ -1585,6 +1876,10 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
 
   function bindWrites() {
     const form = wform();
+    // Escape: run the same animated close instead of the instant native one.
+    dlg().addEventListener('cancel', e => { e.preventDefault(); closeDialog(); });
+    // Tap on the backdrop closes too (the click lands on the <dialog> itself, outside the form).
+    dlg().addEventListener('click', e => { if (e.target === dlg()) closeDialog(); });
     form.addEventListener('submit', e => { e.preventDefault(); submitWrite(); });
     form.addEventListener('input', updatePreview);
     form.addEventListener('change', e => {
@@ -1597,25 +1892,98 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
       const b = e.target.closest('[data-w]');
       if (!b) return;
       switch (b.dataset.w) {
-        case 'close': dlg().close(); break;
+        case 'close': closeDialog(); break;
         case 'newkey': form.idemKey.value = newKey(write.kind === 'ack' ? 'ack' : 'asn'); updatePreview(); break;
         case 'add-line': $('#shpLines').insertAdjacentHTML('beforeend', shpLineRow()); $('#shpLines tr:last-child input').focus(); updatePreview(); break;
         case 'add-pkg': $('#shpPkgs').insertAdjacentHTML('beforeend', pkgRow()); syncPkgs(); $('#shpPkgs tr:last-child input').focus(); updatePreview(); break;
         case 'remove-row': b.closest('tr').remove(); if ($('#shpPkgs')) syncPkgs(); updatePreview(); break;
         case 'back': $('#dlgResult').hidden = true; $('#dlgForm').hidden = false; formFoot(); break;
-        case 'view-po': { const id = write.po.purchaseOrderId; dlg().close(); showTab('orders'); openPo(id); break; }
-        case 'open-shp': { const id = write.shipmentId; dlg().close(); showTab('shipments'); if (id) openShipment(id); break; }
+        case 'view-po': { const id = write.po.purchaseOrderId; closeDialog(); showTab('orders'); openPo(id); break; }
+        case 'open-shp': { const id = write.shipmentId; closeDialog(); showTab('shipments'); if (id) openShipment(id); break; }
       }
     });
   }
 
   // ---------- Header, tabs ----------
-  function renderConsumerSelect() {
+  // ---------- Consumer lens ----------
+  const LENS_COLORS = ['#F2B705', '#3FC1A9', '#F2845C', '#A99BFF', '#5DB4F2', '#B5D85B'];
+  const MAX_PILLS = 6;
+  function consumerColor(c, index) {
+    const i = index ?? settings.consumers.findIndex(x => x.id === c?.id);
+    return LENS_COLORS[Math.max(0, i) % LENS_COLORS.length];
+  }
+  function initials(name) {
+    const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return ((words[0] || '?')[0] + (words[1] ? words[1][0] : (words[0] || '').slice(1, 2))).toUpperCase();
+  }
+  function statHtml(label, big, small, cls) {
+    return `<div><dt>${esc(label)}</dt><dd><span class="big ${cls || ''}">${big}</span>${small ? `<span class="small">${small}</span>` : ''}</dd></div>`;
+  }
+  function countStat(label, rec) {
+    if (!rec) return statHtml(label, '—', 'Not loaded yet');
+    if ('error' in rec) return statHtml(label, '—', rec.error ? `Last load failed, HTTP ${rec.error}` : 'Last load failed', 'bad');
+    return statHtml(label, `${rec.n}${rec.more ? '+' : ''}`, `${rec.more ? 'First page' : 'Last load'}${rec.filtered ? ', filtered' : ''}`);
+  }
+  function renderLens(animate) {
+    const c = activeConsumer();
+    const color = c ? consumerColor(c) : '#6f7f8e';
+    const lens = $('#lens');
+    lens.style.borderBottomColor = color;
+    const av = $('#lensAvatar');
+    av.style.backgroundColor = color;
+    av.textContent = c ? initials(c.name) : '?';
+    const cred = !c ? '' : !c.secret
+      ? '<span class="warn">No key set</span>'
+      : c.authType === 'bearer' ? '<span>Bearer token</span>' : `<span>API key in ${esc(settings.authHeader)}</span>`;
+    $('#lensWho').innerHTML = c
+      ? `<span class="eyebrow">Calling as</span><h1>${esc(c.name)}</h1><div class="lens-meta">${cred}${c.note ? `<span>${esc(c.note)}</span>` : ''}</div>`
+      : `<span class="eyebrow">Calling as</span><h1>Nobody yet</h1><div class="lens-meta"><button type="button" class="linkbtn" data-goto="settings">Add a consumer in Settings</button></div>`;
+    const st = c ? seenFor(c.id) : { orders: null, shipments: null, last: null };
+    const last = st.last;
+    const lastStat = !last ? statHtml('Last response', '—', 'No calls yet')
+      : statHtml('Last response', last.status ? String(last.status) : '—', `${esc(last.note)}${typeof last.ms === 'number' ? `, ${last.ms} ms` : ''}`, last.status && last.status < 400 ? 'ok' : 'bad');
+    $('#lensStats').innerHTML = countStat('Orders visible', st.orders) + countStat('Shipments visible', st.shipments) + lastStat;
+    if (animate && !reduceMotion()) {
+      // Blur masks the crossfade between two consumers so it reads as one change, not two overlapping states.
+      $$('.lens-body').forEach(el => el.animate(
+        [{ opacity: 0.35, filter: 'blur(2px)' }, { opacity: 1, filter: 'blur(0)' }],
+        { duration: 220, easing: 'ease' }));
+    } else if (animate) {
+      $$('.lens-body').forEach(el => el.animate([{ opacity: 0.5 }, { opacity: 1 }], { duration: 160, easing: 'ease' }));
+    }
+  }
+  function renderConsumerSelect(animate) {
     const sel = $('#consumerSelect');
-    if (!settings.consumers.length) { sel.innerHTML = '<option value="">No consumers yet</option>'; sel.disabled = true; return; }
-    sel.disabled = false;
-    sel.innerHTML = settings.consumers.map(c =>
-      `<option value="${esc(c.id)}"${c.id === settings.activeId ? ' selected' : ''}>${esc(c.name)}${c.secret ? '' : ' (no key)'}</option>`).join('');
+    const pills = $('#consumerPills');
+    const many = settings.consumers.length > MAX_PILLS;
+    $('#consumerSelectWrap').hidden = !many;
+    pills.hidden = many;
+    $('#switchLabel').hidden = many || settings.consumers.length < 2;
+    if (!settings.consumers.length) {
+      sel.innerHTML = '<option value="">No consumers yet</option>'; sel.disabled = true; pills.innerHTML = '';
+    } else {
+      sel.disabled = false;
+      sel.innerHTML = settings.consumers.map(c =>
+        `<option value="${esc(c.id)}"${c.id === settings.activeId ? ' selected' : ''}>${esc(c.name)}${c.secret ? '' : ' (no key)'}</option>`).join('');
+      pills.innerHTML = settings.consumers.length < 2
+        ? '<button type="button" class="linkbtn" data-goto="settings">Add another consumer to compare what each one can see</button>'
+        : settings.consumers.map((c, i) => {
+            const on = c.id === settings.activeId;
+            return `<button type="button" class="pill" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-consumer="${esc(c.id)}" style="--dot:${consumerColor(c, i)}"><span class="dot" aria-hidden="true"></span>${esc(c.name)}${c.secret ? '' : ' (no key)'}</button>`;
+          }).join('');
+    }
+    renderLens(animate);
+  }
+  function setActiveConsumer(id) {
+    if (!id || id === settings.activeId) return;
+    settings.activeId = id;
+    persist();
+    renderConsumerSelect(true);
+    const c = activeConsumer();
+    toast(`Calling as ${c ? c.name : 'nobody'}`);
+    updateWho();
+    if (state.tab === 'settings') renderSettings();
+    refreshForConsumer();
   }
   function renderEnv() {
     let text = 'API address not set';
@@ -1625,7 +1993,11 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   function showTab(name) {
     if (!['orders', 'shipments', 'activity', 'settings'].includes(name)) name = 'orders';
     state.tab = name;
-    $$('.tabs [role=tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    $$('.tabs [role=tab]').forEach(b => {
+      const on = b.dataset.tab === name;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
     $$('.tab').forEach(s => { s.hidden = s.id !== `tab-${name}`; });
     if (name === 'activity') renderActivity();
     if (name === 'settings') renderSettings();
@@ -1645,9 +2017,10 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   }
 
   // ---------- Settings UI ----------
-  function consumerRow(c, isActive) {
+  function consumerRow(c, isActive, index) {
     const node = $('#consumerRowTpl').content.firstElementChild.cloneNode(true);
     node.dataset.id = c.id;
+    node.style.setProperty('--swatch', consumerColor(c, index));
     node.classList.toggle('active', isActive);
     $('input[type=radio]', node).checked = isActive;
     $('[data-f=name]', node).value = c.name;
@@ -1664,7 +2037,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     f.sendCorrelationId.checked = src.sendCorrelationId;
     const rows = $('#consumerRows');
     rows.innerHTML = '';
-    src.consumers.forEach(c => rows.appendChild(consumerRow(c, c.id === src.activeId)));
+    src.consumers.forEach((c, i) => rows.appendChild(consumerRow(c, c.id === src.activeId, i)));
     $('#storageNote').textContent = storageBlocked
       ? 'This browser is blocking local storage, so settings last only until you close or reload the page. Export them to keep a copy.'
       : 'Settings, including API keys, are saved in this browser only. Exported files contain the keys in plain text.';
@@ -1692,7 +2065,8 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     const prevActive = settings.activeId;
     settings = next;
     const saved = persist();
-    renderConsumerSelect();
+    for (const id of Object.keys(seen)) if (!settings.consumers.some(c => c.id === id)) delete seen[id];
+    renderConsumerSelect(prevActive !== settings.activeId);
     renderEnv();
     renderSettings();
     toast(saved ? msg : `${msg} for this session only. This browser blocks local storage.`);
@@ -1724,15 +2098,34 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   // ---------- Events ----------
   function bind() {
     $$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+    $('.tabs').addEventListener('keydown', e => {
+      const tabs = $$('.tabs [role=tab]');
+      const i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      const next = tabs[(j + tabs.length) % tabs.length];
+      next.focus();
+      showTab(next.dataset.tab);
+    });
 
-    $('#consumerSelect').addEventListener('change', e => {
-      settings.activeId = e.target.value;
-      persist();
-      const c = activeConsumer();
-      toast(`Calling as ${c ? c.name : 'nobody'}`);
-      updateWho();
-      if (state.tab === 'settings') renderSettings();
-      refreshForConsumer();
+    $('#consumerSelect').addEventListener('change', e => setActiveConsumer(e.target.value));
+    $('#consumerPills').addEventListener('click', e => {
+      const b = e.target.closest('[data-consumer]');
+      if (b) setActiveConsumer(b.dataset.consumer);
+    });
+    $('#consumerPills').addEventListener('keydown', e => {
+      const pills = $$('#consumerPills [data-consumer]');
+      const i = pills.indexOf(document.activeElement);
+      if (i < 0) return;
+      const j = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: pills.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      const next = pills[(j + pills.length) % pills.length];
+      setActiveConsumer(next.dataset.consumer);
+      const again = $(`#consumerPills [data-consumer="${CSS.escape(next.dataset.consumer)}"]`);
+      if (again) { again.focus(); again.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: scrollBehavior() }); }
     });
 
     $('#poFilters').addEventListener('submit', e => { e.preventDefault(); loadOrders({ reset: true }); });
@@ -1753,7 +2146,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     document.addEventListener('click', async e => {
       const t = e.target.closest('[data-goto],[data-po],[data-shp],[data-page],[data-shipments-for],[data-open-po],[data-log],[data-curl],[data-w-ack],[data-w-ship],[data-w-newship]');
       if (!t) return;
-      if (t.dataset.goto) { if (dlg().open) dlg().close(); return showTab(t.dataset.goto); }
+      if (t.dataset.goto) { closeDialog(); return showTab(t.dataset.goto); }
       if (t.dataset.wAck || t.dataset.wShip) {
         const id = t.dataset.wAck || t.dataset.wShip;
         const po = orders.current && orders.current.purchaseOrderId === id ? orders.current : null;
@@ -1798,7 +2191,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
     $('#addConsumer').addEventListener('click', () => {
       const rows = $('#consumerRows');
       const c = { id: uid(), name: `Consumer ${rows.children.length + 1}`, authType: 'apiKey', secret: '', note: '' };
-      const row = consumerRow(c, rows.children.length === 0);
+      const row = consumerRow(c, rows.children.length === 0, rows.children.length);
       rows.appendChild(row);
       $('[data-f=name]', row).select();
     });
@@ -1862,6 +2255,7 @@ fieldset.addrset .wide { grid-column: 1 / -1; }
   introStates();
   bind();
   bindWrites();
+  bindToast();
   const hash = (location.hash || '').replace('#', '');
   showTab(settings.baseUrl ? (hash || 'orders') : 'settings');
 })();
