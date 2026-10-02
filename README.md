@@ -34,18 +34,47 @@ This repo provides mock versions of three of them:
 
 ## Why a façade API
 
-Suppliers and internal applications shouldn't have to know which system holds what, or speak each system's
-dialect. The **Supplier Order Collaboration API** (`facade/`) is a single partner-facing API in front of all three.
-It gives consumers:
+Acme already has these systems, and each one has an API of its own. But those APIs are built around the system,
+not the business. In the ERP, a purchase order is `4500123456` for vendor `0000710245`, with status `01` and lines
+numbered `"00010"`. In the SRM, the same supplier is `SUP-100245`. The TMS knows its carrier by a SCAC code and
+reports problems as SOAP-style faults. Exposing these APIs directly would mean every supplier learns three systems,
+three security models and three error formats. It would also mean Acme could never change a system without
+breaking its partners.
 
-- **One contract.** Consumers work with purchase orders and shipments, not ERP tables, codes and vendor numbers.
-- **Security and entitlement in one place.** Every call is checked against the SRM, so a supplier sees and acts on
-  only its own orders.
-- **Translation.** Codes, identifiers, dates and errors from three systems come back in one consistent format.
-- **Orchestration.** One call can span several systems. Creating an ASN, for example, records the shipment in the
-  TMS and the inbound delivery in the ERP, and cancels the TMS shipment if the ERP rejects it.
-- **Insulation.** Backends can be upgraded or replaced without breaking supplier integrations.
-- **Governance.** Rate limits, idempotency, tracing and usage metering are applied at a single point.
+Instead, Acme exposes one **business API**: the **Supplier Order Collaboration API**. It is designed around what a
+supplier actually does: view purchase orders, acknowledge them, ship against them and track the shipments. Its
+OpenAPI 3.1 specification, [`facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml`](facade/Supplier_Order_Collaboration_OpenAPI_3_1.yaml),
+is written in business terms and agreed before anything is built. The façade layer implements that contract by
+orchestrating the systems behind it.
+
+| | Exposing the system APIs | Exposing the business API |
+|---|---|---|
+| **What consumers see** | ERP tables, codes and vendor numbers, spread across three systems | Purchase orders, acknowledgements and shipments |
+| **Work per supplier** | Three integrations, three dialects | One integration |
+| **Security** | Left to each system | Every call checked against the supplier's entitlements, in one place |
+| **Errors** | Three formats | One format, with a correlation ID for support |
+| **Changing a backend** | Breaks partner integrations | Invisible to partners |
+
+**What suppliers get:**
+- Faster onboarding.
+- An API in their own business language.
+- One set of credentials.
+- Behaviour they can rely on: safe retries, clear errors, consistent paging.
+
+**What Acme gets:**
+
+- **Reuse.** The same API serves supplier portals, partner integrations, internal procurement and plant
+  applications, and AI agents. Nothing has to be rebuilt for each channel.
+- **Control.** Entitlements, rate limits, idempotency and tracing are enforced at a single point, so confidential
+  order data reaches only the consumers allowed to see it.
+- **Agility.** Backends can be upgraded or replaced without touching partner integrations. An ERP migration such as
+  ECC to S/4HANA becomes a change behind the façade, not a project for every supplier.
+- **Speed.** Because the contract comes first, consumers can build against the spec while the façade is still
+  being implemented. The same spec drives documentation, developer-portal listings and client tooling, and any API
+  platform can import it.
+- **Governance.** The spec's `x-acme-*` metadata records owner, audience, data classification, support model,
+  lifecycle and metering, so the API can be catalogued, approved and charged back like any other enterprise
+  product.
 
 ## What this repo provides
 
